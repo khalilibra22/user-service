@@ -1,8 +1,8 @@
 # Use official Node.js LTS (Long Term Support) image as the base image
-FROM node:18
+FROM node:22.14.0
 
 # Set working directory in the container
-WORKDIR /permissions_service
+WORKDIR /user-service
 
 # Copy package.json and package-lock.json (if present) to the working directory
 COPY package*.json ./
