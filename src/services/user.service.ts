@@ -8,7 +8,11 @@ export class UserService {
   }
 
   async createUser(user: UserModel): Promise<UserModel> {
-    return await this.userRepo.save(user);
+    try {
+      return await this.userRepo.save(user);
+    } catch (error) {
+      throw new Error("Error creating user");
+    }
   }
 
   async getUserById(id: number): Promise<UserModel | undefined> {
@@ -16,11 +20,15 @@ export class UserService {
   }
 
   async getUserByEmail(email: string): Promise<UserModel | undefined> {
-    return await this.userRepo.findOne({
-      where: {
-        email: email,
-      },
-    });
+    try {
+      return await this.userRepo.findOne({
+        where: {
+          email: email,
+        },
+      });
+    } catch (error) {
+      throw new Error("Error fetching user");
+    }
   }
 
   async updateUser(id: number, user: UserModel): Promise<UserModel> {

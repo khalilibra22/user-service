@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { UserService } from "../services/user.service";
 import { AuthMiddleware } from "../utils/auth.middleware";
+import { UserDto } from "../dto/user.dto";
 export class AuthController {
   private userService: UserService;
   constructor() {
@@ -17,7 +18,7 @@ export class AuthController {
       const hashedPassword = await AuthMiddleware.hashPassword(password);
       req.body.password = hashedPassword;
       const createdUser = await this.userService.createUser(req.body);
-      res.status(201).json(createdUser);
+      res.status(201).json(new UserDto(createdUser));
     } catch (error) {
       res.status(500).json({ error: "Internal Server Error" });
     }
@@ -30,11 +31,15 @@ export class AuthController {
       res.status(401).json({ error: "Invalid email" });
       return;
     }
-    const pass: string = password;
-    if (user.password != pass) {
-      res.status(401).json({ error: "password" });
+    const isAuthenticated = await AuthMiddleware.comparePasswords(
+      password,
+      user.password
+    );
+    if (!isAuthenticated) {
+      res.status(401).json({ message: "Invalid password" });
       return;
     }
-    res.status(200).json(user);
+    const token = await AuthMiddleware.generateToken(user);
+    res.status(200).json({ id: user.id, token: token });
   }
 }
