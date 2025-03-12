@@ -16,7 +16,15 @@ export class UserService {
   }
 
   async getUserById(id: number): Promise<UserModel | undefined> {
-    return await this.userRepo.findOne(UserModel, id);
+    try {
+      return await this.userRepo.findOne({
+        where: {
+          id: id,
+        },
+      });
+    } catch (error) {
+      throw new Error("Error fetching user");
+    }
   }
 
   async getUserByEmail(email: string): Promise<UserModel | undefined> {
@@ -31,9 +39,12 @@ export class UserService {
     }
   }
 
-  async updateUser(id: number, user: UserModel): Promise<UserModel> {
-    await await this.userRepo.update(UserModel, id, user);
-    return await this.userRepo.findOne(UserModel, id);
+  async updateUser(id: number, user: UserModel): Promise<void> {
+    try {
+      await await this.userRepo.save(user);
+    } catch (error) {
+      throw new Error("Error updating user");
+    }
   }
 
   async deleteUser(id: number): Promise<void> {

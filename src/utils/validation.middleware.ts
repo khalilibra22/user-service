@@ -9,15 +9,21 @@ class ValidationMiddleware {
   }
 
   validate(): (req: Request, res: Response, next: NextFunction) => void {
-    return (req: Request, res: Response, next: NextFunction) => {
-      const { error } = this.schema.validate(req.body);
-      if (error) {
-        return res
-          .status(400)
-          .json({ error: error.details.map((detail) => detail.message) });
-      }
-      next();
-    };
+    try {
+      return (req: Request, res: Response, next: NextFunction) => {
+        const { error } = this.schema.validate(req.body);
+        if (error) {
+          return res
+            .status(400)
+            .json({ error: error.details.map((detail) => detail.message) });
+        }
+        next();
+      };
+    } catch (error) {
+      return (req: Request, res: Response, next: NextFunction) => {
+        res.status(500).json({ error: "Internal Server Error" });
+      };
+    }
   }
 }
 

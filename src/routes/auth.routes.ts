@@ -25,4 +25,14 @@ router.post(
   async (req, res) => await authController.login(req, res)
 );
 
+router.post(
+  "/forgot-password",
+  async (req, res) => await authController.forgotPassword(req, res)
+);
+
+router.post(
+  "/reset-password",
+  async (req, res) => await authController.resetPassword(req, res)
+);
+
 export { router as authRouter };

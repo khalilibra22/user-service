@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { UserService } from "../services/user.service";
 import { AuthMiddleware } from "../utils/auth.middleware";
 import { UserDto } from "../dto/user.dto";
+import { any } from "joi";
 export class AuthController {
   private userService: UserService;
   constructor() {
@@ -25,21 +26,70 @@ export class AuthController {
   }
 
   async login(req: Request, res: Response): Promise<void> {
-    const { email, password } = req.body;
-    const user = await this.userService.getUserByEmail(email);
-    if (!user) {
-      res.status(401).json({ error: "Invalid email" });
-      return;
+    try {
+      const { email, password } = req.body;
+      const user = await this.userService.getUserByEmail(email);
+      if (!user) {
+        res.status(401).json({ error: "Invalid email" });
+        return;
+      }
+      const isAuthenticated = await AuthMiddleware.comparePasswords(
+        password,
+        user.password
+      );
+      if (!isAuthenticated) {
+        res.status(401).json({ message: "Invalid password" });
+        return;
+      }
+      const token = await AuthMiddleware.generateToken(user);
+      res.status(200).json({ id: user.id, token: token });
+    } catch (error) {
+      res.status(500).json({ error: "Internal Server Error" });
     }
-    const isAuthenticated = await AuthMiddleware.comparePasswords(
-      password,
-      user.password
-    );
-    if (!isAuthenticated) {
-      res.status(401).json({ message: "Invalid password" });
-      return;
+  }
+
+  async forgotPassword(req: Request, res: Response): Promise<void> {
+    try {
+      const { email } = req.body;
+      const user = await this.userService.getUserByEmail(email);
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      const token = await AuthMiddleware.generateToken(user);
+      //TODO: Send email with password reset link
+      res
+        .status(200)
+        .json({ message: "Password reset link sent to email", token: token });
+    } catch (error) {
+      res.status(500).json({ error: "Internal Server Error" });
     }
-    const token = await AuthMiddleware.generateToken(user);
-    res.status(200).json({ id: user.id, token: token });
+  }
+
+  async resetPassword(req: Request, res: Response): Promise<void> {
+    try {
+      const token = req.headers.authorization?.split(" ")[1];
+      let decoded = null;
+      try {
+        decoded = await AuthMiddleware.decodeToken(token || "");
+      } catch (error) {
+        res.status(401).json({ message: "Invalid or expired token" });
+        return;
+      }
+
+      const { password } = req.body;
+      const id = Number(decoded.id);
+      const user = await this.userService.getUserById(id);
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      const hashedPassword = await AuthMiddleware.hashPassword(password);
+      user.password = hashedPassword;
+      await this.userService.updateUser(id, user);
+      res.status(200).json({ message: "Password updated successfully" });
+    } catch (error) {
+      res.status(500).json({ error: "Internal Server Error" });
+    }
   }
 }

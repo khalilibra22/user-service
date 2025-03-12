@@ -1,7 +1,6 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
-
 import { UserModel } from "../models/user.model";
 
 class AuthMiddleware {
@@ -50,16 +49,23 @@ class AuthMiddleware {
     });
   }
 
-  static async verifyToken(req: Request, res: Response, next: NextFunction) {
+  static async verifyToken(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
     try {
       const token = req.headers.authorization?.split(" ")[1];
       if (!token) {
-        return res.status(401).json({ message: "Invalid or expired token" });
+        res.status(401).json({ message: "Invalid or expired token" });
+        return;
       }
+
       const decoded = await AuthMiddleware.decodeToken(token);
       next();
     } catch (error) {
       res.status(401).json({ message: "Invalid or expired token" });
+      return;
     }
   }
 }

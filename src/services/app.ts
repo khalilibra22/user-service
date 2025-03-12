@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import { authRouter } from "../routes/auth.routes";
+import { userRouter } from "../routes/user.routes";
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction): void => {
 });
 
 app.use("/auth", authRouter);
+app.use("/users", userRouter);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello World!");
