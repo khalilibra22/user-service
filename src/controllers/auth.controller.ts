@@ -1,0 +1,126 @@
+import { Request, Response } from "express";
+import { UserService } from "../services/user.service";
+import { AuthMiddleware } from "../utils/auth.middleware";
+import { UserDto } from "../dto/user.dto";
+import { any } from "joi";
+export class AuthController {
+  private userService: UserService;
+  constructor() {
+    this.userService = new UserService();
+  }
+  async register(req: Request, res: Response): Promise<void> {
+    try {
+      const { email, password } = req.body;
+      const user = await this.userService.getUserByEmail(email);
+      if (user) {
+        res.status(404).json({ error: "User already exists." });
+        return;
+      }
+      const hashedPassword = await AuthMiddleware.hashPassword(password);
+      req.body.password = hashedPassword;
+      const createdUser = await this.userService.createUser(req.body);
+      const token = await AuthMiddleware.generateToken(createdUser);
+      const verificationLink = `http://localhost:5000/auth/verify-email?token=${token}`;
+      res.status(201).json({
+        userDto: new UserDto(createdUser),
+        verificationLink: verificationLink,
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+
+  async login(req: Request, res: Response): Promise<void> {
+    try {
+      const { email, password } = req.body;
+      const user = await this.userService.getUserByEmail(email);
+      if (!user) {
+        res.status(401).json({ error: "Invalid email" });
+        return;
+      }
+      const isAuthenticated = await AuthMiddleware.comparePasswords(
+        password,
+        user.password
+      );
+      if (!isAuthenticated) {
+        res.status(401).json({ message: "Invalid password" });
+        return;
+      }
+      const token = await AuthMiddleware.generateToken(user);
+      res.status(200).json({ id: user.id, token: token });
+    } catch (error) {
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+
+  async forgotPassword(req: Request, res: Response): Promise<void> {
+    try {
+      const { email } = req.body;
+      const user = await this.userService.getUserByEmail(email);
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      const token = await AuthMiddleware.generateToken(user);
+      //TODO: Send email with password reset link
+      res
+        .status(200)
+        .json({ message: "Password reset link sent to email", token: token });
+    } catch (error) {
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+
+  async resetPassword(req: Request, res: Response): Promise<void> {
+    try {
+      const token = req.headers.authorization?.split(" ")[1];
+      let decoded = null;
+      try {
+        decoded = await AuthMiddleware.decodeToken(token || "");
+      } catch (error) {
+        res.status(401).json({ message: "Invalid or expired token" });
+        return;
+      }
+
+      const { password } = req.body;
+      const id = Number(decoded.id);
+      const user = await this.userService.getUserById(id);
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      const hashedPassword = await AuthMiddleware.hashPassword(password);
+      user.password = hashedPassword;
+      await this.userService.updateUser(id, user);
+      res.status(200).json({ message: "Password updated successfully" });
+    } catch (error) {
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+
+  async verifyEmail(req: Request, res: Response): Promise<void> {
+    try {
+      //read token from query params
+      const token = req.query.token as string;
+      let decoded = null;
+      try {
+        decoded = await AuthMiddleware.decodeToken(token || "");
+      } catch (error) {
+        res.status(401).json({ message: "Invalid or expired token" });
+        return;
+      }
+      const id = Number(decoded.id);
+      const user = await this.userService.getUserById(id);
+
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      user.isActive = true;
+      await this.userService.updateUser(id, user);
+      res.status(200).json({ message: "Email verified successfully" });
+    } catch (error) {
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+}
