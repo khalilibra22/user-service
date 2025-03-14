@@ -17,6 +17,8 @@ export class UserDto {
   bio?: string;
   profilePicture?: string;
   certificate?: string;
+  isActivated?: boolean;
+  isApproved?: boolean;
 
   constructor(user: UserModel) {
     this.id = user.id;
@@ -32,5 +34,7 @@ export class UserDto {
     this.bio = user.bio || undefined;
     this.profilePicture = user.profilePicture || undefined;
     this.certificate = user.certificate || undefined;
+    this.isActivated = user.isActive;
+    this.isApproved = user.isApproved;
   }
 }

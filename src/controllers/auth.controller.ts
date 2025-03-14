@@ -19,7 +19,12 @@ export class AuthController {
       const hashedPassword = await AuthMiddleware.hashPassword(password);
       req.body.password = hashedPassword;
       const createdUser = await this.userService.createUser(req.body);
-      res.status(201).json(new UserDto(createdUser));
+      const token = await AuthMiddleware.generateToken(createdUser);
+      const verificationLink = `http://localhost:5000/auth/verify-email?token=${token}`;
+      res.status(201).json({
+        userDto: new UserDto(createdUser),
+        verificationLink: verificationLink,
+      });
     } catch (error) {
       res.status(500).json({ error: "Internal Server Error" });
     }
@@ -88,6 +93,32 @@ export class AuthController {
       user.password = hashedPassword;
       await this.userService.updateUser(id, user);
       res.status(200).json({ message: "Password updated successfully" });
+    } catch (error) {
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+
+  async verifyEmail(req: Request, res: Response): Promise<void> {
+    try {
+      //read token from query params
+      const token = req.query.token as string;
+      let decoded = null;
+      try {
+        decoded = await AuthMiddleware.decodeToken(token || "");
+      } catch (error) {
+        res.status(401).json({ message: "Invalid or expired token" });
+        return;
+      }
+      const id = Number(decoded.id);
+      const user = await this.userService.getUserById(id);
+
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      user.isActive = true;
+      await this.userService.updateUser(id, user);
+      res.status(200).json({ message: "Email verified successfully" });
     } catch (error) {
       res.status(500).json({ error: "Internal Server Error" });
     }

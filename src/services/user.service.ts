@@ -1,5 +1,6 @@
 import { UserModel } from "../models/user.model";
 import { AppDataSource } from "../config/database";
+import { DataSource } from "typeorm";
 
 export class UserService {
   userRepo: any;
@@ -49,5 +50,26 @@ export class UserService {
 
   async deleteUser(id: number): Promise<void> {
     await this.userRepo.delete(UserModel, id);
+  }
+
+  async getPermissions(id: number): Promise<UserModel | undefined> {
+    try {
+      return await this.userRepo.findOne({
+        where: {
+          id: id,
+        },
+        relations: ["permissions"],
+      });
+    } catch (error) {
+      throw new Error("Error fetching user permissions");
+    }
+  }
+
+  async addPermission(user: UserModel): Promise<void> {
+    try {
+      AppDataSource.manager.save(user);
+    } catch (error) {
+      throw new Error("Error adding permission to user");
+    }
   }
 }

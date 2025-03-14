@@ -5,9 +5,14 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  OneToOne,
+  ManyToMany,
+  JoinTable,
 } from "typeorm";
 import { UserRole } from "../enums/userRoles.enum";
 import { TeachingMode } from "../enums/teachingModes.enum";
+import { UserSettingModel } from "./userSetting.model";
+import { PermissionModel } from "./permission.model";
 
 @Entity("users")
 export class UserModel {
@@ -58,6 +63,12 @@ export class UserModel {
   @Column({ nullable: true })
   certificate!: string;
 
+  @Column({ default: false, name: "is_approved" })
+  isApproved!: boolean;
+
+  @Column({ default: false, name: "is_active" })
+  isActive!: boolean;
+
   @CreateDateColumn({ type: "timestamp" })
   createdAt?: Date;
 
@@ -66,4 +77,15 @@ export class UserModel {
 
   @DeleteDateColumn({ type: "timestamp" })
   deletedAt?: Date;
+
+  @ManyToMany(() => PermissionModel, (permission) => permission.users, {
+    cascade: true,
+  })
+  @JoinTable({ name: "user_permissions" }) // Join table for Many-to-Many
+  permissions?: PermissionModel[];
+
+  @OneToOne(() => UserSettingModel, (settings) => settings.user, {
+    cascade: true,
+  })
+  settings?: UserSettingModel;
 }

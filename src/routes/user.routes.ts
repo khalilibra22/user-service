@@ -25,4 +25,15 @@ router.get(
   async (req, res) => await userController.getUserById(req, res)
 );
 
+router.get(
+  "/:id/permissions",
+  async (req, res) => await userController.getPermissions(req, res)
+);
+
+//add permissions to user
+router.post(
+  "/:id/permissions",
+  async (req, res) => await userController.addPermission(req, res)
+);
+
 export { router as userRouter };

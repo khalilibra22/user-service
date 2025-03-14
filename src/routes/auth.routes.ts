@@ -35,4 +35,9 @@ router.post(
   async (req, res) => await authController.resetPassword(req, res)
 );
 
+router.get(
+  "/verify-email",
+  async (req, res) => await authController.verifyEmail(req, res)
+);
+
 export { router as authRouter };
