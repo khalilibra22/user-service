@@ -1,7 +1,6 @@
 // src/config/ormconfig.ts
 import { DataSource } from "typeorm";
 import { UserModel } from "../models/user.model";
-import { PermissionModel } from "../models/permission.model";
 import { UserSettingModel } from "../models/userSetting.model";
 
 export const AppDataSource = new DataSource({
@@ -11,7 +10,7 @@ export const AppDataSource = new DataSource({
   username: "postgres",
   password: "12345",
   database: "user-service-db",
-  entities: [UserModel, PermissionModel, UserSettingModel],
+  entities: [UserModel, UserSettingModel],
   synchronize: true, // Set to false in production
 });
 
