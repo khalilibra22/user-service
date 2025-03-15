@@ -9,6 +9,6 @@ export class PermissionModel {
   @Column()
   name!: string;
 
-  @ManyToMany(() => UserModel, (user) => user.permissions)
-  users?: UserModel[];
+  // @ManyToMany(() => UserModel, (user) => user.permissions)
+  // users?: UserModel[];
 }

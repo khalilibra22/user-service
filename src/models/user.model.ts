@@ -16,8 +16,8 @@ import { PermissionModel } from "./permission.model";
 
 @Entity("users")
 export class UserModel {
-  @PrimaryGeneratedColumn()
-  id!: number;
+  @PrimaryGeneratedColumn("uuid")
+  id!: string;
 
   @Column()
   fullname!: string;
@@ -78,11 +78,11 @@ export class UserModel {
   @DeleteDateColumn({ type: "timestamp" })
   deletedAt?: Date;
 
-  @ManyToMany(() => PermissionModel, (permission) => permission.users, {
-    cascade: true,
-  })
-  @JoinTable({ name: "user_permissions" }) // Join table for Many-to-Many
-  permissions?: PermissionModel[];
+  // @ManyToMany(() => PermissionModel, (permission) => permission.users, {
+  //   cascade: true,
+  // })
+  // @JoinTable({ name: "user_permissions" }) // Join table for Many-to-Many
+  // permissions?: PermissionModel[];
 
   @OneToOne(() => UserSettingModel, (settings) => settings.user, {
     cascade: true,

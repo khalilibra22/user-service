@@ -4,7 +4,7 @@ import { UserRole } from "../enums/userRoles.enum";
 import { UserModel } from "../models/user.model";
 
 export class UserDto {
-  id?: number;
+  id?: string;
   email?: string;
   fullname?: string;
   phoneNumber?: string;

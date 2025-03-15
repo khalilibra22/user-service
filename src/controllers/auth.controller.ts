@@ -83,7 +83,7 @@ export class AuthController {
       }
 
       const { password } = req.body;
-      const id = Number(decoded.id);
+      const id = decoded.id;
       const user = await this.userService.getUserById(id);
       if (!user) {
         res.status(404).json({ error: "User not found" });
@@ -109,7 +109,7 @@ export class AuthController {
         res.status(401).json({ message: "Invalid or expired token" });
         return;
       }
-      const id = Number(decoded.id);
+      const id = decoded.id;
       const user = await this.userService.getUserById(id);
 
       if (!user) {
