@@ -1,8 +1,7 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { UserService } from "../services/user.service";
 import { AuthMiddleware } from "../utils/auth.middleware";
 import { UserDto } from "../dto/user.dto";
-import { any } from "joi";
 export class AuthController {
   private userService: UserService;
   constructor() {
@@ -13,9 +12,21 @@ export class AuthController {
       const { email, password } = req.body;
       const user = await this.userService.getUserByEmail(email);
       if (user) {
-        res.status(404).json({ error: "User already exists." });
+        res.status(409).json({ error: "User already exists." });
         return;
       }
+      if (!req.files) {
+        res.status(400).json({ error: "No files uploaded" });
+        return;
+      }
+      const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+      req.body.profilePicture = files.profilePicture
+        ? files.profilePicture[0].filename
+        : null;
+      req.body.certificate = files.certificate
+        ? files.certificate[0].filename
+        : null;
+
       const hashedPassword = await AuthMiddleware.hashPassword(password);
       req.body.password = hashedPassword;
       const createdUser = await this.userService.createUser(req.body);

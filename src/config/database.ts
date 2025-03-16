@@ -11,7 +11,7 @@ export const AppDataSource = new DataSource({
   password: "12345",
   database: "user-service-db",
   entities: [UserModel, UserSettingModel],
-  synchronize: true, // Set to false in production
+  synchronize: true,
 });
 
 AppDataSource.initialize().then(() => {

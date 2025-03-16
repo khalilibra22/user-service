@@ -3,7 +3,7 @@ import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import { authRouter } from "../routes/auth.routes";
 import { userRouter } from "../routes/user.routes";
-import { permissionRouter } from "../routes/permission.routes";
+import path from "path";
 
 dotenv.config();
 
@@ -21,10 +21,10 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction): void => {
   }
   next(err); // Forward the error if it's not a JSON parsing error
 });
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 app.use("/auth", authRouter);
 app.use("/users", userRouter);
-app.use("/permissions", permissionRouter);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello World!");
