@@ -16,3 +16,10 @@ export const RolePermissions: Record<UserRole, Permission[]> = {
 export const getImageUrl = (filename: string): string => {
   return `${process.env.BASE_URL}/uploads/${filename}`;
 };
+
+export const getPermission = (permissionValue: number): Permission | null => {
+  if (permissionValue in Permission) {
+    return permissionValue as Permission;
+  }
+  return null; // Handle invalid values
+};

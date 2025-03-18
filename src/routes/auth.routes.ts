@@ -22,7 +22,6 @@ router.post(
     { name: "certificate", maxCount: 1 },
   ]),
   authValidationMiddleware.validate(),
-
   async (req, res) => await authController.register(req, res)
 );
 router.post(
