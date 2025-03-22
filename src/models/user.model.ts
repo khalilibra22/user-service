@@ -6,8 +6,6 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
   OneToOne,
-  ManyToMany,
-  JoinTable,
 } from "typeorm";
 import { UserRole } from "../enums/userRoles.enum";
 import { TeachingMode } from "../enums/teachingModes.enum";

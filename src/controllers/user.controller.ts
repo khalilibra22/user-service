@@ -15,9 +15,7 @@ export class UserController {
     try {
       const id = req.params.id;
       const user = await this.userService.getUserById(id);
-
       if (!user) {
-        res.status(404).json({ error: "User not found" });
         return;
       }
       const isPermitted = PermissionMiddleware.checkPermission(
@@ -29,7 +27,12 @@ export class UserController {
         return;
       }
       res.status(200).json(new UserDto(user));
-    } catch (error) {
+    } catch (error: any) {
+      if (error.message === "Error fetching user") {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+
       res.status(500).json({ error: "Internal Server Error" });
     }
   }
