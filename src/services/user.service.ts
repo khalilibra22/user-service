@@ -16,7 +16,7 @@ export class UserService {
     }
   }
 
-  async getUserById(id: number): Promise<UserModel | undefined> {
+  async getUserById(id: string): Promise<UserModel | undefined> {
     try {
       return await this.userRepo.findOne({
         where: {
@@ -40,7 +40,7 @@ export class UserService {
     }
   }
 
-  async updateUser(id: number, user: UserModel): Promise<void> {
+  async updateUser(id: string, user: UserModel): Promise<void> {
     try {
       await await this.userRepo.save(user);
     } catch (error) {
@@ -52,7 +52,7 @@ export class UserService {
     await this.userRepo.delete(UserModel, id);
   }
 
-  async getPermissions(id: number): Promise<UserModel | undefined> {
+  async getPermissions(id: string): Promise<UserModel | undefined> {
     try {
       return await this.userRepo.findOne({
         where: {

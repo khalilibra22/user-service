@@ -1,36 +1,56 @@
 import { Request, Response } from "express";
 import { UserService } from "../services/user.service";
 import { UserDto } from "../dto/user.dto";
-import { PermissionService } from "../services/permission.service";
+import { PermissionMiddleware } from "../utils/permission.middleware";
+import { Permission } from "../enums/permission.enum";
+import { getPermission } from "../utils";
 
 export class UserController {
   private userService: UserService;
-  private permissionService: PermissionService;
   constructor() {
     this.userService = new UserService();
-    this.permissionService = new PermissionService();
   }
 
   async getUserById(req: Request, res: Response): Promise<void> {
     try {
-      const id = Number(req.params.id);
+      const id = req.params.id;
       const user = await this.userService.getUserById(id);
       if (!user) {
-        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      const isPermitted = PermissionMiddleware.checkPermission(
+        user.role,
+        Permission.USER_CRUD
+      );
+      if (!isPermitted) {
+        res.status(403).json({ error: "Unauthorized" });
         return;
       }
       res.status(200).json(new UserDto(user));
-    } catch (error) {
+    } catch (error: any) {
+      if (error.message === "Error fetching user") {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+
       res.status(500).json({ error: "Internal Server Error" });
     }
   }
 
   async updateUser(req: Request, res: Response): Promise<void> {
     try {
-      const id = Number(req.params.id);
+      const id = req.params.id;
       const user = await this.userService.getUserById(id);
       if (!user) {
         res.status(404).json({ error: "User not found" });
+        return;
+      }
+      const isPermitted = PermissionMiddleware.checkPermission(
+        user.role,
+        Permission.USER_CRUD
+      );
+      if (!isPermitted) {
+        res.status(403).json({ error: "Unauthorized" });
         return;
       }
       const updatedUser = { ...user, ...req.body };
@@ -50,43 +70,29 @@ export class UserController {
     }
   }
 
-  async getPermissions(req: Request, res: Response): Promise<void> {
+  async checkPermissions(req: Request, res: Response): Promise<void> {
     try {
-      const id = Number(req.params.id);
-      const user = await this.userService.getPermissions(id);
-      if (!user) {
-        res.status(404).json({ error: "User not found" });
+      const id = req.params.id;
+      const permissionParam = Number(req.body.permission);
+      const permission = getPermission(permissionParam);
+      if (!permission) {
+        res.status(400).json({ error: "Permission is required" });
         return;
       }
-      res.status(200).json(user.permissions);
-    } catch (error) {
-      res.status(500).json({ error: "Internal Server Error" });
-    }
-  }
-
-  //add permissions to user
-  async addPermission(req: Request, res: Response): Promise<void> {
-    try {
-      const id = Number(req.params.id);
       const user = await this.userService.getUserById(id);
       if (!user) {
         res.status(404).json({ error: "User not found" });
         return;
       }
-      const permissionId = Number(req.body.permissionId);
-      const permission = await this.permissionService.getPermissionById(
-        permissionId
+      const isPermitted = PermissionMiddleware.checkPermission(
+        user.role,
+        permission
       );
-      if (!permission) {
-        res.status(404).json({ error: "Permission not found" });
+      if (!isPermitted) {
+        res.status(403).json({ error: "Unauthorized" });
         return;
       }
-      if (user.permissions === undefined) {
-        user.permissions = [];
-      }
-      user.permissions.push(permission);
-      await this.userService.addPermission(user);
-      res.status(200).json({ message: "Permission added successfully" });
+      res.status(200).json({ message: "Authorized" });
     } catch (error) {
       res.status(500).json({ error: "Internal Server Error" });
     }

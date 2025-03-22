@@ -2,9 +2,10 @@ import { UnorderedBulkOperation } from "typeorm";
 import { TeachingMode } from "../enums/teachingModes.enum";
 import { UserRole } from "../enums/userRoles.enum";
 import { UserModel } from "../models/user.model";
+import { getImageUrl } from "../utils";
 
 export class UserDto {
-  id?: number;
+  id?: string;
   email?: string;
   fullname?: string;
   phoneNumber?: string;
@@ -32,8 +33,12 @@ export class UserDto {
     this.address = user.address || undefined;
     this.teachingModes = user.teachingModes || undefined;
     this.bio = user.bio || undefined;
-    this.profilePicture = user.profilePicture || undefined;
-    this.certificate = user.certificate || undefined;
+    this.profilePicture =
+      user.profilePicture != null
+        ? getImageUrl(user.profilePicture)
+        : undefined;
+    this.certificate =
+      user.certificate != null ? getImageUrl(user.certificate) : undefined;
     this.isActivated = user.isActive;
     this.isApproved = user.isApproved;
   }

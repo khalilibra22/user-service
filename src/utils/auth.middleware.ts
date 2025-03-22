@@ -2,6 +2,8 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
 import { UserModel } from "../models/user.model";
+import { UserRole } from "../enums/userRoles.enum";
+import { UserDto } from "../dto/user.dto";
 
 class AuthMiddleware {
   private static saltRounds = 10;
@@ -28,7 +30,12 @@ class AuthMiddleware {
     return new Promise((resolve, reject) => {
       try {
         const token = jwt.sign(
-          { id: user.id, email: user.email, phoneNumber: user.phoneNumber },
+          {
+            id: user.id,
+            email: user.email,
+            phoneNumber: user.phoneNumber,
+            roles: user.role,
+          },
           process.env.JWT_SECRET!
           //{ expiresIn: "1h" }
         );
@@ -67,6 +74,23 @@ class AuthMiddleware {
       res.status(401).json({ message: "Invalid or expired token" });
       return;
     }
+  }
+
+  static async getTokenDecode(token: string): Promise<UserDto> {
+    return new Promise((resolve, reject) => {
+      try {
+        const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
+        const userDto: UserDto = {
+          id: decoded.id,
+          email: decoded.email,
+          phoneNumber: decoded.phoneNumber,
+          role: decoded.roles,
+        };
+        resolve(userDto);
+      } catch (error) {
+        reject(error);
+      }
+    });
   }
 }
 export { AuthMiddleware };

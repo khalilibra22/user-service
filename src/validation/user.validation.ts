@@ -78,12 +78,12 @@ export const userValidationSchema = Joi.object({
   profilePicture: Joi.when("role", {
     is: Joi.valid(UserRole.ADMIN, UserRole.STUDENT),
     then: Joi.forbidden(),
-    otherwise: Joi.string().required(),
+    otherwise: Joi.object().optional(),
   }),
   certificate: Joi.when("role", {
     is: Joi.valid(UserRole.ADMIN, UserRole.STUDENT),
     then: Joi.forbidden(),
-    otherwise: Joi.string().required(),
+    otherwise: Joi.object().optional(),
   }),
 });
 
@@ -155,12 +155,12 @@ export const updateUserValidationSchema = Joi.object({
   profilePicture: Joi.when("role", {
     is: Joi.valid(UserRole.ADMIN, UserRole.STUDENT),
     then: Joi.forbidden(),
-    otherwise: Joi.string().required(),
+    otherwise: Joi.object().required(),
   }),
   certificate: Joi.when("role", {
     is: Joi.valid(UserRole.ADMIN, UserRole.STUDENT),
     then: Joi.forbidden(),
-    otherwise: Joi.string().required(),
+    otherwise: Joi.object().required(),
   }),
 });
 

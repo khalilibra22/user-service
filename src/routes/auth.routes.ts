@@ -5,6 +5,7 @@ import {
   loginValidationSchema,
   userValidationSchema,
 } from "../validation/user.validation";
+import { upload } from "../config/multer";
 
 const router = express.Router();
 
@@ -16,6 +17,10 @@ const loginValidationMiddleware = new ValidationMiddleware(
 
 router.post(
   "/",
+  upload.fields([
+    { name: "profilePicture", maxCount: 1 },
+    { name: "certificate", maxCount: 1 },
+  ]),
   authValidationMiddleware.validate(),
   async (req, res) => await authController.register(req, res)
 );
