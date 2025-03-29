@@ -2,6 +2,11 @@
 import { DataSource } from "typeorm";
 import { UserModel } from "../models/user.model";
 import { UserSettingModel } from "../models/userSetting.model";
+import { AcademicBackgroundModel } from "../models/academicBackground.model";
+import { CategoryModel } from "../models/category.model";
+import { TopicModel } from "../models/topic.model";
+import { PaymentMethodModel } from "../models/paymentMethod.model";
+import { SubjectModel } from "../models/subject.model";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -11,7 +16,15 @@ export const AppDataSource = new DataSource({
   password: "AVNS_0vhpVNq82FydIBgv2ow",
   database: "defaultdb",
   ssl: { rejectUnauthorized: false },
-  entities: [UserModel, UserSettingModel],
+  entities: [
+    UserModel,
+    UserSettingModel,
+    AcademicBackgroundModel,
+    CategoryModel,
+    SubjectModel,
+    TopicModel,
+    PaymentMethodModel,
+  ],
   synchronize: true,
 });
 

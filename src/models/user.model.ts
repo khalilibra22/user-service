@@ -6,10 +6,16 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
   OneToOne,
+  OneToMany,
+  ManyToMany,
+  JoinTable,
 } from "typeorm";
 import { UserRole } from "../enums/userRoles.enum";
 import { TeachingMode } from "../enums/teachingModes.enum";
 import { UserSettingModel } from "./userSetting.model";
+import { AcademicBackgroundModel } from "./academicBackground.model";
+import { PaymentMethodModel } from "./paymentMethod.model";
+import { TopicModel } from "./topic.model";
 
 @Entity("users")
 export class UserModel {
@@ -48,11 +54,17 @@ export class UserModel {
   @Column({ nullable: true })
   address!: string;
 
+  @Column({ nullable: true })
+  address2!: string;
+
   @Column({ type: "simple-array", nullable: true, name: "teaching_modes" })
   teachingModes!: TeachingMode[];
 
   @Column({ nullable: true })
   bio!: string;
+
+  @Column({ nullable: true })
+  gender!: string;
 
   @Column({ nullable: true, name: "profile_picture" })
   profilePicture!: string;
@@ -79,4 +91,17 @@ export class UserModel {
     cascade: true,
   })
   settings?: UserSettingModel;
+
+  @OneToMany(
+    () => AcademicBackgroundModel,
+    (academicBackground) => academicBackground.user
+  )
+  academicBackgrounds?: AcademicBackgroundModel[];
+
+  @OneToMany(() => PaymentMethodModel, (paymentMethod) => paymentMethod.user)
+  paymentMethods?: PaymentMethodModel[];
+
+  @ManyToMany(() => TopicModel)
+  @JoinTable()
+  topics?: TopicModel[];
 }
