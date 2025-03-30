@@ -7,6 +7,7 @@ import { CategoryModel } from "../models/category.model";
 import { TopicModel } from "../models/topic.model";
 import { PaymentMethodModel } from "../models/paymentMethod.model";
 import { SubjectModel } from "../models/subject.model";
+import { UserTopicModel } from "../models/userTopic.model";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -23,6 +24,7 @@ export const AppDataSource = new DataSource({
     CategoryModel,
     SubjectModel,
     TopicModel,
+    UserTopicModel,
     PaymentMethodModel,
   ],
   synchronize: true,

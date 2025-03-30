@@ -4,10 +4,12 @@ import {
   DeleteDateColumn,
   Entity,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
 import { SubjectModel } from "./subject.model";
+import { UserTopicModel } from "./userTopic.model";
 
 @Entity("topics")
 export class TopicModel {
@@ -17,9 +19,6 @@ export class TopicModel {
   @Column()
   name?: string;
 
-  @Column({ type: "decimal", precision: 10, scale: 2 })
-  price?: number;
-
   @Column({ default: true, name: "is_actived" })
   isActived!: boolean;
 
@@ -28,6 +27,9 @@ export class TopicModel {
 
   @ManyToOne(() => SubjectModel, (subject) => subject.topics)
   subject?: SubjectModel;
+
+  @OneToMany(() => UserTopicModel, (userTopic) => userTopic.topic)
+  users?: UserTopicModel[];
 
   @CreateDateColumn({ type: "timestamp" })
   createdAt?: Date;

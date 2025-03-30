@@ -16,6 +16,7 @@ import { UserSettingModel } from "./userSetting.model";
 import { AcademicBackgroundModel } from "./academicBackground.model";
 import { PaymentMethodModel } from "./paymentMethod.model";
 import { TopicModel } from "./topic.model";
+import { UserTopicModel } from "./userTopic.model";
 
 @Entity("users")
 export class UserModel {
@@ -101,7 +102,6 @@ export class UserModel {
   @OneToMany(() => PaymentMethodModel, (paymentMethod) => paymentMethod.user)
   paymentMethods?: PaymentMethodModel[];
 
-  @ManyToMany(() => TopicModel)
-  @JoinTable()
-  topics?: TopicModel[];
+  @OneToMany(() => UserTopicModel, (userTopic) => userTopic.user)
+  topics?: UserTopicModel[];
 }
