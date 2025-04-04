@@ -4,11 +4,15 @@ import { UserDto } from "../dto/user.dto";
 import { PermissionMiddleware } from "../utils/permission.middleware";
 import { Permission } from "../enums/permission.enum";
 import { getPermission } from "../utils";
+import { AcademicBackgroundService } from "../services/academicBackground.service";
+import { UserTopicModel } from "../models/userTopic.model";
 
 export class UserController {
   private userService: UserService;
+  private academicBackgroundService: AcademicBackgroundService;
   constructor() {
     this.userService = new UserService();
+    this.academicBackgroundService = new AcademicBackgroundService();
   }
 
   async getUserById(req: Request, res: Response): Promise<void> {
@@ -96,6 +100,71 @@ export class UserController {
       }
       res.status(200).json({ message: "Authorized" });
     } catch (error) {
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+
+  async addTopicToUser(req: Request, res: Response): Promise<void> {
+    try {
+      const id = req.params.id;
+      const user = await this.userService.getUserById(id);
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      const isPermitted = PermissionMiddleware.checkPermission(
+        user.role,
+        Permission.TEACHER_CRUD
+      );
+      if (!isPermitted) {
+        res.status(403).json({ error: "Unauthorized" });
+        return;
+      }
+      const topicId = req.body.topicId;
+      const topic = await this.academicBackgroundService.getTopicById(topicId);
+      if (!topic) {
+        res.status(404).json({ error: "Topic not found" });
+        return;
+      }
+      const userTopic: UserTopicModel = {
+        user: user,
+        topic: topic,
+        price: req.body.price,
+      };
+      await this.academicBackgroundService.addTopicToUser(userTopic);
+      res.status(200).json({ message: "Topic added to user successfully" });
+    } catch (error: any) {
+      if (error.message === "Error fetching user") {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+
+  async getTopicsByUserId(req: Request, res: Response): Promise<void> {
+    try {
+      const id = req.params.id;
+      const user = await this.userService.getUserById(id);
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      const isPermitted = PermissionMiddleware.checkPermission(
+        user.role,
+        Permission.TEACHER_CRUD
+      );
+      if (!isPermitted) {
+        res.status(403).json({ error: "Unauthorized" });
+        return;
+      }
+      const topics = await this.academicBackgroundService.getTopicsByUserId(id);
+      res.status(200).json(topics);
+    } catch (error: any) {
+      if (error.message === "Error fetching user") {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
       res.status(500).json({ error: "Internal Server Error" });
     }
   }

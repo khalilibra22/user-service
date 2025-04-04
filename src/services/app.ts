@@ -4,6 +4,7 @@ import cors from "cors";
 import { authRouter } from "../routes/auth.routes";
 import { userRouter } from "../routes/user.routes";
 import path from "path";
+import { academicBackgroundRouter } from "../routes/academicBackground.routes";
 
 dotenv.config();
 
@@ -25,6 +26,7 @@ app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 app.use("/auth", authRouter);
 app.use("/users", userRouter);
+app.use("/academic-backgrounds", academicBackgroundRouter); // Assuming you have a route for academic background
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello World!");

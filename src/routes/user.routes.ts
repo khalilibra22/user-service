@@ -30,4 +30,18 @@ router.post(
   async (req, res) => await userController.checkPermissions(req, res)
 );
 
+//Add topic to user
+router.post(
+  "/:id/topics",
+  AuthMiddleware.verifyToken,
+  async (req, res) => await userController.addTopicToUser(req, res)
+);
+
+// Get topics by user id
+router.get(
+  "/:id/topics",
+  AuthMiddleware.verifyToken,
+  async (req, res) => await userController.getTopicsByUserId(req, res)
+);
+
 export { router as userRouter };
