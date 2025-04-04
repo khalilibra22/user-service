@@ -1,6 +1,5 @@
 import { UserModel } from "../models/user.model";
 import { AppDataSource } from "../config/database";
-import { DataSource } from "typeorm";
 
 export class UserService {
   userRepo: any;

@@ -55,7 +55,9 @@ export class UserController {
       }
       const updatedUser = { ...user, ...req.body };
       await this.userService.updateUser(id, updatedUser);
-      res.status(200).json({ message: "User updated successfully" });
+      res
+        .status(200)
+        .json({ message: "User updated successfully", updatedUser });
     } catch (error) {
       res.status(500).json({ error: "Internal Server Error" });
     }

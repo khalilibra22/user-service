@@ -67,6 +67,21 @@ export class UserModel {
   @Column({ nullable: true })
   gender!: string;
 
+  @Column({ default: "arabic" })
+  language!: string;
+
+  @Column({
+    name: "time_slot",
+    default: 1,
+    type: "decimal",
+    precision: 5,
+    scale: 2,
+  })
+  timeSlot!: number;
+
+  @Column({ name: "push_notifications", default: true })
+  pushNotifications!: boolean;
+
   @Column({ nullable: true, name: "profile_picture" })
   profilePicture!: string;
 
