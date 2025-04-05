@@ -9,6 +9,7 @@ import {
   OneToMany,
   ManyToMany,
   JoinTable,
+  ManyToOne,
 } from "typeorm";
 import { UserRole } from "../enums/userRoles.enum";
 import { TeachingMode } from "../enums/teachingModes.enum";
@@ -17,6 +18,8 @@ import { AcademicBackgroundModel } from "./academicBackground.model";
 import { PaymentMethodModel } from "./paymentMethod.model";
 import { TopicModel } from "./topic.model";
 import { UserTopicModel } from "./userTopic.model";
+import { PlanModel } from "./plan.model";
+import { SubscriptionModel } from "./subscription.model";
 
 @Entity("users")
 export class UserModel {
@@ -119,4 +122,10 @@ export class UserModel {
 
   @OneToMany(() => UserTopicModel, (userTopic) => userTopic.user)
   topics?: UserTopicModel[];
+
+  @ManyToOne(() => PlanModel, (plan) => plan.users)
+  plan?: PlanModel;
+
+  @OneToMany(() => SubscriptionModel, (subscription) => subscription.user)
+  subscriptions?: SubscriptionModel[];
 }

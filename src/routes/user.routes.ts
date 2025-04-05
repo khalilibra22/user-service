@@ -44,4 +44,11 @@ router.get(
   async (req, res) => await userController.getTopicsByUserId(req, res)
 );
 
+// Get user plan
+router.get(
+  "/:id/plan",
+  AuthMiddleware.verifyToken,
+  async (req, res) => await userController.getUserPlan(req, res)
+);
+
 export { router as userRouter };

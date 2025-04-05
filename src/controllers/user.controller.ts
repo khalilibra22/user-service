@@ -168,4 +168,32 @@ export class UserController {
       res.status(500).json({ error: "Internal Server Error" });
     }
   }
+
+  // Get user plan
+  async getUserPlan(req: Request, res: Response): Promise<void> {
+    try {
+      const id = req.params.id;
+      const user = await this.userService.getUserById(id);
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      const isPermitted = PermissionMiddleware.checkPermission(
+        user.role,
+        Permission.SUBSCRIPTION
+      );
+      if (!isPermitted) {
+        res.status(403).json({ error: "Unauthorized" });
+        return;
+      }
+      const userPlan = await this.userService.getUserPlan(user.id);
+      res.status(200).json(userPlan?.plan);
+    } catch (error: any) {
+      if (error.message === "Error fetching user") {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
 }

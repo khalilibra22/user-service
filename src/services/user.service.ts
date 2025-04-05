@@ -71,4 +71,18 @@ export class UserService {
       throw new Error("Error adding permission to user");
     }
   }
+
+  // Get user plan
+  async getUserPlan(id: string): Promise<UserModel | undefined> {
+    try {
+      return await this.userRepo.findOne({
+        where: {
+          id: id,
+        },
+        relations: ["plan"],
+      });
+    } catch (error) {
+      throw new Error("Error fetching user plan");
+    }
+  }
 }

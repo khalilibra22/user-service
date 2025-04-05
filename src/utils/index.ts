@@ -7,10 +7,19 @@ export const RolePermissions: Record<UserRole, Permission[]> = {
     Permission.STUDENT_CRUD,
     Permission.ACADEMY_CRUD,
     Permission.USER_CRUD,
+    Permission.SUBSCRIPTION,
   ],
-  [UserRole.TEACHER]: [Permission.TEACHER_CRUD, Permission.USER_CRUD],
+  [UserRole.TEACHER]: [
+    Permission.TEACHER_CRUD,
+    Permission.USER_CRUD,
+    Permission.SUBSCRIPTION,
+  ],
   [UserRole.STUDENT]: [Permission.STUDENT_CRUD, Permission.USER_CRUD],
-  [UserRole.ACADEMY]: [Permission.ACADEMY_CRUD, Permission.USER_CRUD],
+  [UserRole.ACADEMY]: [
+    Permission.ACADEMY_CRUD,
+    Permission.USER_CRUD,
+    Permission.SUBSCRIPTION,
+  ],
 };
 
 export const getImageUrl = (filename: string): string => {
@@ -22,4 +31,17 @@ export const getPermission = (permissionValue: number): Permission | null => {
     return permissionValue as Permission;
   }
   return null; // Handle invalid values
+};
+
+export const getDurationInMonths = (
+  duration?: number,
+  unit?: string
+): number => {
+  //check if the parameters are not null or undefined
+  const adjustedDuration = duration ?? 0;
+  const adjustedUnit = unit || "months";
+  if (adjustedUnit === "years") {
+    return adjustedDuration * 12;
+  }
+  return adjustedDuration;
 };

@@ -20,10 +20,10 @@ export class AcademicBackgroundModel {
   @Column({ nullable: true })
   description?: string;
 
-  @Column({ name: "start_date" })
+  @Column({ name: "start_date", type: "timestamp", nullable: true })
   startDate?: Date;
 
-  @Column({ name: "end_date", nullable: true })
+  @Column({ name: "end_date", type: "timestamp", nullable: true })
   endDate?: Date;
 
   @Column({ name: "is_verified", default: false })
