@@ -29,4 +29,20 @@ router.get(
   async (req, res) => await subscriptionController.getPlans(req, res)
 );
 
+// Get all active subscriptions
+router.get(
+  "/active",
+  AuthMiddleware.verifyToken,
+  async (req, res) =>
+    await subscriptionController.getActiveSubscriptions(req, res)
+);
+
+//Check if the user has an active subscription
+// router.get(
+//   "/check-active",
+//   //AuthMiddleware.verifyToken,
+//   async (req, res) =>
+//     await subscriptionController.checkExpiredSubscriptions(req, res)
+// );
+
 export { router as subscriptionRouter };
