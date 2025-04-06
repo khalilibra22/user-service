@@ -60,34 +60,25 @@ export class SubscriptionService {
   }
 
   async checkExpiredSubscriptions(): Promise<void> {
-    const now = new Date();
+    try {
+      const now = new Date();
 
-    const expiredSubscriptions = await this.subscriptionRepo.find({
-      where: {
-        status: "active",
-        endDate: LessThan(now),
-      },
-    });
-
-    if (expiredSubscriptions.length > 0) {
-      console.log(
-        `Found ${expiredSubscriptions.length} expired subscriptions:`
-      );
-      expiredSubscriptions.forEach((sub: any) => {
-        console.log(
-          `Subscription ID: ${sub.id}, User ID: ${sub.user?.id}, End Date: ${sub.endDate}`
-        );
+      const expiredSubscriptions = await this.subscriptionRepo.find({
+        where: {
+          status: "active",
+          endDate: LessThan(now),
+        },
       });
 
-      // Update status of expired subscriptions
-      for (const sub of expiredSubscriptions) {
-        sub.status = "inactive";
+      if (expiredSubscriptions.length > 0) {
+        // Update status of expired subscriptions
+        for (const sub of expiredSubscriptions) {
+          sub.status = "inactive";
+        }
+        await this.subscriptionRepo.save(expiredSubscriptions);
       }
-
-      await this.subscriptionRepo.save(expiredSubscriptions);
-      console.log("Expired subscriptions updated.");
-    } else {
-      console.log("No expired subscriptions found.");
+    } catch (error) {
+      throw new Error("Error checking expired subscriptions");
     }
   }
 
