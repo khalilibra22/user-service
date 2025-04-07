@@ -4,4 +4,5 @@ export enum Permission {
   ACADEMY_CRUD = 3,
   USER_CRUD = 4,
   SUBSCRIPTION = 5,
+  PAYMENT_METHOD_CRUD = 6,
 }

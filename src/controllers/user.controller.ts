@@ -196,4 +196,108 @@ export class UserController {
       res.status(500).json({ error: "Internal Server Error" });
     }
   }
+  // Add payemnt method
+  async addPaymentMethod(req: Request, res: Response): Promise<void> {
+    try {
+      const id = req.params.id;
+      const user = await this.userService.getUserById(id);
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      const isPermitted = PermissionMiddleware.checkPermission(
+        user.role,
+        Permission.PAYMENT_METHOD_CRUD
+      );
+      if (!isPermitted) {
+        res.status(403).json({ error: "Unauthorized" });
+        return;
+      }
+      const paymentMethodBody = { ...req.body, user: user };
+      const payementMethod = await this.userService.addPaymentMethod(
+        paymentMethodBody
+      );
+      res.status(200).json(payementMethod);
+    } catch (error: any) {
+      if (error.message === "Error fetching user") {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+  //Update payment method
+  async updatePaymentMethod(req: Request, res: Response): Promise<void> {
+    try {
+      const id = req.params.id;
+      const user = await this.userService.getUserById(id);
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      const isPermitted = PermissionMiddleware.checkPermission(
+        user.role,
+        Permission.PAYMENT_METHOD_CRUD
+      );
+      if (!isPermitted) {
+        res.status(403).json({ error: "Unauthorized" });
+        return;
+      }
+      const paymentMethodId = req.params.paymentMethodId;
+      const paymentMethod = await this.userService.getPaymentMethodById(
+        paymentMethodId
+      );
+      if (!paymentMethod) {
+        res.status(404).json({ error: "Payment method not found" });
+        return;
+      }
+      const paymentMethodBody = {
+        ...req.body,
+        id: paymentMethodId,
+        user: user,
+      };
+      await this.userService.updatePaymentMethod(paymentMethodBody);
+      res.status(200).json({ message: "Payment method updated successfully" });
+    } catch (error: any) {
+      if (error.message === "Error fetching user") {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      if (error.message === "Error fetching payment method") {
+        res.status(404).json({ error: "Payment method not found" });
+        return;
+      }
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+
+  // Get payment methods by user id
+  async getPaymentMethodsByUserId(req: Request, res: Response): Promise<void> {
+    try {
+      const id = req.params.id;
+      const user = await this.userService.getUserById(id);
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      const isPermitted = PermissionMiddleware.checkPermission(
+        user.role,
+        Permission.PAYMENT_METHOD_CRUD
+      );
+      if (!isPermitted) {
+        res.status(403).json({ error: "Unauthorized" });
+        return;
+      }
+      const paymentMethods = await this.userService.getPaymentMethodsByUserId(
+        id
+      );
+      res.status(200).json(paymentMethods);
+    } catch (error: any) {
+      if (error.message === "Error fetching user") {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
 }

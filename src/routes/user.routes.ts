@@ -46,9 +46,30 @@ router.get(
 
 // Get user plan
 router.get(
-  "/:id/plan",
+  "/:id/plans",
   AuthMiddleware.verifyToken,
   async (req, res) => await userController.getUserPlan(req, res)
+);
+
+//Add payment method to user
+router.post(
+  "/:id/payment-methods",
+  AuthMiddleware.verifyToken,
+  async (req, res) => await userController.addPaymentMethod(req, res)
+);
+
+// Update payment method
+router.put(
+  "/:id/payment-methods/:paymentMethodId",
+  AuthMiddleware.verifyToken,
+  async (req, res) => await userController.updatePaymentMethod(req, res)
+);
+
+// Get payment methods by user id
+router.get(
+  "/:id/payment-methods",
+  AuthMiddleware.verifyToken,
+  async (req, res) => await userController.getPaymentMethodsByUserId(req, res)
 );
 
 export { router as userRouter };

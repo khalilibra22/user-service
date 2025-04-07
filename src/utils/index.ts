@@ -8,17 +8,20 @@ export const RolePermissions: Record<UserRole, Permission[]> = {
     Permission.ACADEMY_CRUD,
     Permission.USER_CRUD,
     Permission.SUBSCRIPTION,
+    Permission.PAYMENT_METHOD_CRUD,
   ],
   [UserRole.TEACHER]: [
     Permission.TEACHER_CRUD,
     Permission.USER_CRUD,
     Permission.SUBSCRIPTION,
+    Permission.PAYMENT_METHOD_CRUD,
   ],
   [UserRole.STUDENT]: [Permission.STUDENT_CRUD, Permission.USER_CRUD],
   [UserRole.ACADEMY]: [
     Permission.ACADEMY_CRUD,
     Permission.USER_CRUD,
     Permission.SUBSCRIPTION,
+    Permission.PAYMENT_METHOD_CRUD,
   ],
 };
 

@@ -11,16 +11,16 @@ import { UserModel } from "./user.model";
 
 @Entity("payment_methods")
 export class PaymentMethodModel {
-  @PrimaryGeneratedColumn()
-  id?: number;
+  @PrimaryGeneratedColumn("uuid")
+  id?: string;
 
   @Column()
-  type?: string;
+  type?: string; // e.g., "bank", "credit_card", etc.
 
   @Column({ nullable: true, name: "bank_name" })
   bankName?: string;
 
-  @Column({ nullable: true, name: "account_number" })
+  @Column({ name: "account_number" })
   accountNumber?: string;
 
   @Column({ nullable: true, name: "swift_code_key" })
