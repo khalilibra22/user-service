@@ -6,6 +6,9 @@ import { Permission } from "../enums/permission.enum";
 import { getPermission } from "../utils";
 import { AcademicBackgroundService } from "../services/academicBackground.service";
 import { UserTopicModel } from "../models/userTopic.model";
+import { plainToInstance } from "class-transformer";
+import { UserTopicDto } from "../dto/userTopic.dto";
+import { PaymentMethodDto } from "../dto/paymentMethod.dto";
 
 export class UserController {
   private userService: UserService;
@@ -30,7 +33,10 @@ export class UserController {
         res.status(403).json({ error: "Unauthorized" });
         return;
       }
-      res.status(200).json(new UserDto(user));
+      const userDto = plainToInstance(UserDto, user, {
+        excludeExtraneousValues: true,
+      });
+      res.status(200).json(userDto);
     } catch (error: any) {
       if (error.message === "Error fetching user") {
         res.status(404).json({ error: "User not found" });
@@ -159,7 +165,10 @@ export class UserController {
         return;
       }
       const topics = await this.academicBackgroundService.getTopicsByUserId(id);
-      res.status(200).json(topics);
+      const topicDtos = plainToInstance(UserTopicDto, topics, {
+        excludeExtraneousValues: true,
+      });
+      res.status(200).json(topicDtos);
     } catch (error: any) {
       if (error.message === "Error fetching user") {
         res.status(404).json({ error: "User not found" });
@@ -217,7 +226,14 @@ export class UserController {
       const payementMethod = await this.userService.addPaymentMethod(
         paymentMethodBody
       );
-      res.status(200).json(payementMethod);
+      const paymentMethodDto = plainToInstance(
+        PaymentMethodDto,
+        payementMethod,
+        {
+          excludeExtraneousValues: true,
+        }
+      );
+      res.status(201).json(paymentMethodDto);
     } catch (error: any) {
       if (error.message === "Error fetching user") {
         res.status(404).json({ error: "User not found" });

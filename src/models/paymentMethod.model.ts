@@ -24,7 +24,7 @@ export class PaymentMethodModel {
   accountNumber?: string;
 
   @Column({ nullable: true, name: "swift_code_key" })
-  swiftCodeKey?: string;
+  swiftCodeOrCcpKey?: string; // e.g., "SWIFT" for bank or "CCP" for postal bank
 
   @Column({ nullable: true, name: "bank_address" })
   bankAddress?: string;

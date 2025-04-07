@@ -3,6 +3,10 @@ import { PermissionMiddleware } from "../utils/permission.middleware";
 import { Permission } from "../enums/permission.enum";
 import { AcademicBackgroundService } from "../services/academicBackground.service";
 import { UserService } from "../services/user.service";
+import { plainToInstance } from "class-transformer";
+import { AcademicBackgroundDto } from "../dto/AcademicBackground.dto";
+import { CategoryDto } from "../dto/category.dto";
+import { TopicDto } from "../dto/topic.dto";
 
 export class AcademicBackgroundController {
   private academicBackgroundService: AcademicBackgroundService;
@@ -36,7 +40,14 @@ export class AcademicBackgroundController {
         await this.academicBackgroundService.createAcademicBackground(
           academicBackground
         );
-      res.status(201).json(createdAcademicBackground);
+      const academicBackgroundDto = plainToInstance(
+        AcademicBackgroundDto,
+        createdAcademicBackground,
+        {
+          excludeExtraneousValues: true,
+        }
+      );
+      res.status(201).json(academicBackgroundDto);
     } catch (error: any) {
       if (error.message === "Error fetching user") {
         res.status(404).json({ error: "User not found" });
@@ -51,7 +62,10 @@ export class AcademicBackgroundController {
       const category = req.body;
       const createdCategory =
         await this.academicBackgroundService.createCategory(category);
-      res.status(201).json(createdCategory);
+      const categoryDto = plainToInstance(CategoryDto, createdCategory, {
+        excludeExtraneousValues: true,
+      });
+      res.status(201).json(categoryDto);
     } catch (error) {
       res.status(500).json({ error: "Internal Server Error" });
     }
@@ -73,7 +87,10 @@ export class AcademicBackgroundController {
       const createdSubject = await this.academicBackgroundService.createSubject(
         subject
       );
-      res.status(201).json(createdSubject);
+      const subjectDto = plainToInstance(CategoryDto, createdSubject, {
+        excludeExtraneousValues: true,
+      });
+      res.status(201).json(subjectDto);
     } catch (error) {
       res.status(500).json({ error: "Internal Server Error" });
     }
@@ -95,7 +112,23 @@ export class AcademicBackgroundController {
       const createdTopic = await this.academicBackgroundService.createTopic(
         topic
       );
-      res.status(201).json(createdTopic);
+      const topicDto = plainToInstance(TopicDto, createdTopic, {
+        excludeExtraneousValues: true,
+      });
+      res.status(201).json(topicDto);
+    } catch (error) {
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+
+  async getCategories(req: Request, res: Response): Promise<void> {
+    try {
+      const categories =
+        await this.academicBackgroundService.getAllCategories();
+      const categoriesDto = plainToInstance(CategoryDto, categories, {
+        excludeExtraneousValues: true,
+      });
+      res.status(200).json(categoriesDto);
     } catch (error) {
       res.status(500).json({ error: "Internal Server Error" });
     }

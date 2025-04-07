@@ -88,14 +88,4 @@ export class SubscriptionController {
       res.status(500).json({ error: "Internal Server Error" });
     }
   }
-
-  // Method that checks for expired subscriptions and updates their status
-  // async checkExpiredSubscriptions(req: Request, res: Response): Promise<void> {
-  //   try {
-  //     await this.subscriptionService.checkExpiredSubscriptions();
-  //     res.status(200).json({ message: "Expired subscriptions checked" });
-  //   } catch (error) {
-  //     res.status(500).json({ error: "Internal Server Error" });
-  //   }
-  // }
 }

@@ -147,4 +147,15 @@ export class AcademicBackgroundService {
       throw new Error("Error fetching topics by user id");
     }
   }
+
+  // Get all categories
+  async getAllCategories(): Promise<CategoryModel[]> {
+    try {
+      return await this.categoryRepo.find({
+        relations: ["subjects", "subjects.topics"],
+      });
+    } catch (error) {
+      throw new Error("Error fetching categories");
+    }
+  }
 }

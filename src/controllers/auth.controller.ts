@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { UserService } from "../services/user.service";
 import { AuthMiddleware } from "../utils/auth.middleware";
 import { UserDto } from "../dto/user.dto";
+import { plainToInstance } from "class-transformer";
 export class AuthController {
   private userService: UserService;
   constructor() {
@@ -32,8 +33,11 @@ export class AuthController {
       const createdUser = await this.userService.createUser(req.body);
       const token = await AuthMiddleware.generateToken(createdUser);
       const verificationLink = `http://localhost:5000/auth/verify-email?token=${token}`;
+      const userDto = plainToInstance(UserDto, createdUser, {
+        excludeExtraneousValues: true,
+      });
       res.status(201).json({
-        userDto: new UserDto(createdUser),
+        userDto: userDto,
         verificationLink: verificationLink,
       });
     } catch (error) {

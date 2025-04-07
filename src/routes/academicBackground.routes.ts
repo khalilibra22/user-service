@@ -22,6 +22,13 @@ router.post(
     await academicBackgroundController.createCategory(req, res)
 );
 
+// get all categories
+router.get(
+  "/categories",
+  AuthMiddleware.verifyToken,
+  async (req, res) => await academicBackgroundController.getCategories(req, res)
+);
+
 router.post(
   "/subjects",
   AuthMiddleware.verifyToken,
