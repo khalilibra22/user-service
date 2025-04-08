@@ -1,6 +1,11 @@
 import express from "express";
 import { ValidationMiddleware } from "../utils/validation.middleware";
-import { updateUserValidationSchema } from "../validation/user.validation";
+import {
+  addTopicToUserValidationSchema,
+  checkPermissionsValidationSchema,
+  paymentMethodValidationSchema,
+  updateUserValidationSchema,
+} from "../validation/user.validation";
 import { UserController } from "../controllers/user.controller";
 import { AuthMiddleware } from "../utils/auth.middleware";
 
@@ -8,14 +13,10 @@ const router = express.Router();
 
 const userController = new UserController();
 
-const userValidationMiddleware = new ValidationMiddleware(
-  updateUserValidationSchema
-);
-
 router.put(
   "/:id",
   AuthMiddleware.verifyToken,
-  userValidationMiddleware.validate(),
+  ValidationMiddleware.validate(updateUserValidationSchema),
   async (req, res) => await userController.updateUser(req, res)
 );
 
@@ -27,13 +28,15 @@ router.get(
 
 router.post(
   "/:id/check-permissions",
+  AuthMiddleware.verifyToken,
+  ValidationMiddleware.validate(checkPermissionsValidationSchema),
   async (req, res) => await userController.checkPermissions(req, res)
 );
 
-//Add topic to user
 router.post(
   "/:id/topics",
   AuthMiddleware.verifyToken,
+  ValidationMiddleware.validate(addTopicToUserValidationSchema),
   async (req, res) => await userController.addTopicToUser(req, res)
 );
 
@@ -55,6 +58,7 @@ router.get(
 router.post(
   "/:id/payment-methods",
   AuthMiddleware.verifyToken,
+  ValidationMiddleware.validate(paymentMethodValidationSchema),
   async (req, res) => await userController.addPaymentMethod(req, res)
 );
 
@@ -62,6 +66,7 @@ router.post(
 router.put(
   "/:id/payment-methods/:paymentMethodId",
   AuthMiddleware.verifyToken,
+  ValidationMiddleware.validate(paymentMethodValidationSchema),
   async (req, res) => await userController.updatePaymentMethod(req, res)
 );
 

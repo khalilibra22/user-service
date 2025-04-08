@@ -2,6 +2,10 @@ import express from "express";
 import { ValidationMiddleware } from "../utils/validation.middleware";
 import { AuthMiddleware } from "../utils/auth.middleware";
 import { SubscriptionController } from "../controllers/subscription.controller";
+import {
+  planSValdationSchema,
+  userSubscriptionValidationSchema,
+} from "../validation/subscription.validation";
 
 const router = express.Router();
 
@@ -10,7 +14,7 @@ const subscriptionController = new SubscriptionController();
 router.post(
   "/plans",
   AuthMiddleware.verifyToken,
-  //userValidationMiddleware.validate(),
+  ValidationMiddleware.validate(planSValdationSchema),
   async (req, res) => await subscriptionController.createPlan(req, res)
 );
 
@@ -20,6 +24,7 @@ router.post(
 router.post(
   "/:planId",
   AuthMiddleware.verifyToken,
+  ValidationMiddleware.validate(userSubscriptionValidationSchema),
   async (req, res) => await subscriptionController.createSubscription(req, res)
 );
 
@@ -29,7 +34,6 @@ router.get(
   async (req, res) => await subscriptionController.getPlans(req, res)
 );
 
-// Get all active subscriptions
 router.get(
   "/active",
   AuthMiddleware.verifyToken,

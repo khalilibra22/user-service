@@ -307,7 +307,14 @@ export class UserController {
       const paymentMethods = await this.userService.getPaymentMethodsByUserId(
         id
       );
-      res.status(200).json(paymentMethods);
+      const paymentMethodDtos = plainToInstance(
+        PaymentMethodDto,
+        paymentMethods,
+        {
+          excludeExtraneousValues: true,
+        }
+      );
+      res.status(200).json(paymentMethodDtos);
     } catch (error: any) {
       if (error.message === "Error fetching user") {
         res.status(404).json({ error: "User not found" });

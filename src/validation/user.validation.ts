@@ -93,7 +93,6 @@ export const updateUserValidationSchema = Joi.object({
   role: Joi.number()
     .valid(...Object.values(UserRole))
     .required(),
-  // Fields forbidden for Admins (0) and Students (2)
   state: Joi.when("role", {
     is: Joi.valid(UserRole.ADMIN, UserRole.STUDENT),
     then: Joi.forbidden(),
@@ -145,3 +144,54 @@ export const loginValidationSchema = Joi.object({
   email: Joi.string().email().required(),
   password: Joi.string().required(),
 });
+
+export const forgotPasswordSchema = Joi.object({
+  email: Joi.string().email().required(),
+});
+
+export const resetPasswordSchema = Joi.object({
+  password: Joi.string()
+    .min(6)
+    .pattern(new RegExp("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]+$")) // At least one letter & one number
+    .required()
+    .messages({
+      "string.pattern.base":
+        "Password must be at least 6 characters long and contain at least one letter and one number.",
+    }),
+});
+
+export const checkPermissionsValidationSchema = Joi.object({
+  permission: Joi.number().integer().positive().required(),
+});
+
+export const addTopicToUserValidationSchema = Joi.object({
+  topicId: Joi.number().integer().positive().required(),
+  price: Joi.number().positive().required(),
+});
+
+const bankSchema = Joi.object({
+  type: Joi.string().valid("bank").required(),
+  bankName: Joi.string().required(),
+  accountNumber: Joi.string().required(),
+  swiftCodeOrCcpKey: Joi.string().required(),
+  bankAddress: Joi.string().required(),
+  accountHolderName: Joi.string().required(),
+});
+
+const ccpSchema = Joi.object({
+  type: Joi.string().valid("ccp").required(),
+  accountNumber: Joi.string().required(),
+  swiftCodeOrCcpKey: Joi.string().required(),
+  accountHolderName: Joi.string().required(),
+});
+
+const baridimobSchema = Joi.object({
+  type: Joi.string().valid("baridimob").required(),
+  accountNumber: Joi.string().required(),
+});
+
+export const paymentMethodValidationSchema = Joi.alternatives().try(
+  bankSchema,
+  ccpSchema,
+  baridimobSchema
+);
