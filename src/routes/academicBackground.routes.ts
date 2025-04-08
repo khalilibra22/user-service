@@ -7,7 +7,7 @@ import {
   createCategorySchema,
   createSubjectSchema,
   createTopicSchema,
-} from "../validation/academicBackground.validation";
+} from "../validations/academicBackground.validation";
 
 const router = express.Router();
 

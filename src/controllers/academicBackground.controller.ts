@@ -4,9 +4,9 @@ import { Permission } from "../enums/permission.enum";
 import { AcademicBackgroundService } from "../services/academicBackground.service";
 import { UserService } from "../services/user.service";
 import { plainToInstance } from "class-transformer";
-import { AcademicBackgroundDto } from "../dto/AcademicBackground.dto";
-import { CategoryDto } from "../dto/category.dto";
-import { TopicDto } from "../dto/topic.dto";
+import { AcademicBackgroundDto } from "../dtos/AcademicBackground.dto";
+import { CategoryDto } from "../dtos/category.dto";
+import { TopicDto } from "../dtos/topic.dto";
 
 export class AcademicBackgroundController {
   private academicBackgroundService: AcademicBackgroundService;

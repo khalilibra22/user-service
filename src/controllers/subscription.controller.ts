@@ -5,8 +5,8 @@ import { Permission } from "../enums/permission.enum";
 import { SubscriptionService } from "../services/subscription.service";
 import { getDurationInMonths } from "../utils";
 import { plainToInstance } from "class-transformer";
-import { PlanDto } from "../dto/plan.dto";
-import { SubscriptionDto } from "../dto/subscription.dto";
+import { PlanDto } from "../dtos/plan.dto";
+import { SubscriptionDto } from "../dtos/subscription.dto";
 
 export class SubscriptionController {
   private subscriptionService: SubscriptionService;

@@ -6,7 +6,7 @@ import {
   loginValidationSchema,
   resetPasswordSchema,
   userValidationSchema,
-} from "../validation/user.validation";
+} from "../validations/user.validation";
 import { upload } from "../config/multer";
 
 const router = express.Router();

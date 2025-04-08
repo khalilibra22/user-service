@@ -5,7 +5,7 @@ import { SubscriptionController } from "../controllers/subscription.controller";
 import {
   planSValdationSchema,
   userSubscriptionValidationSchema,
-} from "../validation/subscription.validation";
+} from "../validations/subscription.validation";
 
 const router = express.Router();
 

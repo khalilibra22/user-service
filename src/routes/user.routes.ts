@@ -5,7 +5,7 @@ import {
   checkPermissionsValidationSchema,
   paymentMethodValidationSchema,
   updateUserValidationSchema,
-} from "../validation/user.validation";
+} from "../validations/user.validation";
 import { UserController } from "../controllers/user.controller";
 import { AuthMiddleware } from "../utils/auth.middleware";
 

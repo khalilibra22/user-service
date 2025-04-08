@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
 import { UserModel } from "../models/user.model";
 import { UserRole } from "../enums/userRoles.enum";
-import { UserDto } from "../dto/user.dto";
+import { UserDto } from "../dtos/user.dto";
 
 class AuthMiddleware {
   private static saltRounds = 10;

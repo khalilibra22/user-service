@@ -1,14 +1,14 @@
 import { Request, Response } from "express";
 import { UserService } from "../services/user.service";
-import { UserDto } from "../dto/user.dto";
+import { UserDto } from "../dtos/user.dto";
 import { PermissionMiddleware } from "../utils/permission.middleware";
 import { Permission } from "../enums/permission.enum";
 import { getPermission } from "../utils";
 import { AcademicBackgroundService } from "../services/academicBackground.service";
 import { UserTopicModel } from "../models/userTopic.model";
 import { plainToInstance } from "class-transformer";
-import { UserTopicDto } from "../dto/userTopic.dto";
-import { PaymentMethodDto } from "../dto/paymentMethod.dto";
+import { UserTopicDto } from "../dtos/userTopic.dto";
+import { PaymentMethodDto } from "../dtos/paymentMethod.dto";
 
 export class UserController {
   private userService: UserService;

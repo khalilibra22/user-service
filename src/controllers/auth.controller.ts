@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { UserService } from "../services/user.service";
 import { AuthMiddleware } from "../utils/auth.middleware";
-import { UserDto } from "../dto/user.dto";
+import { UserDto } from "../dtos/user.dto";
 import { plainToInstance } from "class-transformer";
 export class AuthController {
   private userService: UserService;
