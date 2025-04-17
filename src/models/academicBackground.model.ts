@@ -35,7 +35,7 @@ export class AcademicBackgroundModel {
   @Column()
   ordering?: number;
 
-  @Column()
+  @Column({ nullable: true })
   certificate?: string;
 
   @ManyToOne(() => UserModel, (user) => user.academicBackgrounds)

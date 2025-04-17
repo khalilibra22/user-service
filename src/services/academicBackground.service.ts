@@ -28,6 +28,7 @@ export class AcademicBackgroundService {
     try {
       return await this.academicBackgroundRepo.save(academicBackground);
     } catch (error) {
+      console.error(error);
       throw new Error("Error creating academic background");
     }
   }

@@ -9,5 +9,11 @@ export class MinimalUserDto {
   fullname?: string;
 
   @Expose()
+  phoneNumber?: string;
+
+  @Expose()
+  email?: string;
+
+  @Expose()
   role?: UserRole;
 }

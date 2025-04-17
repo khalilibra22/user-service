@@ -9,6 +9,8 @@ import { UserTopicModel } from "../models/userTopic.model";
 import { plainToInstance } from "class-transformer";
 import { UserTopicDto } from "../dtos/userTopic.dto";
 import { PaymentMethodDto } from "../dtos/paymentMethod.dto";
+import { UserRole } from "../enums/userRoles.enum";
+import { MinimalUserDto } from "../dtos/minimalUser.dto";
 
 export class UserController {
   private userService: UserService;
@@ -33,9 +35,19 @@ export class UserController {
         res.status(403).json({ error: "Unauthorized" });
         return;
       }
-      const userDto = plainToInstance(UserDto, user, {
-        excludeExtraneousValues: true,
-      });
+      let userDto;
+      if (user.role === UserRole.STUDENT || user.role === UserRole.ADMIN) {
+        userDto = plainToInstance(MinimalUserDto, user, {
+          excludeExtraneousValues: true,
+        });
+      } else {
+        userDto = plainToInstance(UserDto, user, {
+          excludeExtraneousValues: true,
+        });
+      }
+      // const userDto = plainToInstance(UserDto, user, {
+      //   excludeExtraneousValues: true,
+      // });
       res.status(200).json(userDto);
     } catch (error: any) {
       if (error.message === "Error fetching user") {
@@ -63,12 +75,15 @@ export class UserController {
         res.status(403).json({ error: "Unauthorized" });
         return;
       }
+      delete req.body.role;
       const updatedUser = { ...user, ...req.body };
       await this.userService.updateUser(id, updatedUser);
-      res
-        .status(200)
-        .json({ message: "User updated successfully", updatedUser });
-    } catch (error) {
+      res.status(200).json({ message: "User updated successfully" });
+    } catch (error: any) {
+      if (error.message === "Error fetching user") {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
       res.status(500).json({ error: "Internal Server Error" });
     }
   }

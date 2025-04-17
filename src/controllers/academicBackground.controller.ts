@@ -49,6 +49,7 @@ export class AcademicBackgroundController {
       );
       res.status(201).json(academicBackgroundDto);
     } catch (error: any) {
+      console.log(error);
       if (error.message === "Error fetching user") {
         res.status(404).json({ error: "User not found" });
         return;
