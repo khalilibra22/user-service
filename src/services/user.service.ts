@@ -1,11 +1,13 @@
 import { UserModel } from "../models/user.model";
 import { AppDataSource } from "../config/database";
-import { DataSource } from "typeorm";
+import { PaymentMethodModel } from "../models/paymentMethod.model";
 
 export class UserService {
   userRepo: any;
+  payementMethodRepo: any;
   constructor() {
     this.userRepo = AppDataSource.getRepository(UserModel);
+    this.payementMethodRepo = AppDataSource.getRepository(PaymentMethodModel);
   }
 
   async createUser(user: UserModel): Promise<UserModel> {
@@ -67,9 +69,78 @@ export class UserService {
 
   async addPermission(user: UserModel): Promise<void> {
     try {
-      AppDataSource.manager.save(user);
+      await AppDataSource.manager.save(user);
     } catch (error) {
       throw new Error("Error adding permission to user");
+    }
+  }
+
+  // Get user plan
+  async getUserPlan(id: string): Promise<UserModel | undefined> {
+    try {
+      return await this.userRepo.findOne({
+        where: {
+          id: id,
+        },
+        relations: ["plan"],
+      });
+    } catch (error) {
+      throw new Error("Error fetching user plan");
+    }
+  }
+
+  // Add payement method to user
+  async addPaymentMethod(
+    paymentMethod: PaymentMethodModel
+  ): Promise<PaymentMethodModel> {
+    try {
+      const newPaymentMethod = await this.payementMethodRepo.save(
+        paymentMethod
+      );
+      return newPaymentMethod;
+    } catch (error) {
+      throw new Error("Error adding payment method to user");
+    }
+  }
+
+  // Update payment method
+  async updatePaymentMethod(paymentMethod: PaymentMethodModel): Promise<void> {
+    try {
+      await this.payementMethodRepo.save(paymentMethod);
+    } catch (error) {
+      throw new Error("Error updating payment method");
+    }
+  }
+
+  // Get payment methods by user id
+  async getPaymentMethodsByUserId(
+    userId: string
+  ): Promise<PaymentMethodModel[]> {
+    try {
+      return await this.payementMethodRepo.find({
+        where: {
+          user: {
+            id: userId,
+          },
+        },
+      });
+    } catch (error) {
+      throw new Error("Error fetching payment methods");
+    }
+  }
+
+  //getPaymentMethodById
+  async getPaymentMethodById(
+    id: string
+  ): Promise<PaymentMethodModel | undefined> {
+    try {
+      return await this.payementMethodRepo.findOne({
+        where: {
+          id: id,
+        },
+      });
+    } catch (error) {
+      throw new Error("Error fetching payment method");
     }
   }
 }

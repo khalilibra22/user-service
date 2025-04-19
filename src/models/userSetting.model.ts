@@ -18,8 +18,8 @@ export class UserSettingModel {
   @Column({ name: "email_notifications", default: true })
   emailNotifications!: boolean;
 
-  @Column({ name: "push_notifications", default: true })
-  pushNotifications!: boolean;
+  @Column({ name: "is_accept_terms", default: false })
+  isAcceptTerms!: boolean;
 
   @OneToOne(() => UserModel, (user) => user.settings, { onDelete: "CASCADE" })
   @JoinColumn({ name: "user_id" })

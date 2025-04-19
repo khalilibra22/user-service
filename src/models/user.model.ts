@@ -6,10 +6,20 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
   OneToOne,
+  OneToMany,
+  ManyToMany,
+  JoinTable,
+  ManyToOne,
 } from "typeorm";
 import { UserRole } from "../enums/userRoles.enum";
 import { TeachingMode } from "../enums/teachingModes.enum";
 import { UserSettingModel } from "./userSetting.model";
+import { AcademicBackgroundModel } from "./academicBackground.model";
+import { PaymentMethodModel } from "./paymentMethod.model";
+import { TopicModel } from "./topic.model";
+import { UserTopicModel } from "./userTopic.model";
+import { PlanModel } from "./plan.model";
+import { SubscriptionModel } from "./subscription.model";
 
 @Entity("users")
 export class UserModel {
@@ -48,11 +58,32 @@ export class UserModel {
   @Column({ nullable: true })
   address!: string;
 
+  @Column({ nullable: true })
+  address2!: string;
+
   @Column({ type: "simple-array", nullable: true, name: "teaching_modes" })
   teachingModes!: TeachingMode[];
 
   @Column({ nullable: true })
   bio!: string;
+
+  @Column({ nullable: true })
+  gender!: string;
+
+  @Column({ default: "arabic" })
+  language!: string;
+
+  @Column({
+    name: "time_slot",
+    default: 1,
+    type: "decimal",
+    precision: 5,
+    scale: 2,
+  })
+  timeSlot!: number;
+
+  @Column({ name: "push_notifications", default: true })
+  pushNotifications!: boolean;
 
   @Column({ nullable: true, name: "profile_picture" })
   profilePicture!: string;
@@ -79,4 +110,22 @@ export class UserModel {
     cascade: true,
   })
   settings?: UserSettingModel;
+
+  @OneToMany(
+    () => AcademicBackgroundModel,
+    (academicBackground) => academicBackground.user
+  )
+  academicBackgrounds?: AcademicBackgroundModel[];
+
+  @OneToMany(() => PaymentMethodModel, (paymentMethod) => paymentMethod.user)
+  paymentMethods?: PaymentMethodModel[];
+
+  @OneToMany(() => UserTopicModel, (userTopic) => userTopic.user)
+  topics?: UserTopicModel[];
+
+  @ManyToOne(() => PlanModel, (plan) => plan.users)
+  plan?: PlanModel;
+
+  @OneToMany(() => SubscriptionModel, (subscription) => subscription.user)
+  subscriptions?: SubscriptionModel[];
 }

@@ -1,7 +1,10 @@
 import { Request, Response } from "express";
 import { UserService } from "../services/user.service";
 import { AuthMiddleware } from "../utils/auth.middleware";
-import { UserDto } from "../dto/user.dto";
+import { UserDto } from "../dtos/user.dto";
+import { plainToInstance } from "class-transformer";
+import { UserRole } from "../enums/userRoles.enum";
+import { MinimalUserDto } from "../dtos/minimalUser.dto";
 export class AuthController {
   private userService: UserService;
   constructor() {
@@ -31,11 +34,21 @@ export class AuthController {
       req.body.password = hashedPassword;
       const createdUser = await this.userService.createUser(req.body);
       const token = await AuthMiddleware.generateToken(createdUser);
-      const verificationLink = `http://localhost:5000/auth/verify-email?token=${token}`;
-      res.status(201).json({
-        userDto: new UserDto(createdUser),
-        verificationLink: verificationLink,
-      });
+      //const verificationLink = `http://localhost:5000/auth/verify-email?token=${token}`;
+      let userDto;
+      if (
+        createdUser.role === UserRole.STUDENT ||
+        createdUser.role === UserRole.ADMIN
+      ) {
+        userDto = plainToInstance(MinimalUserDto, createdUser, {
+          excludeExtraneousValues: true,
+        });
+      } else {
+        userDto = plainToInstance(UserDto, createdUser, {
+          excludeExtraneousValues: true,
+        });
+      }
+      res.status(201).json(userDto);
     } catch (error) {
       res.status(500).json({ error: "Internal Server Error" });
     }
@@ -46,7 +59,7 @@ export class AuthController {
       const { email, password } = req.body;
       const user = await this.userService.getUserByEmail(email);
       if (!user) {
-        res.status(401).json({ error: "Invalid email" });
+        res.status(401).json({ error: "Invalid credentials" });
         return;
       }
       const isAuthenticated = await AuthMiddleware.comparePasswords(
@@ -54,7 +67,7 @@ export class AuthController {
         user.password
       );
       if (!isAuthenticated) {
-        res.status(401).json({ message: "Invalid password" });
+        res.status(401).json({ message: "Invalid credentials" });
         return;
       }
       const token = await AuthMiddleware.generateToken(user);

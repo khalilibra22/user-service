@@ -2,18 +2,16 @@ import express from "express";
 import { AuthController } from "../controllers/auth.controller";
 import { ValidationMiddleware } from "../utils/validation.middleware";
 import {
+  forgotPasswordSchema,
   loginValidationSchema,
+  resetPasswordSchema,
   userValidationSchema,
-} from "../validation/user.validation";
+} from "../validations/user.validation";
 import { upload } from "../config/multer";
 
 const router = express.Router();
 
 const authController = new AuthController();
-const authValidationMiddleware = new ValidationMiddleware(userValidationSchema);
-const loginValidationMiddleware = new ValidationMiddleware(
-  loginValidationSchema
-);
 
 router.post(
   "/",
@@ -21,22 +19,24 @@ router.post(
     { name: "profilePicture", maxCount: 1 },
     { name: "certificate", maxCount: 1 },
   ]),
-  authValidationMiddleware.validate(),
+  ValidationMiddleware.validate(userValidationSchema),
   async (req, res) => await authController.register(req, res)
 );
 router.post(
   "/login",
-  loginValidationMiddleware.validate(),
+  ValidationMiddleware.validate(loginValidationSchema),
   async (req, res) => await authController.login(req, res)
 );
 
 router.post(
   "/forgot-password",
+  ValidationMiddleware.validate(forgotPasswordSchema),
   async (req, res) => await authController.forgotPassword(req, res)
 );
 
 router.post(
   "/reset-password",
+  ValidationMiddleware.validate(resetPasswordSchema),
   async (req, res) => await authController.resetPassword(req, res)
 );
 

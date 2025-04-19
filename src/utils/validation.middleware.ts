@@ -2,28 +2,22 @@ import { Request, Response, NextFunction } from "express";
 import { Schema } from "joi";
 
 class ValidationMiddleware {
-  schema: Schema;
-
-  constructor(schema: Schema) {
-    this.schema = schema;
-  }
-
-  validate(): (req: Request, res: Response, next: NextFunction) => void {
-    try {
-      return (req: Request, res: Response, next: NextFunction) => {
-        const { error } = this.schema.validate(req.body);
+  static validate(schema: Schema) {
+    return (req: Request, res: Response, next: NextFunction): void => {
+      try {
+        const { error } = schema.validate(req.body, { abortEarly: false });
         if (error) {
-          return res
-            .status(400)
-            .json({ error: error.details.map((detail) => detail.message) });
+          res.status(400).json({
+            error: error.details.map((detail) => detail.message),
+          });
+          return;
         }
         next();
-      };
-    } catch (error) {
-      return (req: Request, res: Response, next: NextFunction) => {
+      } catch (err) {
+        console.error("Validation Middleware Error:", err);
         res.status(500).json({ error: "Internal Server Error" });
-      };
-    }
+      }
+    };
   }
 }
 
