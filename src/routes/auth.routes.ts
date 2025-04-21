@@ -8,6 +8,7 @@ import {
   userValidationSchema,
 } from "../validations/user.validation";
 import { upload } from "../config/multer";
+import passport from "passport";
 
 const router = express.Router();
 
@@ -44,5 +45,30 @@ router.get(
   "/verify-email",
   async (req, res) => await authController.verifyEmail(req, res)
 );
+
+router.get(
+  "/google",
+  passport.authenticate("google", {
+    scope: ["profile", "email"],
+  })
+);
+
+router.get(
+  "/google/callback",
+  passport.authenticate("google", {
+    failureRedirect: "/auth/failure",
+    session: true,
+  }),
+  async (req, res) => await authController.googleLogin(req, res)
+);
+
+router.get(
+  "/logout",
+  async (req, res) => await authController.logout(req, res)
+);
+
+router.get("/failure", (req, res) => {
+  res.status(401).json({ message: "Authentication failed" });
+});
 
 export { router as authRouter };

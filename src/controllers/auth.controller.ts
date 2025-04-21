@@ -64,7 +64,7 @@ export class AuthController {
       }
       const isAuthenticated = await AuthMiddleware.comparePasswords(
         password,
-        user.password
+        user.password ?? ""
       );
       if (!isAuthenticated) {
         res.status(401).json({ message: "Invalid credentials" });
@@ -143,6 +143,41 @@ export class AuthController {
       user.isActive = true;
       await this.userService.updateUser(id, user);
       res.status(200).json({ message: "Email verified successfully" });
+    } catch (error) {
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+
+  async logout(req: Request, res: Response): Promise<void> {
+    try {
+      req.logout(() => {
+        res.status(200).json({ message: "Logged out" });
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+
+  // sign in with google
+  async googleLogin(req: Request, res: Response): Promise<void> {
+    try {
+      const user = req.user as any;
+      if (!user) {
+        res.status(401).json({ error: "Invalid credentials" });
+        return;
+      }
+      // const state = req.query.state;
+      // if (typeof state !== "string") {
+      //   res.status(400).json({ error: "Invalid state parameter" });
+      //   return;
+      // }
+      // const decoded = JSON.parse(
+      //   Buffer.from(state, "base64").toString("utf-8")
+      // );
+      // const role = decoded.role;
+
+      const token = await AuthMiddleware.generateToken(user);
+      res.status(200).json({ id: user.id, token: token });
     } catch (error) {
       res.status(500).json({ error: "Internal Server Error" });
     }
