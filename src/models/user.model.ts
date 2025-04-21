@@ -16,7 +16,6 @@ import { TeachingMode } from "../enums/teachingModes.enum";
 import { UserSettingModel } from "./userSetting.model";
 import { AcademicBackgroundModel } from "./academicBackground.model";
 import { PaymentMethodModel } from "./paymentMethod.model";
-import { TopicModel } from "./topic.model";
 import { UserTopicModel } from "./userTopic.model";
 import { PlanModel } from "./plan.model";
 import { SubscriptionModel } from "./subscription.model";
@@ -24,19 +23,22 @@ import { SubscriptionModel } from "./subscription.model";
 @Entity("users")
 export class UserModel {
   @PrimaryGeneratedColumn("uuid")
-  id!: string;
+  id?: string;
+
+  @Column({ unique: true, nullable: true })
+  googleId?: string;
 
   @Column()
-  fullname!: string;
+  fullname?: string;
 
   @Column({ unique: true })
-  email!: string;
+  email?: string;
 
-  @Column()
-  phoneNumber!: string;
+  @Column({ nullable: true })
+  phoneNumber?: string;
 
-  @Column()
-  password!: string;
+  @Column({ nullable: true })
+  password?: string;
 
   @Column({
     type: "enum",
@@ -47,31 +49,31 @@ export class UserModel {
   role!: UserRole;
 
   @Column({ nullable: true })
-  state!: string;
+  state?: string;
 
   @Column({ nullable: true })
-  city!: string;
+  city?: string;
 
   @Column({ nullable: true })
-  zipcode!: string;
+  zipcode?: string;
 
   @Column({ nullable: true })
-  address!: string;
+  address?: string;
 
   @Column({ nullable: true })
-  address2!: string;
+  address2?: string;
 
   @Column({ type: "simple-array", nullable: true, name: "teaching_modes" })
-  teachingModes!: TeachingMode[];
+  teachingModes?: TeachingMode[];
 
   @Column({ nullable: true })
-  bio!: string;
+  bio?: string;
 
   @Column({ nullable: true })
-  gender!: string;
+  gender?: string;
 
   @Column({ default: "arabic" })
-  language!: string;
+  language?: string;
 
   @Column({
     name: "time_slot",
@@ -80,22 +82,22 @@ export class UserModel {
     precision: 5,
     scale: 2,
   })
-  timeSlot!: number;
+  timeSlot?: number;
 
   @Column({ name: "push_notifications", default: true })
-  pushNotifications!: boolean;
+  pushNotifications?: boolean;
 
   @Column({ nullable: true, name: "profile_picture" })
-  profilePicture!: string;
+  profilePicture?: string;
 
   @Column({ nullable: true })
-  certificate!: string;
+  certificate?: string;
 
   @Column({ default: false, name: "is_approved" })
-  isApproved!: boolean;
+  isApproved?: boolean;
 
   @Column({ default: false, name: "is_active" })
-  isActive!: boolean;
+  isActive?: boolean;
 
   @CreateDateColumn({ type: "timestamp" })
   createdAt?: Date;

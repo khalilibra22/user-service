@@ -67,15 +67,15 @@ export class UserController {
         res.status(404).json({ error: "User not found" });
         return;
       }
-      const isPermitted = PermissionMiddleware.checkPermission(
-        user.role,
-        Permission.USER_CRUD
-      );
-      if (!isPermitted) {
-        res.status(403).json({ error: "Unauthorized" });
-        return;
-      }
-      delete req.body.role;
+      // const isPermitted = PermissionMiddleware.checkPermission(
+      //   user.role,
+      //   Permission.USER_CRUD
+      // );
+      // if (!isPermitted) {
+      //   res.status(403).json({ error: "Unauthorized" });
+      //   return;
+      // }
+      //delete req.body.role;
       const updatedUser = { ...user, ...req.body };
       await this.userService.updateUser(id, updatedUser);
       res.status(200).json({ message: "User updated successfully" });
@@ -210,7 +210,7 @@ export class UserController {
         res.status(403).json({ error: "Unauthorized" });
         return;
       }
-      const userPlan = await this.userService.getUserPlan(user.id);
+      const userPlan = await this.userService.getUserPlan(id);
       res.status(200).json(userPlan?.plan);
     } catch (error: any) {
       if (error.message === "Error fetching user") {

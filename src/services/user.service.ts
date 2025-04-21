@@ -14,6 +14,7 @@ export class UserService {
     try {
       return await this.userRepo.save(user);
     } catch (error) {
+      console.error(error);
       throw new Error("Error creating user");
     }
   }
@@ -141,6 +142,19 @@ export class UserService {
       });
     } catch (error) {
       throw new Error("Error fetching payment method");
+    }
+  }
+
+  // get user by googleId
+  async getUserByGoogleId(googleId: string): Promise<UserModel | undefined> {
+    try {
+      return await this.userRepo.findOne({
+        where: {
+          googleId: googleId,
+        },
+      });
+    } catch (error) {
+      throw new Error("Error fetching user by Google ID");
     }
   }
 }

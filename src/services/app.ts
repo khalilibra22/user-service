@@ -7,11 +7,25 @@ import { userRouter } from "../routes/user.routes";
 import path from "path";
 import { academicBackgroundRouter } from "../routes/academicBackground.routes";
 import { subscriptionRouter } from "../routes/subscription.routes";
+import session from "express-session";
+import passport from "passport";
+import "../config/passport";
 
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 5000;
+
+app.use(
+  session({
+    secret: "secret",
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use(cors());
 
