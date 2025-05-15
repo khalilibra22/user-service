@@ -338,4 +338,77 @@ export class UserController {
       res.status(500).json({ error: "Internal Server Error" });
     }
   }
+
+  //  get All Teachers using pagination
+  async getAllTeachers(req: Request, res: Response): Promise<void> {
+    try {
+      const page = Number(req.query.page) || 1;
+      const limit = Number(req.query.limit) || 10;
+      const teachers = await this.userService.getAllUsers(
+        page,
+        limit,
+        UserRole.TEACHER
+      );
+      const teacherDtos = plainToInstance(UserDto, teachers, {
+        excludeExtraneousValues: true,
+      });
+      res.status(200).json(teacherDtos);
+    } catch (error) {
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+
+  async getAllStudents(req: Request, res: Response): Promise<void> {
+    try {
+      const page = Number(req.query.page) || 1;
+      const limit = Number(req.query.limit) || 10;
+      const students = await this.userService.getAllUsers(
+        page,
+        limit,
+        UserRole.STUDENT
+      );
+      const studentDtos = plainToInstance(MinimalUserDto, students, {
+        excludeExtraneousValues: true,
+      });
+      res.status(200).json(studentDtos);
+    } catch (error) {
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+
+  async getAllAcademies(req: Request, res: Response): Promise<void> {
+    try {
+      const page = Number(req.query.page) || 1;
+      const limit = Number(req.query.limit) || 10;
+      const academies = await this.userService.getAllUsers(
+        page,
+        limit,
+        UserRole.ACADEMY
+      );
+      const academyDtos = plainToInstance(UserDto, academies, {
+        excludeExtraneousValues: true,
+      });
+      res.status(200).json(academyDtos);
+    } catch (error) {
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+
+  async getAllAdmins(req: Request, res: Response): Promise<void> {
+    try {
+      const page = Number(req.query.page) || 1;
+      const limit = Number(req.query.limit) || 10;
+      const admins = await this.userService.getAllUsers(
+        page,
+        limit,
+        UserRole.ADMIN
+      );
+      const adminDtos = plainToInstance(MinimalUserDto, admins, {
+        excludeExtraneousValues: true,
+      });
+      res.status(200).json(adminDtos);
+    } catch (error) {
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
 }

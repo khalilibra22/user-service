@@ -21,7 +21,7 @@ router.put(
 );
 
 router.get(
-  "/:id",
+  "/:id/details",
   AuthMiddleware.verifyToken,
   async (req, res) => await userController.getUserById(req, res)
 );
@@ -75,6 +75,31 @@ router.get(
   "/:id/payment-methods",
   AuthMiddleware.verifyToken,
   async (req, res) => await userController.getPaymentMethodsByUserId(req, res)
+);
+
+// Get all teahers
+router.get(
+  "/teachers",
+  AuthMiddleware.verifyToken,
+  async (req, res) => await userController.getAllTeachers(req, res)
+);
+
+router.get(
+  "/students",
+  AuthMiddleware.verifyToken,
+  async (req, res) => await userController.getAllStudents(req, res)
+);
+
+router.get(
+  "/academies",
+  AuthMiddleware.verifyToken,
+  async (req, res) => await userController.getAllAcademies(req, res)
+);
+
+router.get(
+  "/admins",
+  AuthMiddleware.verifyToken,
+  async (req, res) => await userController.getAllAdmins(req, res)
 );
 
 export { router as userRouter };
