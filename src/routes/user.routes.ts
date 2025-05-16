@@ -3,6 +3,7 @@ import { ValidationMiddleware } from "../utils/validation.middleware";
 import {
   addTopicToUserValidationSchema,
   checkPermissionsValidationSchema,
+  createUserValidationSchema,
   paymentMethodValidationSchema,
   updateUserValidationSchema,
 } from "../validations/user.validation";
@@ -100,6 +101,14 @@ router.get(
   "/admins",
   AuthMiddleware.verifyToken,
   async (req, res) => await userController.getAllAdmins(req, res)
+);
+
+//create user
+router.post(
+  "/",
+  AuthMiddleware.verifyToken,
+  ValidationMiddleware.validate(createUserValidationSchema),
+  async (req, res) => await userController.createUser(req, res)
 );
 
 export { router as userRouter };

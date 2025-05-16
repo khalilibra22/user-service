@@ -11,6 +11,7 @@ import { UserTopicDto } from "../dtos/userTopic.dto";
 import { PaymentMethodDto } from "../dtos/paymentMethod.dto";
 import { UserRole } from "../enums/userRoles.enum";
 import { MinimalUserDto } from "../dtos/minimalUser.dto";
+import { AuthMiddleware } from "../utils/auth.middleware";
 
 export class UserController {
   private userService: UserService;
@@ -407,6 +408,27 @@ export class UserController {
         excludeExtraneousValues: true,
       });
       res.status(200).json(adminDtos);
+    } catch (error) {
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+
+  // create user by admin
+  async createUser(req: Request, res: Response): Promise<void> {
+    try {
+      const { email, password } = req.body;
+      const user = await this.userService.getUserByEmail(email);
+      if (user) {
+        res.status(409).json({ error: "User already exists." });
+        return;
+      }
+      const hashedPassword = await AuthMiddleware.hashPassword(password);
+      req.body.password = hashedPassword;
+      const createdUser = await this.userService.createUser(req.body);
+      const userDto = plainToInstance(UserDto, createdUser, {
+        excludeExtraneousValues: true,
+      });
+      res.status(201).json(userDto);
     } catch (error) {
       res.status(500).json({ error: "Internal Server Error" });
     }
