@@ -3,6 +3,7 @@ import { ValidationMiddleware } from "../utils/validation.middleware";
 import {
   addTopicToUserValidationSchema,
   checkPermissionsValidationSchema,
+  createUserValidationSchema,
   paymentMethodValidationSchema,
   updateUserValidationSchema,
 } from "../validations/user.validation";
@@ -21,7 +22,7 @@ router.put(
 );
 
 router.get(
-  "/:id",
+  "/:id/details",
   AuthMiddleware.verifyToken,
   async (req, res) => await userController.getUserById(req, res)
 );
@@ -75,6 +76,39 @@ router.get(
   "/:id/payment-methods",
   AuthMiddleware.verifyToken,
   async (req, res) => await userController.getPaymentMethodsByUserId(req, res)
+);
+
+// Get all teahers
+router.get(
+  "/teachers",
+  AuthMiddleware.verifyToken,
+  async (req, res) => await userController.getAllTeachers(req, res)
+);
+
+router.get(
+  "/students",
+  AuthMiddleware.verifyToken,
+  async (req, res) => await userController.getAllStudents(req, res)
+);
+
+router.get(
+  "/academies",
+  AuthMiddleware.verifyToken,
+  async (req, res) => await userController.getAllAcademies(req, res)
+);
+
+router.get(
+  "/admins",
+  AuthMiddleware.verifyToken,
+  async (req, res) => await userController.getAllAdmins(req, res)
+);
+
+//create user
+router.post(
+  "/",
+  AuthMiddleware.verifyToken,
+  ValidationMiddleware.validate(createUserValidationSchema),
+  async (req, res) => await userController.createUser(req, res)
 );
 
 export { router as userRouter };

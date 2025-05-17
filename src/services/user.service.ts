@@ -1,6 +1,7 @@
 import { UserModel } from "../models/user.model";
 import { AppDataSource } from "../config/database";
 import { PaymentMethodModel } from "../models/paymentMethod.model";
+import { UserRole } from "../enums/userRoles.enum";
 
 export class UserService {
   userRepo: any;
@@ -155,6 +156,24 @@ export class UserService {
       });
     } catch (error) {
       throw new Error("Error fetching user by Google ID");
+    }
+  }
+
+  async getAllUsers(
+    page: number,
+    limit: number,
+    role: UserRole
+  ): Promise<UserModel[]> {
+    try {
+      return await this.userRepo.find({
+        where: {
+          role: role,
+        },
+        skip: (page - 1) * limit,
+        take: limit,
+      });
+    } catch (error) {
+      throw new Error("Error fetching users");
     }
   }
 }
