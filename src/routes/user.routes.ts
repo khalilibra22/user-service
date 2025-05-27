@@ -5,6 +5,7 @@ import {
   checkPermissionsValidationSchema,
   createUserValidationSchema,
   paymentMethodValidationSchema,
+  updateUserPhoneNumberValidationSchema,
   updateUserValidationSchema,
 } from "../validations/user.validation";
 import { UserController } from "../controllers/user.controller";
@@ -109,6 +110,14 @@ router.post(
   AuthMiddleware.verifyToken,
   ValidationMiddleware.validate(createUserValidationSchema),
   async (req, res) => await userController.createUser(req, res)
+);
+
+//update user's phone number
+router.patch(
+  "/:id/phone-number",
+  AuthMiddleware.verifyToken,
+  ValidationMiddleware.validate(updateUserPhoneNumberValidationSchema),
+  async (req, res) => await userController.updateUserPhoneNumber(req, res)
 );
 
 export { router as userRouter };

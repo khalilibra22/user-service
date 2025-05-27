@@ -279,3 +279,13 @@ export const createUserValidationSchema = Joi.object({
     otherwise: Joi.string().optional(),
   }),
 });
+
+export const updateUserPhoneNumberValidationSchema = Joi.object({
+  phoneNumber: Joi.string()
+    .pattern(/^0[5-7]\d{8}$/)
+    .required()
+    .messages({
+      "string.pattern.base":
+        "Phone number must be a valid Algerian mobile number starting with 05, 06, or 07 followed by 8 digits",
+    }),
+});
