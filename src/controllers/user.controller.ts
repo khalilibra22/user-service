@@ -92,9 +92,19 @@ export class UserController {
 
   async deleteUser(req: Request, res: Response): Promise<void> {
     try {
-      await this.userService.deleteUser(Number(req.params.id));
-      res.status(200).json({ message: "User deleted successfully" });
-    } catch (error) {
+      const id = req.params.id;
+      const user = await this.userService.getUserById(id);
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      await this.userService.deleteUser(id);
+      res.status(204).json({ message: "User deleted successfully" });
+    } catch (error: any) {
+      if (error.message === "Error fetching user") {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
       res.status(500).json({ error: "Internal Server Error" });
     }
   }
@@ -455,6 +465,82 @@ export class UserController {
       user.phoneNumber = req.body.phoneNumber;
       await this.userService.updateUser(id, user);
       res.status(200).json({ message: "Phone number updated successfully" });
+    } catch (error: any) {
+      if (error.message === "Error fetching user") {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+
+  //update user's email
+  async updateUserEmail(req: Request, res: Response): Promise<void> {
+    try {
+      const id = req.params.id;
+      const user = await this.userService.getUserById(id);
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      // check email if already exists
+      const existingUser = await this.userService.getUserByEmail(
+        req.body.email
+      );
+      if (existingUser && existingUser.id !== id) {
+        res.status(409).json({ error: "Email already exists." });
+        return;
+      }
+      user.email = req.body.email;
+      await this.userService.updateUser(id, user);
+      res.status(200).json({ message: "Email updated successfully" });
+    } catch (error: any) {
+      if (error.message === "Error fetching user") {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+
+  // update user's password
+  async updateUserPassword(req: Request, res: Response): Promise<void> {
+    try {
+      const id = req.params.id;
+      const user = await this.userService.getUserById(id);
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      const { password } = req.body;
+      const hashedPassword = await AuthMiddleware.hashPassword(password);
+      user.password = hashedPassword;
+      await this.userService.updateUser(id, user);
+      res.status(200).json({ message: "Password updated successfully" });
+    } catch (error: any) {
+      if (error.message === "Error fetching user") {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+
+  //update user's contact information
+  async updateUserContactInfo(req: Request, res: Response): Promise<void> {
+    try {
+      const id = req.params.id;
+      const user = await this.userService.getUserById(id);
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+
+      const userData = { ...user, ...req.body };
+      await this.userService.updateUser(id, userData);
+      res
+        .status(200)
+        .json({ message: "Contact information updated successfully" });
     } catch (error: any) {
       if (error.message === "Error fetching user") {
         res.status(404).json({ error: "User not found" });

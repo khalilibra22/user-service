@@ -2,9 +2,12 @@ import express from "express";
 import { ValidationMiddleware } from "../utils/validation.middleware";
 import {
   addTopicToUserValidationSchema,
+  changeEmailSchema,
   checkPermissionsValidationSchema,
+  contactInfoValidationSchema,
   createUserValidationSchema,
   paymentMethodValidationSchema,
+  resetPasswordSchema,
   updateUserPhoneNumberValidationSchema,
   updateUserValidationSchema,
 } from "../validations/user.validation";
@@ -118,6 +121,37 @@ router.patch(
   AuthMiddleware.verifyToken,
   ValidationMiddleware.validate(updateUserPhoneNumberValidationSchema),
   async (req, res) => await userController.updateUserPhoneNumber(req, res)
+);
+
+// delete user
+router.delete(
+  "/:id",
+  AuthMiddleware.verifyToken,
+  async (req, res) => await userController.deleteUser(req, res)
+);
+
+// update user password
+router.patch(
+  "/:id/password",
+  AuthMiddleware.verifyToken,
+  ValidationMiddleware.validate(resetPasswordSchema),
+  async (req, res) => await userController.updateUserPassword(req, res)
+);
+
+// update user email
+router.patch(
+  "/:id/email",
+  AuthMiddleware.verifyToken,
+  ValidationMiddleware.validate(changeEmailSchema),
+  async (req, res) => await userController.updateUserEmail(req, res)
+);
+
+// update user's contact information
+router.patch(
+  "/:id/contact-info",
+  AuthMiddleware.verifyToken,
+  ValidationMiddleware.validate(contactInfoValidationSchema),
+  async (req, res) => await userController.updateUserContactInfo(req, res)
 );
 
 export { router as userRouter };

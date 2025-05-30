@@ -146,7 +146,7 @@ export const loginValidationSchema = Joi.object({
   password: Joi.string().required(),
 });
 
-export const forgotPasswordSchema = Joi.object({
+export const changeEmailSchema = Joi.object({
   email: Joi.string().email().required(),
 });
 
@@ -288,4 +288,30 @@ export const updateUserPhoneNumberValidationSchema = Joi.object({
       "string.pattern.base":
         "Phone number must be a valid Algerian mobile number starting with 05, 06, or 07 followed by 8 digits",
     }),
+});
+
+export const contactInfoValidationSchema = Joi.object({
+  contactEmail: Joi.string().email().required(),
+  contactPhoneNumber: Joi.string()
+    .pattern(/^0[5-7]\d{8}$/)
+    .required()
+    .messages({
+      "string.pattern.base":
+        "Phone number must be a valid Algerian mobile number starting with 05, 06, or 07 followed by 8 digits",
+    }),
+  secondaryContactPhoneNumber: Joi.string()
+    .pattern(/^0[5-7]\d{8}$/)
+    .optional()
+    .messages({
+      "string.pattern.base":
+        "Phone number must be a valid Algerian mobile number starting with 05, 06, or 07 followed by 8 digits",
+    }),
+  whatsappNumber: Joi.string()
+    .pattern(/^0[5-7]\d{8}$/)
+    .optional()
+    .messages({
+      "string.pattern.base":
+        "Phone number must be a valid Algerian mobile number starting with 05, 06, or 07 followed by 8 digits",
+    }),
+  website: Joi.string().uri().optional(),
 });

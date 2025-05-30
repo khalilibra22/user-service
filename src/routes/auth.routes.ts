@@ -2,7 +2,7 @@ import express from "express";
 import { AuthController } from "../controllers/auth.controller";
 import { ValidationMiddleware } from "../utils/validation.middleware";
 import {
-  forgotPasswordSchema,
+  changeEmailSchema,
   loginValidationSchema,
   resetPasswordSchema,
   userValidationSchema,
@@ -31,7 +31,7 @@ router.post(
 
 router.post(
   "/forgot-password",
-  ValidationMiddleware.validate(forgotPasswordSchema),
+  ValidationMiddleware.validate(changeEmailSchema),
   async (req, res) => await authController.forgotPassword(req, res)
 );
 

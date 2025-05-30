@@ -93,6 +93,25 @@ export class UserModel {
   @Column({ nullable: true })
   certificate?: string;
 
+  //contact email
+  @Column({ nullable: true, name: "contact_email" })
+  contactEmail?: string;
+
+  @Column({ nullable: true, name: "contact_phone_number" })
+  contactPhoneNumber?: string;
+
+  //secondary contact phone number
+  @Column({ nullable: true, name: "secondary_contact_phone_number" })
+  secondaryContactPhoneNumber?: string;
+
+  //watsapp number
+  @Column({ nullable: true, name: "whatsapp_number" })
+  whatsappNumber?: string;
+
+  //website
+  @Column({ nullable: true })
+  website?: string;
+
   @Column({ default: false, name: "is_approved" })
   isApproved?: boolean;
 
