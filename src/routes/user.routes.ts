@@ -8,7 +8,6 @@ import {
   contactInfoValidationSchema,
   createUserValidationSchema,
   paymentMethodValidationSchema,
-  resetPasswordSchema,
   updateUserPhoneNumberValidationSchema,
   updateUserValidationSchema,
 } from "../validations/user.validation";

@@ -1,20 +1,16 @@
 import Joi from "joi";
 import { UserRole } from "../enums/userRoles.enum";
-import { TeachingMode } from "../enums/teachingModes.enum";
-import e from "express";
+import {
+  passwordValidation,
+  phoneNumberValidation,
+  teachingModesValidation,
+} from ".";
 
 export const userValidationSchema = Joi.object({
   fullname: Joi.string().required(),
   email: Joi.string().email().required(),
-  phoneNumber: Joi.string().required(),
-  password: Joi.string()
-    .min(6)
-    .pattern(new RegExp("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]+$")) // At least one letter & one number
-    .required()
-    .messages({
-      "string.pattern.base":
-        "Password must be at least 6 characters long and contain at least one letter and one number.",
-    }),
+  phoneNumber: phoneNumberValidation,
+  password: passwordValidation,
   role: Joi.number()
     .valid(...Object.values(UserRole))
     .required(),
@@ -40,37 +36,7 @@ export const userValidationSchema = Joi.object({
     then: Joi.forbidden(),
     otherwise: Joi.string().required(),
   }),
-
-  // Teaching Modes Validation
-  teachingModes: Joi.when("role", {
-    is: Joi.valid(UserRole.ADMIN, UserRole.STUDENT),
-    then: Joi.forbidden(),
-    otherwise: Joi.array()
-      .items(Joi.number().valid(...Object.values(TeachingMode))) // Teaching modes must be valid numbers
-      .required()
-      .custom((value, helpers) => {
-        const role = helpers.state.ancestors[0].role; // Get role from input
-
-        if (
-          role === UserRole.ACADEMY &&
-          (value.includes(TeachingMode.HOME) ||
-            value.includes(TeachingMode.STUDENT_HOME))
-        ) {
-          return helpers.error("any.invalid", {
-            message:
-              "Academies cannot use teaching modes: HOME or STUDENT_HOME.",
-          });
-        }
-        if (role === UserRole.TEACHER && value.includes(TeachingMode.ACADEMY)) {
-          return helpers.error("any.invalid", {
-            message: "Teachers cannot use ACADEMY teaching mode.",
-          });
-        }
-
-        return value;
-      }),
-  }),
-
+  teachingModes: teachingModesValidation,
   bio: Joi.when("role", {
     is: Joi.valid(UserRole.ADMIN, UserRole.STUDENT),
     then: Joi.forbidden(),
@@ -90,11 +56,16 @@ export const userValidationSchema = Joi.object({
 
 export const updateUserValidationSchema = Joi.object({
   fullname: Joi.string().required(),
-  phoneNumber: Joi.string().optional(),
+  phoneNumber: phoneNumberValidation,
   role: Joi.number()
     .valid(...Object.values(UserRole))
     .required(),
   state: Joi.when("role", {
+    is: Joi.valid(UserRole.ADMIN, UserRole.STUDENT),
+    then: Joi.forbidden(),
+    otherwise: Joi.string().required(),
+  }),
+  district: Joi.when("role", {
     is: Joi.valid(UserRole.ADMIN, UserRole.STUDENT),
     then: Joi.forbidden(),
     otherwise: Joi.string().required(),
@@ -130,15 +101,22 @@ export const updateUserValidationSchema = Joi.object({
     otherwise: Joi.boolean().required(),
   }),
   gender: Joi.when("role", {
-    is: Joi.valid(UserRole.ADMIN, UserRole.STUDENT),
+    is: Joi.valid(UserRole.ADMIN, UserRole.STUDENT, UserRole.ACADEMY),
     then: Joi.forbidden(),
     otherwise: Joi.string().required(),
   }),
   language: Joi.when("role", {
     is: Joi.valid(UserRole.ADMIN, UserRole.STUDENT),
     then: Joi.forbidden(),
+    otherwise: Joi.string().optional(),
+  }),
+  bio: Joi.when("role", {
+    is: Joi.valid(UserRole.ADMIN, UserRole.STUDENT),
+    then: Joi.forbidden(),
     otherwise: Joi.string().required(),
   }),
+  // Teaching Modes Validation
+  teachingModes: teachingModesValidation,
 });
 
 export const loginValidationSchema = Joi.object({
@@ -151,26 +129,12 @@ export const changeEmailSchema = Joi.object({
 });
 
 export const resetPasswordSchema = Joi.object({
-  password: Joi.string()
-    .min(6)
-    .pattern(new RegExp("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]+$")) // At least one letter & one number
-    .required()
-    .messages({
-      "string.pattern.base":
-        "Password must be at least 6 characters long and contain at least one letter and one number.",
-    }),
+  password: passwordValidation,
 });
 
 export const changePasswordSchema = Joi.object({
   currentPassword: Joi.string().required(),
-  newPassword: Joi.string()
-    .min(6)
-    .pattern(new RegExp("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]+$")) // At least one letter & one number
-    .required()
-    .messages({
-      "string.pattern.base":
-        "Password must be at least 6 characters long and contain at least one letter and one number.",
-    }),
+  newPassword: passwordValidation,
 });
 
 export const checkPermissionsValidationSchema = Joi.object({
@@ -212,15 +176,8 @@ export const paymentMethodValidationSchema = Joi.alternatives().try(
 export const createUserValidationSchema = Joi.object({
   fullname: Joi.string().required(),
   email: Joi.string().email().required(),
-  password: Joi.string()
-    .min(6)
-    .pattern(new RegExp("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]+$")) // At least one letter & one number
-    .required()
-    .messages({
-      "string.pattern.base":
-        "Password must be at least 6 characters long and contain at least one letter and one number.",
-    }),
-  phoneNumber: Joi.string().required(),
+  password: passwordValidation,
+  phoneNumber: phoneNumberValidation,
   address: Joi.string().required(),
   isActive: Joi.boolean().required(),
   isApproved: Joi.boolean().required(),
@@ -247,34 +204,7 @@ export const createUserValidationSchema = Joi.object({
     then: Joi.forbidden(),
     otherwise: Joi.string().optional(),
   }),
-  teachingModes: Joi.when("role", {
-    is: Joi.valid(UserRole.ADMIN, UserRole.STUDENT),
-    then: Joi.forbidden(),
-    otherwise: Joi.array()
-      .items(Joi.number().valid(...Object.values(TeachingMode))) // Teaching modes must be valid numbers
-      .required()
-      .custom((value, helpers) => {
-        const role = helpers.state.ancestors[0].role; // Get role from input
-
-        if (
-          role === UserRole.ACADEMY &&
-          (value.includes(TeachingMode.HOME) ||
-            value.includes(TeachingMode.STUDENT_HOME))
-        ) {
-          return helpers.error("any.invalid", {
-            message:
-              "Academies cannot use teaching modes: HOME or STUDENT_HOME.",
-          });
-        }
-        if (role === UserRole.TEACHER && value.includes(TeachingMode.ACADEMY)) {
-          return helpers.error("any.invalid", {
-            message: "Teachers cannot use ACADEMY teaching mode.",
-          });
-        }
-
-        return value;
-      }),
-  }),
+  teachingModes: teachingModesValidation,
   bio: Joi.when("role", {
     is: Joi.valid(UserRole.ADMIN, UserRole.STUDENT),
     then: Joi.forbidden(),
@@ -293,37 +223,13 @@ export const createUserValidationSchema = Joi.object({
 });
 
 export const updateUserPhoneNumberValidationSchema = Joi.object({
-  phoneNumber: Joi.string()
-    .pattern(/^0[5-7]\d{8}$/)
-    .required()
-    .messages({
-      "string.pattern.base":
-        "Phone number must be a valid Algerian mobile number starting with 05, 06, or 07 followed by 8 digits",
-    }),
+  phoneNumber: phoneNumberValidation,
 });
 
 export const contactInfoValidationSchema = Joi.object({
   contactEmail: Joi.string().email().required(),
-  contactPhoneNumber: Joi.string()
-    .pattern(/^0[5-7]\d{8}$/)
-    .required()
-    .messages({
-      "string.pattern.base":
-        "Phone number must be a valid Algerian mobile number starting with 05, 06, or 07 followed by 8 digits",
-    }),
-  secondaryContactPhoneNumber: Joi.string()
-    .pattern(/^0[5-7]\d{8}$/)
-    .optional()
-    .messages({
-      "string.pattern.base":
-        "Phone number must be a valid Algerian mobile number starting with 05, 06, or 07 followed by 8 digits",
-    }),
-  whatsappNumber: Joi.string()
-    .pattern(/^0[5-7]\d{8}$/)
-    .optional()
-    .messages({
-      "string.pattern.base":
-        "Phone number must be a valid Algerian mobile number starting with 05, 06, or 07 followed by 8 digits",
-    }),
+  contactPhoneNumber: phoneNumberValidation,
+  secondaryContactPhoneNumber: phoneNumberValidation,
+  whatsappNumber: phoneNumberValidation,
   website: Joi.string().uri().optional(),
 });

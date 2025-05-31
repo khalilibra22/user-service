@@ -52,6 +52,9 @@ export class UserModel {
   state?: string;
 
   @Column({ nullable: true })
+  district?: string;
+
+  @Column({ nullable: true })
   city?: string;
 
   @Column({ nullable: true })
