@@ -161,6 +161,18 @@ export const resetPasswordSchema = Joi.object({
     }),
 });
 
+export const changePasswordSchema = Joi.object({
+  currentPassword: Joi.string().required(),
+  newPassword: Joi.string()
+    .min(6)
+    .pattern(new RegExp("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]+$")) // At least one letter & one number
+    .required()
+    .messages({
+      "string.pattern.base":
+        "Password must be at least 6 characters long and contain at least one letter and one number.",
+    }),
+});
+
 export const checkPermissionsValidationSchema = Joi.object({
   permission: Joi.number().integer().positive().required(),
 });

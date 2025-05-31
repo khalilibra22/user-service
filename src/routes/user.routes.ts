@@ -3,6 +3,7 @@ import { ValidationMiddleware } from "../utils/validation.middleware";
 import {
   addTopicToUserValidationSchema,
   changeEmailSchema,
+  changePasswordSchema,
   checkPermissionsValidationSchema,
   contactInfoValidationSchema,
   createUserValidationSchema,
@@ -134,7 +135,7 @@ router.delete(
 router.patch(
   "/:id/password",
   AuthMiddleware.verifyToken,
-  ValidationMiddleware.validate(resetPasswordSchema),
+  ValidationMiddleware.validate(changePasswordSchema),
   async (req, res) => await userController.updateUserPassword(req, res)
 );
 
@@ -152,6 +153,13 @@ router.patch(
   AuthMiddleware.verifyToken,
   ValidationMiddleware.validate(contactInfoValidationSchema),
   async (req, res) => await userController.updateUserContactInfo(req, res)
+);
+
+// Get user's contact information
+router.get(
+  "/:id/contact-info",
+  AuthMiddleware.verifyToken,
+  async (req, res) => await userController.getUserContactInfo(req, res)
 );
 
 export { router as userRouter };

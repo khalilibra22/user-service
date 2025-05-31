@@ -12,6 +12,7 @@ import { PaymentMethodDto } from "../dtos/paymentMethod.dto";
 import { UserRole } from "../enums/userRoles.enum";
 import { MinimalUserDto } from "../dtos/minimalUser.dto";
 import { AuthMiddleware } from "../utils/auth.middleware";
+import { UserContactInfoDto } from "../dtos/userContactInfo.dto";
 
 export class UserController {
   private userService: UserService;
@@ -512,8 +513,16 @@ export class UserController {
         res.status(404).json({ error: "User not found" });
         return;
       }
-      const { password } = req.body;
-      const hashedPassword = await AuthMiddleware.hashPassword(password);
+      const { newPassword, currentPassword } = req.body;
+      const isAuthenticated = await AuthMiddleware.comparePasswords(
+        currentPassword,
+        user.password ?? ""
+      );
+      if (!isAuthenticated) {
+        res.status(400).json({ error: "Current password is incorrect" });
+        return;
+      }
+      const hashedPassword = await AuthMiddleware.hashPassword(newPassword);
       user.password = hashedPassword;
       await this.userService.updateUser(id, user);
       res.status(200).json({ message: "Password updated successfully" });
@@ -541,6 +550,28 @@ export class UserController {
       res
         .status(200)
         .json({ message: "Contact information updated successfully" });
+    } catch (error: any) {
+      if (error.message === "Error fetching user") {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+
+  //get user contact information
+  async getUserContactInfo(req: Request, res: Response): Promise<void> {
+    try {
+      const id = req.params.id;
+      const user = await this.userService.getUserById(id);
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      const userContactInfoDto = plainToInstance(UserContactInfoDto, user, {
+        excludeExtraneousValues: true,
+      });
+      res.status(200).json(userContactInfoDto);
     } catch (error: any) {
       if (error.message === "Error fetching user") {
         res.status(404).json({ error: "User not found" });
