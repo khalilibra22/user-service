@@ -21,6 +21,11 @@ export const userValidationSchema = Joi.object({
     then: Joi.forbidden(),
     otherwise: Joi.string().required(),
   }),
+  district: Joi.when("role", {
+    is: Joi.valid(UserRole.ADMIN, UserRole.STUDENT),
+    then: Joi.forbidden(),
+    otherwise: Joi.string().required(),
+  }),
   city: Joi.when("role", {
     is: Joi.valid(UserRole.ADMIN, UserRole.STUDENT),
     then: Joi.forbidden(),

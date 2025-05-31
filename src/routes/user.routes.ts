@@ -13,10 +13,13 @@ import {
 } from "../validations/user.validation";
 import { UserController } from "../controllers/user.controller";
 import { AuthMiddleware } from "../utils/auth.middleware";
+import { AcademicBackgroundController } from "../controllers/academicBackground.controller";
+import { academicBackgroundSchema } from "../validations/academicBackground.validation";
 
 const router = express.Router();
 
 const userController = new UserController();
+const academicBackgroundController = new AcademicBackgroundController();
 
 router.put(
   "/:id",
@@ -159,6 +162,32 @@ router.get(
   "/:id/contact-info",
   AuthMiddleware.verifyToken,
   async (req, res) => await userController.getUserContactInfo(req, res)
+);
+
+// Create user's academic background
+router.post(
+  "/:id/academic-backgrounds",
+  AuthMiddleware.verifyToken,
+  ValidationMiddleware.validate(academicBackgroundSchema),
+  async (req, res) =>
+    await academicBackgroundController.createAcademicBackground(req, res)
+);
+
+// Update user's academic background
+router.put(
+  "/:id/academic-backgrounds/:academicBackgroundId",
+  ValidationMiddleware.validate(academicBackgroundSchema),
+  AuthMiddleware.verifyToken,
+  async (req, res) =>
+    await academicBackgroundController.updateAcademicBackground(req, res)
+);
+
+// Get user's academic background by user ID
+router.get(
+  "/:id/academic-backgrounds",
+  AuthMiddleware.verifyToken,
+  async (req, res) =>
+    await academicBackgroundController.getAcademicBackgroundByUserId(req, res)
 );
 
 export { router as userRouter };

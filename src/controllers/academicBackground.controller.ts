@@ -18,23 +18,13 @@ export class AcademicBackgroundController {
 
   async createAcademicBackground(req: Request, res: Response): Promise<void> {
     try {
-      const academicBackground = req.body;
-      const { userId } = req.body;
-      const user = await this.userService.getUserById(userId);
+      const id = req.params.id;
+      const user = await this.userService.getUserById(id);
       if (!user) {
         res.status(404).json({ error: "User not found" });
         return;
       }
-      const isPermitted = PermissionMiddleware.checkPermission(
-        user.role,
-        Permission.TEACHER_CRUD
-      );
-      if (!isPermitted) {
-        res.status(403).json({ error: "Unauthorized" });
-        return;
-      }
-
-      delete academicBackground.userId;
+      const academicBackground = req.body;
       academicBackground.user = user;
       const createdAcademicBackground =
         await this.academicBackgroundService.createAcademicBackground(
@@ -49,7 +39,6 @@ export class AcademicBackgroundController {
       );
       res.status(201).json(academicBackgroundDto);
     } catch (error: any) {
-      console.log(error);
       if (error.message === "Error fetching user") {
         res.status(404).json({ error: "User not found" });
         return;
@@ -75,7 +64,7 @@ export class AcademicBackgroundController {
   async createSubject(req: Request, res: Response): Promise<void> {
     try {
       const subject = req.body;
-      const { categoryId } = req.body;
+      const categoryId = req.params.id;
       const category = await this.academicBackgroundService.getCategoryById(
         categoryId
       );
@@ -83,7 +72,6 @@ export class AcademicBackgroundController {
         res.status(404).json({ error: "Category not found" });
         return;
       }
-      delete subject.categoryId;
       subject.category = category;
       const createdSubject = await this.academicBackgroundService.createSubject(
         subject
@@ -100,7 +88,15 @@ export class AcademicBackgroundController {
   async createTopic(req: Request, res: Response): Promise<void> {
     try {
       const topic = req.body;
-      const { subjectId } = req.body;
+      const categoryId = req.params.id;
+      const subjectId = req.params.subjectId;
+      const category = await this.academicBackgroundService.getCategoryById(
+        categoryId
+      );
+      if (!category) {
+        res.status(404).json({ error: "Category not found" });
+        return;
+      }
       const subject = await this.academicBackgroundService.getSubjectById(
         subjectId
       );
@@ -108,7 +104,6 @@ export class AcademicBackgroundController {
         res.status(404).json({ error: "Subject not found" });
         return;
       }
-      delete topic.subjectId;
       topic.subject = subject;
       const createdTopic = await this.academicBackgroundService.createTopic(
         topic
@@ -131,6 +126,76 @@ export class AcademicBackgroundController {
       });
       res.status(200).json(categoriesDto);
     } catch (error) {
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+
+  //update academic background
+  async updateAcademicBackground(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = req.params.id;
+      const user = await this.userService.getUserById(userId);
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      const id = Number(req.params.academicBackgroundId);
+      if (isNaN(id)) {
+        res.status(400).json({ error: "Invalid academic background ID" });
+        return;
+      }
+      const academicBackground =
+        await this.academicBackgroundService.getAcademicBackgroundById(id);
+      if (!academicBackground) {
+        res.status(404).json({ error: "Academic background not found" });
+        return;
+      }
+      const academicBackgroundData = req.body;
+      await this.academicBackgroundService.updateAcademicBackground(
+        academicBackgroundData
+      );
+      res
+        .status(200)
+        .json({ message: "Academic background updated successfully" });
+    } catch (error) {
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+
+  // get academic background by user ID
+  async getAcademicBackgroundByUserId(
+    req: Request,
+    res: Response
+  ): Promise<void> {
+    try {
+      const userId = req.params.id;
+      const user = await this.userService.getUserById(userId);
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      const academicBackgrounds =
+        await this.academicBackgroundService.getAcademicBackgroundsByUserId(
+          userId
+        );
+      if (!academicBackgrounds) {
+        res.status(404).json({ error: "Academic background not found" });
+        return;
+      }
+      const academicBackgroundDtos = plainToInstance(
+        AcademicBackgroundDto,
+        academicBackgrounds,
+        {
+          excludeExtraneousValues: true,
+        }
+      );
+      res.status(200).json(academicBackgroundDtos);
+    } catch (error: any) {
+      console.error(error);
+      if (error.message === "Error fetching user") {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
       res.status(500).json({ error: "Internal Server Error" });
     }
   }
