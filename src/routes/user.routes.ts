@@ -15,11 +15,17 @@ import { UserController } from "../controllers/user.controller";
 import { AuthMiddleware } from "../utils/auth.middleware";
 import { AcademicBackgroundController } from "../controllers/academicBackground.controller";
 import { academicBackgroundSchema } from "../validations/academicBackground.validation";
+import { AvailabilityController } from "../controllers/availability.controller";
+import {
+  availabilityExceptionSchema,
+  availabilitySchema,
+} from "../validations/availability.validation";
 
 const router = express.Router();
 
 const userController = new UserController();
 const academicBackgroundController = new AcademicBackgroundController();
+const availabilityController = new AvailabilityController();
 
 router.put(
   "/:id",
@@ -176,8 +182,8 @@ router.post(
 // Update user's academic background
 router.put(
   "/:id/academic-backgrounds/:academicBackgroundId",
-  ValidationMiddleware.validate(academicBackgroundSchema),
   AuthMiddleware.verifyToken,
+  ValidationMiddleware.validate(academicBackgroundSchema),
   async (req, res) =>
     await academicBackgroundController.updateAcademicBackground(req, res)
 );
@@ -188,6 +194,70 @@ router.get(
   AuthMiddleware.verifyToken,
   async (req, res) =>
     await academicBackgroundController.getAcademicBackgroundByUserId(req, res)
+);
+
+// create availability
+router.post(
+  "/:id/availabilities",
+  AuthMiddleware.verifyToken,
+  ValidationMiddleware.validate(availabilitySchema),
+  async (req, res) => await availabilityController.createAvailability(req, res)
+);
+
+// update availability
+router.put(
+  "/:id/availabilities/:availabilityId",
+  AuthMiddleware.verifyToken,
+  ValidationMiddleware.validate(availabilitySchema),
+  async (req, res) => await availabilityController.updateAvailability(req, res)
+);
+
+// delete availability
+router.delete(
+  "/:id/availabilities/:availabilityId",
+  AuthMiddleware.verifyToken,
+  async (req, res) => await availabilityController.deleteAvailability(req, res)
+);
+
+// get user's availability by user ID
+router.get(
+  "/:id/availabilities",
+  AuthMiddleware.verifyToken,
+  async (req, res) =>
+    await availabilityController.getTeacherAvailability(req, res)
+);
+
+router.post(
+  "/:id/availability-exceptions",
+  AuthMiddleware.verifyToken,
+  ValidationMiddleware.validate(availabilityExceptionSchema),
+  async (req, res) =>
+    await availabilityController.createAvailabilityException(req, res)
+);
+
+// update availability exception
+router.put(
+  "/:id/availability-exceptions/:exceptionId",
+  AuthMiddleware.verifyToken,
+  ValidationMiddleware.validate(availabilityExceptionSchema),
+  async (req, res) =>
+    await availabilityController.updateAvailabilityException(req, res)
+);
+
+// delete availability exception
+router.delete(
+  "/:id/availability-exceptions/:exceptionId",
+  AuthMiddleware.verifyToken,
+  async (req, res) =>
+    await availabilityController.deleteAvailabilityException(req, res)
+);
+
+// get user's availability exceptions by user ID
+router.get(
+  "/:id/availability-exceptions",
+  AuthMiddleware.verifyToken,
+  async (req, res) =>
+    await availabilityController.getTeacherAvailabilityExceptions(req, res)
 );
 
 export { router as userRouter };
