@@ -106,7 +106,7 @@ export class AcademicBackgroundService {
     }
   }
 
-  async getTopicById(id: string): Promise<TopicModel | undefined> {
+  async getTopicById(id: number): Promise<TopicModel | undefined> {
     try {
       return await this.topicRepo.findOne({
         where: {
@@ -172,6 +172,21 @@ export class AcademicBackgroundService {
     } catch (error) {
       console.error(error);
       throw new Error("Error fetching academic backgrounds by user id");
+    }
+  }
+  async deleteTopic(id: number): Promise<void> {
+    try {
+      await this.topicRepo.softDelete(id);
+    } catch (error) {
+      throw new Error("Error deleting topic");
+    }
+  }
+
+  async updateTopic(topic: TopicModel): Promise<void> {
+    try {
+      return await this.topicRepo.save(topic);
+    } catch (error) {
+      throw new Error("Error updating topic");
     }
   }
 }

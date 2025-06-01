@@ -36,4 +36,23 @@ router.post(
   async (req, res) => await academicBackgroundController.createTopic(req, res)
 );
 
+router.delete(
+  "/:id/subjects/:subjectId/topics/:topicId",
+  AuthMiddleware.verifyToken,
+  async (req, res) => await academicBackgroundController.deleteTopic(req, res)
+);
+
+router.put(
+  "/:id/subjects/:subjectId/topics/:topicId",
+  AuthMiddleware.verifyToken,
+  ValidationMiddleware.validate(taxonomyValidationSchema),
+  async (req, res) => await academicBackgroundController.updateTopic(req, res)
+);
+
+router.patch(
+  "/:id/subjects/:subjectId/topics/:topicId/toggle-status",
+  AuthMiddleware.verifyToken,
+  async (req, res) =>
+    await academicBackgroundController.toggleTopicStatus(req, res)
+);
 export { router as categoriesRouter };

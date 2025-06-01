@@ -14,7 +14,10 @@ import {
 import { UserController } from "../controllers/user.controller";
 import { AuthMiddleware } from "../utils/auth.middleware";
 import { AcademicBackgroundController } from "../controllers/academicBackground.controller";
-import { academicBackgroundSchema } from "../validations/academicBackground.validation";
+import {
+  academicBackgroundSchema,
+  updateAcademicBackgroundSchema,
+} from "../validations/academicBackground.validation";
 import { AvailabilityController } from "../controllers/availability.controller";
 import {
   availabilityExceptionSchema,
@@ -89,6 +92,13 @@ router.get(
   "/:id/payment-methods",
   AuthMiddleware.verifyToken,
   async (req, res) => await userController.getPaymentMethodsByUserId(req, res)
+);
+
+// Delete payment method
+router.delete(
+  "/:id/payment-methods/:paymentMethodId",
+  AuthMiddleware.verifyToken,
+  async (req, res) => await userController.deletePaymentMethod(req, res)
 );
 
 // Get all teahers
@@ -183,7 +193,7 @@ router.post(
 router.put(
   "/:id/academic-backgrounds/:academicBackgroundId",
   AuthMiddleware.verifyToken,
-  ValidationMiddleware.validate(academicBackgroundSchema),
+  ValidationMiddleware.validate(updateAcademicBackgroundSchema),
   async (req, res) =>
     await academicBackgroundController.updateAcademicBackground(req, res)
 );

@@ -2,13 +2,25 @@ import Joi from "joi";
 
 export const academicBackgroundSchema = Joi.object({
   title: Joi.string().required(),
-  description: Joi.string().required(),
+  description: Joi.string().optional(),
   startDate: Joi.date().timestamp().required(),
   endDate: Joi.date().timestamp().required(),
-  ordering: Joi.number().integer().required(),
-  institution: Joi.string().optional(),
-  certificate: Joi.string().uri().optional(),
-  //userId: Joi.string().uuid({ version: "uuidv4" }).required(),
+  institution: Joi.string().required(),
+  location: Joi.string().optional(),
+  documentUrl: Joi.string().uri().optional(),
+  type: Joi.string()
+    .valid("experience", "education", "certification")
+    .required(),
+});
+
+export const updateAcademicBackgroundSchema = Joi.object({
+  title: Joi.string().required(),
+  description: Joi.string().optional(),
+  startDate: Joi.date().timestamp().required(),
+  endDate: Joi.date().timestamp().required(),
+  institution: Joi.string().required(),
+  location: Joi.string().optional(),
+  documentUrl: Joi.string().uri().optional(),
 });
 
 export const taxonomyValidationSchema = Joi.object({

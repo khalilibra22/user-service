@@ -150,6 +150,30 @@ export class UserService {
     }
   }
 
+  // Get payment method by type
+  async getPaymentMethodByType(
+    type: string
+  ): Promise<PaymentMethodModel | undefined> {
+    try {
+      return await this.payementMethodRepo.findOne({
+        where: {
+          type: type,
+        },
+      });
+    } catch (error) {
+      throw new Error("Error fetching payment method by type");
+    }
+  }
+
+  // Delete payment method softly
+  async deletePaymentMethod(id: string): Promise<void> {
+    try {
+      await this.payementMethodRepo.softDelete(id);
+    } catch (error) {
+      throw new Error("Error deleting payment method");
+    }
+  }
+
   // get user by googleId
   async getUserByGoogleId(googleId: string): Promise<UserModel | undefined> {
     try {
