@@ -12,6 +12,7 @@ import { PaymentMethodDto } from "../dtos/paymentMethod.dto";
 import { UserRole } from "../enums/userRoles.enum";
 import { MinimalUserDto } from "../dtos/minimalUser.dto";
 import { AuthMiddleware } from "../utils/auth.middleware";
+import { UserContactInfoDto } from "../dtos/userContactInfo.dto";
 
 export class UserController {
   private userService: UserService;
@@ -26,6 +27,7 @@ export class UserController {
       const id = req.params.id;
       const user = await this.userService.getUserById(id);
       if (!user) {
+        res.status(404).json({ error: "User not found" });
         return;
       }
       const isPermitted = PermissionMiddleware.checkPermission(
@@ -91,9 +93,19 @@ export class UserController {
 
   async deleteUser(req: Request, res: Response): Promise<void> {
     try {
-      await this.userService.deleteUser(Number(req.params.id));
-      res.status(200).json({ message: "User deleted successfully" });
-    } catch (error) {
+      const id = req.params.id;
+      const user = await this.userService.getUserById(id);
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      await this.userService.deleteUser(id);
+      res.status(204).json({ message: "User deleted successfully" });
+    } catch (error: any) {
+      if (error.message === "Error fetching user") {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
       res.status(500).json({ error: "Internal Server Error" });
     }
   }
@@ -430,6 +442,141 @@ export class UserController {
       });
       res.status(201).json(userDto);
     } catch (error) {
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+
+  //update user's phone number
+  async updateUserPhoneNumber(req: Request, res: Response): Promise<void> {
+    try {
+      const id = req.params.id;
+      const user = await this.userService.getUserById(id);
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      const isPermitted = PermissionMiddleware.checkPermission(
+        user.role,
+        Permission.USER_CRUD
+      );
+      if (!isPermitted) {
+        res.status(403).json({ error: "Unauthorized" });
+        return;
+      }
+      user.phoneNumber = req.body.phoneNumber;
+      await this.userService.updateUser(id, user);
+      res.status(200).json({ message: "Phone number updated successfully" });
+    } catch (error: any) {
+      if (error.message === "Error fetching user") {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+
+  //update user's email
+  async updateUserEmail(req: Request, res: Response): Promise<void> {
+    try {
+      const id = req.params.id;
+      const user = await this.userService.getUserById(id);
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      // check email if already exists
+      const existingUser = await this.userService.getUserByEmail(
+        req.body.email
+      );
+      if (existingUser && existingUser.id !== id) {
+        res.status(409).json({ error: "Email already exists." });
+        return;
+      }
+      user.email = req.body.email;
+      await this.userService.updateUser(id, user);
+      res.status(200).json({ message: "Email updated successfully" });
+    } catch (error: any) {
+      if (error.message === "Error fetching user") {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+
+  // update user's password
+  async updateUserPassword(req: Request, res: Response): Promise<void> {
+    try {
+      const id = req.params.id;
+      const user = await this.userService.getUserById(id);
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      const { newPassword, currentPassword } = req.body;
+      const isAuthenticated = await AuthMiddleware.comparePasswords(
+        currentPassword,
+        user.password ?? ""
+      );
+      if (!isAuthenticated) {
+        res.status(400).json({ error: "Current password is incorrect" });
+        return;
+      }
+      const hashedPassword = await AuthMiddleware.hashPassword(newPassword);
+      user.password = hashedPassword;
+      await this.userService.updateUser(id, user);
+      res.status(200).json({ message: "Password updated successfully" });
+    } catch (error: any) {
+      if (error.message === "Error fetching user") {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+
+  //update user's contact information
+  async updateUserContactInfo(req: Request, res: Response): Promise<void> {
+    try {
+      const id = req.params.id;
+      const user = await this.userService.getUserById(id);
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+
+      const userData = { ...user, ...req.body };
+      await this.userService.updateUser(id, userData);
+      res
+        .status(200)
+        .json({ message: "Contact information updated successfully" });
+    } catch (error: any) {
+      if (error.message === "Error fetching user") {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+
+  //get user contact information
+  async getUserContactInfo(req: Request, res: Response): Promise<void> {
+    try {
+      const id = req.params.id;
+      const user = await this.userService.getUserById(id);
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      const userContactInfoDto = plainToInstance(UserContactInfoDto, user, {
+        excludeExtraneousValues: true,
+      });
+      res.status(200).json(userContactInfoDto);
+    } catch (error: any) {
+      if (error.message === "Error fetching user") {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
       res.status(500).json({ error: "Internal Server Error" });
     }
   }

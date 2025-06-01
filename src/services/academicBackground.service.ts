@@ -33,27 +33,24 @@ export class AcademicBackgroundService {
     }
   }
 
+  async updateAcademicBackground(
+    academicBackground: AcademicBackgroundModel
+  ): Promise<void> {
+    try {
+      return await this.academicBackgroundRepo.save(academicBackground);
+    } catch (error) {
+      console.error(error);
+      throw new Error("Error creating academic background");
+    }
+  }
+
   async getAcademicBackgroundById(
-    id: string
+    id: number
   ): Promise<AcademicBackgroundModel | undefined> {
     try {
       return await this.academicBackgroundRepo.findOne({
         where: {
           id: id,
-        },
-      });
-    } catch (error) {
-      throw new Error("Error fetching academic background");
-    }
-  }
-
-  async getAcademicBackgroundByUserId(
-    userId: string
-  ): Promise<AcademicBackgroundModel | undefined> {
-    try {
-      return await this.academicBackgroundRepo.findOne({
-        where: {
-          userId: userId,
         },
       });
     } catch (error) {
@@ -157,6 +154,24 @@ export class AcademicBackgroundService {
       });
     } catch (error) {
       throw new Error("Error fetching categories");
+    }
+  }
+
+  //Get academic backgrounds by user id
+  async getAcademicBackgroundsByUserId(
+    userId: string
+  ): Promise<AcademicBackgroundModel[] | undefined> {
+    try {
+      return await this.academicBackgroundRepo.find({
+        where: {
+          user: {
+            id: userId,
+          },
+        },
+      });
+    } catch (error) {
+      console.error(error);
+      throw new Error("Error fetching academic backgrounds by user id");
     }
   }
 }

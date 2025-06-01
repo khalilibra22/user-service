@@ -5,7 +5,7 @@ import cors from "cors";
 import { authRouter } from "../routes/auth.routes";
 import { userRouter } from "../routes/user.routes";
 import path from "path";
-import { academicBackgroundRouter } from "../routes/academicBackground.routes";
+import { categoriesRouter } from "../routes/category.routes";
 import { subscriptionRouter } from "../routes/subscription.routes";
 import session from "express-session";
 import passport from "passport";
@@ -42,7 +42,7 @@ app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 app.use("/auth", authRouter);
 app.use("/users", userRouter);
-app.use("/academic-backgrounds", academicBackgroundRouter); // Assuming you have a route for academic background
+app.use("/categories", categoriesRouter); // Assuming you have a route for academic background
 app.use("/subscriptions", subscriptionRouter); // Assuming you have a route for subscriptions
 
 app.get("/", (req: Request, res: Response) => {

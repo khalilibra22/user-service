@@ -2,12 +2,7 @@ import express from "express";
 import { ValidationMiddleware } from "../utils/validation.middleware";
 import { AuthMiddleware } from "../utils/auth.middleware";
 import { AcademicBackgroundController } from "../controllers/academicBackground.controller";
-import {
-  academicBackgroundSchema,
-  createCategorySchema,
-  createSubjectSchema,
-  createTopicSchema,
-} from "../validations/academicBackground.validation";
+import { taxonomyValidationSchema } from "../validations/academicBackground.validation";
 
 const router = express.Router();
 
@@ -16,37 +11,29 @@ const academicBackgroundController = new AcademicBackgroundController();
 router.post(
   "/",
   AuthMiddleware.verifyToken,
-  ValidationMiddleware.validate(academicBackgroundSchema),
-  async (req, res) =>
-    await academicBackgroundController.createAcademicBackground(req, res)
-);
-
-router.post(
-  "/categories",
-  AuthMiddleware.verifyToken,
-  ValidationMiddleware.validate(createCategorySchema),
+  ValidationMiddleware.validate(taxonomyValidationSchema),
   async (req, res) =>
     await academicBackgroundController.createCategory(req, res)
 );
 
 router.get(
-  "/categories",
+  "/",
   AuthMiddleware.verifyToken,
   async (req, res) => await academicBackgroundController.getCategories(req, res)
 );
 
 router.post(
-  "/subjects",
+  "/:id/subjects",
   AuthMiddleware.verifyToken,
-  ValidationMiddleware.validate(createSubjectSchema),
+  ValidationMiddleware.validate(taxonomyValidationSchema),
   async (req, res) => await academicBackgroundController.createSubject(req, res)
 );
 
 router.post(
-  "/topics",
+  "/:id/subjects/:subjectId/topics",
   AuthMiddleware.verifyToken,
-  ValidationMiddleware.validate(createTopicSchema),
+  ValidationMiddleware.validate(taxonomyValidationSchema),
   async (req, res) => await academicBackgroundController.createTopic(req, res)
 );
 
-export { router as academicBackgroundRouter };
+export { router as categoriesRouter };

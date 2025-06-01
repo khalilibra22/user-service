@@ -2,17 +2,24 @@ import express from "express";
 import { ValidationMiddleware } from "../utils/validation.middleware";
 import {
   addTopicToUserValidationSchema,
+  changeEmailSchema,
+  changePasswordSchema,
   checkPermissionsValidationSchema,
+  contactInfoValidationSchema,
   createUserValidationSchema,
   paymentMethodValidationSchema,
+  updateUserPhoneNumberValidationSchema,
   updateUserValidationSchema,
 } from "../validations/user.validation";
 import { UserController } from "../controllers/user.controller";
 import { AuthMiddleware } from "../utils/auth.middleware";
+import { AcademicBackgroundController } from "../controllers/academicBackground.controller";
+import { academicBackgroundSchema } from "../validations/academicBackground.validation";
 
 const router = express.Router();
 
 const userController = new UserController();
+const academicBackgroundController = new AcademicBackgroundController();
 
 router.put(
   "/:id",
@@ -109,6 +116,78 @@ router.post(
   AuthMiddleware.verifyToken,
   ValidationMiddleware.validate(createUserValidationSchema),
   async (req, res) => await userController.createUser(req, res)
+);
+
+//update user's phone number
+router.patch(
+  "/:id/phone-number",
+  AuthMiddleware.verifyToken,
+  ValidationMiddleware.validate(updateUserPhoneNumberValidationSchema),
+  async (req, res) => await userController.updateUserPhoneNumber(req, res)
+);
+
+// delete user
+router.delete(
+  "/:id",
+  AuthMiddleware.verifyToken,
+  async (req, res) => await userController.deleteUser(req, res)
+);
+
+// update user password
+router.patch(
+  "/:id/password",
+  AuthMiddleware.verifyToken,
+  ValidationMiddleware.validate(changePasswordSchema),
+  async (req, res) => await userController.updateUserPassword(req, res)
+);
+
+// update user email
+router.patch(
+  "/:id/email",
+  AuthMiddleware.verifyToken,
+  ValidationMiddleware.validate(changeEmailSchema),
+  async (req, res) => await userController.updateUserEmail(req, res)
+);
+
+// update user's contact information
+router.patch(
+  "/:id/contact-info",
+  AuthMiddleware.verifyToken,
+  ValidationMiddleware.validate(contactInfoValidationSchema),
+  async (req, res) => await userController.updateUserContactInfo(req, res)
+);
+
+// Get user's contact information
+router.get(
+  "/:id/contact-info",
+  AuthMiddleware.verifyToken,
+  async (req, res) => await userController.getUserContactInfo(req, res)
+);
+
+// Create user's academic background
+router.post(
+  "/:id/academic-backgrounds",
+  AuthMiddleware.verifyToken,
+  ValidationMiddleware.validate(academicBackgroundSchema),
+  async (req, res) =>
+    await academicBackgroundController.createAcademicBackground(req, res)
+);
+
+// Update user's academic background
+router.put(
+  "/:id/academic-backgrounds/:academicBackgroundId",
+  ValidationMiddleware.validate(academicBackgroundSchema),
+  AuthMiddleware.verifyToken,
+  async (req, res) =>
+    await academicBackgroundController.updateAcademicBackground(req, res)
+);
+
+// Get user's academic background by user ID
+router.get(
+  "/:id/academic-backgrounds",
+  AuthMiddleware.verifyToken,
+  async (req, res) =>
+    await academicBackgroundController.getAcademicBackgroundByUserId(req, res)
 );
 
 export { router as userRouter };

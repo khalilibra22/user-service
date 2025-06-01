@@ -52,8 +52,12 @@ export class UserService {
     }
   }
 
-  async deleteUser(id: number): Promise<void> {
-    await this.userRepo.delete(UserModel, id);
+  async deleteUser(id: string): Promise<void> {
+    try {
+      await this.userRepo.softDelete(id);
+    } catch (error) {
+      throw new Error("Error deleting user");
+    }
   }
 
   async getPermissions(id: string): Promise<UserModel | undefined> {

@@ -8,22 +8,10 @@ export const academicBackgroundSchema = Joi.object({
   ordering: Joi.number().integer().required(),
   institution: Joi.string().optional(),
   certificate: Joi.string().uri().optional(),
-  userId: Joi.string().uuid({ version: "uuidv4" }).required(),
+  //userId: Joi.string().uuid({ version: "uuidv4" }).required(),
 });
 
-export const createCategorySchema = Joi.object({
+export const taxonomyValidationSchema = Joi.object({
   name: Joi.string().required(),
   description: Joi.string().optional(),
-});
-
-export const createSubjectSchema = Joi.object({
-  name: Joi.string().required(),
-  description: Joi.string().optional(),
-  categoryId: Joi.number().integer().required(),
-});
-
-export const createTopicSchema = Joi.object({
-  name: Joi.string().required(),
-  description: Joi.string().optional(),
-  subjectId: Joi.number().integer().required(),
 });

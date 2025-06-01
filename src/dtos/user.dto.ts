@@ -23,6 +23,9 @@ export class UserDto {
   state?: string;
 
   @Expose()
+  district?: string;
+
+  @Expose()
   city?: string;
 
   @Expose()
