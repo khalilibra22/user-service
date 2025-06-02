@@ -41,14 +41,3 @@ export class AvailabilityModel {
   @DeleteDateColumn()
   deletedAt?: Date;
 }
-// @Column({ type: "date", nullable: true })
-// exceptionDate?: Date;
-
-// @Column({ type: "time", nullable: true })
-// exceptionStartTime?: string;
-
-// @Column({ type: "time", nullable: true })
-// exceptionEndTime?: string;
-
-// @Column({ type: "boolean", default: false })
-// isException?: boolean;

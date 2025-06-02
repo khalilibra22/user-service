@@ -1,18 +1,31 @@
 import { Request, Response } from "express";
 import { AvailabilityService } from "../services/availability.service";
+import { AvailabilityDto } from "../dtos/availability.dto";
+import { plainToInstance } from "class-transformer";
+import { UserService } from "../services/user.service";
 
 export class AvailabilityController {
   private availabilityService: AvailabilityService;
+  private userService: UserService;
   constructor() {
     this.availabilityService = new AvailabilityService();
+    this.userService = new UserService();
   }
 
   async getTeacherAvailability(req: Request, res: Response): Promise<void> {
     try {
       const userId = req.params.id;
+      const user = await this.userService.getUserById(userId);
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
       const availability =
         await this.availabilityService.getTeacherAvailability(userId);
-      res.status(200).json(availability);
+      const availabilityDtos = plainToInstance(AvailabilityDto, availability, {
+        excludeExtraneousValues: true,
+      });
+      res.status(200).json(availabilityDtos);
     } catch (error) {
       res.status(500).json({ error: "Failed to get availability" });
     }
@@ -21,14 +34,29 @@ export class AvailabilityController {
   // Create new availability
   async createAvailability(req: Request, res: Response): Promise<void> {
     try {
+      const id = req.params.id;
+      const user = await this.userService.getUserById(id);
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
       const availabilityData = req.body;
       const newAvailability = await this.availabilityService.createAvailability(
         availabilityData
       );
-      res
-        .status(201)
-        .json({ message: "Availability created", data: newAvailability });
-    } catch (error) {
+      const availabilityDto = plainToInstance(
+        AvailabilityDto,
+        newAvailability,
+        {
+          excludeExtraneousValues: true,
+        }
+      );
+      res.status(201).json(availabilityDto);
+    } catch (error: any) {
+      if (error.message === "Error fetching user") {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
       res.status(500).json({ error: "Failed to create availability" });
     }
   }
@@ -36,14 +64,27 @@ export class AvailabilityController {
   // Update availability
   async updateAvailability(req: Request, res: Response): Promise<void> {
     try {
-      const { id } = req.params;
-      const updateData = req.body;
-      const updatedAvailability =
-        await this.availabilityService.updateAvailability(updateData);
-      res
-        .status(200)
-        .json({ message: "Availability updated", data: updatedAvailability });
-    } catch (error) {
+      const { id, availabilityId } = req.params;
+      const user = await this.userService.getUserById(id);
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      const availability = await this.availabilityService.getAvailabilityById(
+        availabilityId
+      );
+      if (!availability) {
+        res.status(404).json({ error: "Availability not found" });
+        return;
+      }
+      const updateData = { ...availability, ...req.body };
+      await this.availabilityService.updateAvailability(updateData);
+      res.status(200).json({ message: "Availability updated successfully" });
+    } catch (error: any) {
+      if (error.message === "Error fetching user") {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
       res.status(500).json({ error: "Failed to update availability" });
     }
   }
@@ -51,10 +92,26 @@ export class AvailabilityController {
   // Delete availability
   async deleteAvailability(req: Request, res: Response): Promise<void> {
     try {
-      const { id } = req.params;
-      await this.availabilityService.deleteAvailability(id);
-      res.status(200).json({ message: "Availability deleted", id });
-    } catch (error) {
+      const { id, availabilityId } = req.params;
+      const user = await this.userService.getUserById(id);
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      const availability = await this.availabilityService.getAvailabilityById(
+        availabilityId
+      );
+      if (!availability) {
+        res.status(404).json({ error: "Availability not found" });
+        return;
+      }
+      await this.availabilityService.deleteAvailability(availabilityId);
+      res.status(204).json({ message: "Availability deleted", id });
+    } catch (error: any) {
+      if (error.message === "Error fetching user") {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
       res.status(500).json({ error: "Failed to delete availability" });
     }
   }
