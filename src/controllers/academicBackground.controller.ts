@@ -189,7 +189,21 @@ export class AcademicBackgroundController {
           excludeExtraneousValues: true,
         }
       );
-      res.status(200).json(academicBackgroundDtos);
+
+      // Group DTOs by type
+      const groupedByType = academicBackgroundDtos.reduce(
+        (acc: any, dto: any) => {
+          const type = dto.type || "other";
+          if (!acc[type]) {
+            acc[type] = [];
+          }
+          acc[type].push(dto);
+          return acc;
+        },
+        {}
+      );
+
+      res.status(200).json(groupedByType);
     } catch (error: any) {
       console.error(error);
       if (error.message === "Error fetching user") {

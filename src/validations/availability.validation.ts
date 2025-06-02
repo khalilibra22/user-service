@@ -30,21 +30,20 @@ export const availabilitySchema = Joi.object({
 
 // Validation for availability exception body
 export const availabilityExceptionSchema = Joi.object({
-  date: Joi.date().iso().required(),
+  exceptionDate: Joi.date().required(),
   startTime: Joi.string()
     .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
-    .optional()
+    .required()
     .messages({
       "string.pattern.base": "Start time must be in HH:MM format",
     }),
   endTime: Joi.string()
     .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
-    .optional()
+    .required()
     .messages({
       "string.pattern.base": "End time must be in HH:MM format",
     }),
-  isAvailable: Joi.boolean().default(false),
-  //reason: Joi.string().max(255).optional(),
+  isAvailable: Joi.boolean().optional(),
 });
 
 // Validation for updating availability

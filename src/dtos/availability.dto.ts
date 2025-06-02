@@ -12,4 +12,7 @@ export class AvailabilityDto {
 
   @Expose()
   endTime?: string;
+
+  @Expose()
+  isAvailable?: boolean;
 }

@@ -143,12 +143,12 @@ export class UserModel {
   )
   academicBackgrounds?: AcademicBackgroundModel[];
 
-  @OneToMany(() => AvailabilityModel, (availability) => availability.teacher)
+  @OneToMany(() => AvailabilityModel, (availability) => availability.user)
   availabilities?: AvailabilityModel[];
 
   @OneToMany(
     () => AvailabilityExceptionModel,
-    (availabilityException) => availabilityException.teacher
+    (availabilityException) => availabilityException.user
   )
   availabilityExceptions?: AvailabilityExceptionModel[];
 

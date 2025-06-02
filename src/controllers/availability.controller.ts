@@ -3,6 +3,7 @@ import { AvailabilityService } from "../services/availability.service";
 import { AvailabilityDto } from "../dtos/availability.dto";
 import { plainToInstance } from "class-transformer";
 import { UserService } from "../services/user.service";
+import { AvailabilityExceptionDto } from "../dtos/availabilityException.dto";
 
 export class AvailabilityController {
   private availabilityService: AvailabilityService;
@@ -26,7 +27,11 @@ export class AvailabilityController {
         excludeExtraneousValues: true,
       });
       res.status(200).json(availabilityDtos);
-    } catch (error) {
+    } catch (error: any) {
+      if (error.message === "Error fetching user") {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
       res.status(500).json({ error: "Failed to get availability" });
     }
   }
@@ -40,7 +45,7 @@ export class AvailabilityController {
         res.status(404).json({ error: "User not found" });
         return;
       }
-      const availabilityData = req.body;
+      const availabilityData = { ...req.body, user: user };
       const newAvailability = await this.availabilityService.createAvailability(
         availabilityData
       );
@@ -122,16 +127,31 @@ export class AvailabilityController {
     res: Response
   ): Promise<void> {
     try {
-      const exceptionData = req.body;
+      const id = req.params.id;
+      const user = await this.userService.getUserById(id);
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      const exceptionData = { ...req.body, user: user };
       const newException =
         await this.availabilityService.createAvailabilityException(
           exceptionData
         );
-      res.status(201).json({
-        message: "Availability exception created",
-        data: newException,
-      });
-    } catch (error) {
+      const exeptionDto = plainToInstance(
+        AvailabilityExceptionDto,
+        newException,
+        {
+          excludeExtraneousValues: true,
+        }
+      );
+      res.status(201).json(exeptionDto);
+    } catch (error: any) {
+      if (error.message === "Error fetching user") {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      console.error(error);
       res
         .status(500)
         .json({ error: "Failed to create availability exception" });
@@ -144,11 +164,28 @@ export class AvailabilityController {
     res: Response
   ): Promise<void> {
     try {
-      const { userId } = req.params;
+      const { id } = req.params;
+      const user = await this.userService.getUserById(id);
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+
       const exceptions =
-        await this.availabilityService.getTeacherAvailabilityExceptions(userId);
-      res.status(200).json(exceptions);
-    } catch (error) {
+        await this.availabilityService.getTeacherAvailabilityExceptions(id);
+      const exeptionDtos = plainToInstance(
+        AvailabilityExceptionDto,
+        exceptions,
+        {
+          excludeExtraneousValues: true,
+        }
+      );
+      res.status(200).json(exeptionDtos);
+    } catch (error: any) {
+      if (error.message === "Error fetching user") {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
       res.status(500).json({ error: "Failed to get availability exceptions" });
     }
   }
@@ -159,10 +196,27 @@ export class AvailabilityController {
     res: Response
   ): Promise<void> {
     try {
-      const { id } = req.params;
-      await this.availabilityService.deleteAvailabilityException(id);
-      res.status(200).json({ message: "Availability exception deleted", id });
-    } catch (error) {
+      const { id, exceptionId } = req.params;
+      const user = await this.userService.getUserById(id);
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      const exception =
+        await this.availabilityService.getAvailabilityExceptionById(
+          exceptionId
+        );
+      if (!exception) {
+        res.status(404).json({ error: "Availability exception not found" });
+        return;
+      }
+      await this.availabilityService.deleteAvailabilityException(exceptionId);
+      res.status(204).json({ message: "Availability exception deleted", id });
+    } catch (error: any) {
+      if (error.message === "Error fetching user") {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
       res
         .status(500)
         .json({ error: "Failed to delete availability exception" });
@@ -175,15 +229,30 @@ export class AvailabilityController {
     res: Response
   ): Promise<void> {
     try {
-      const { id } = req.params;
-      const updateData = req.body;
-      const updatedException =
-        await this.availabilityService.updateAvailabilityException(updateData);
-      res.status(200).json({
-        message: "Availability exception updated",
-        data: updatedException,
-      });
-    } catch (error) {
+      const { id, exceptionId } = req.params;
+      const user = await this.userService.getUserById(id);
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      const exception =
+        await this.availabilityService.getAvailabilityExceptionById(
+          exceptionId
+        );
+      if (!exception) {
+        res.status(404).json({ error: "Availability exception not found" });
+        return;
+      }
+      const updateData = { ...exception, ...req.body };
+      await this.availabilityService.updateAvailabilityException(updateData);
+      res
+        .status(200)
+        .json({ message: "Availability exception updated successfully" });
+    } catch (error: any) {
+      if (error.message === "Error fetching user") {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
       res
         .status(500)
         .json({ error: "Failed to update availability exception" });

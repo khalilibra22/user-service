@@ -28,9 +28,12 @@ export class AvailabilityModel {
   @Column({ type: "time" })
   endTime?: string;
 
+  @Column({ type: "boolean", default: true })
+  isAvailable?: boolean;
+
   @ManyToOne(() => UserModel, (user) => user.availabilities)
-  @JoinColumn({ name: "teacherId" })
-  teacher?: UserModel;
+  //@JoinColumn({ name: "teacherId" })
+  user?: UserModel;
 
   @CreateDateColumn()
   createdAt?: Date;

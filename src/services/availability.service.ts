@@ -107,7 +107,7 @@ export class AvailabilityService {
     try {
       return await this.aviabilityRepo.find({
         where: {
-          teacher: {
+          user: {
             id: teacherId,
           },
         },
@@ -125,7 +125,7 @@ export class AvailabilityService {
     try {
       return await this.availabilityExceptionRepo.find({
         where: {
-          teacher: {
+          user: {
             id: teacherId,
           },
         },

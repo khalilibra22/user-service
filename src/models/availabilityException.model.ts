@@ -16,10 +16,10 @@ export class AvailabilityExceptionModel {
   id?: string;
 
   @ManyToOne(() => UserModel, (user) => user.availabilityExceptions)
-  @JoinColumn({ name: "teacherId" })
-  teacher?: UserModel;
+  //@JoinColumn({ name: "teacherId" })
+  user?: UserModel;
 
-  @Column({ type: "date" })
+  @Column({ type: "timestamp" })
   exceptionDate?: Date;
 
   @Column({ type: "time" })
