@@ -1,13 +1,11 @@
 import { Request, Response } from "express";
-import { PermissionMiddleware } from "../utils/permission.middleware";
-import { Permission } from "../enums/permission.enum";
 import { AcademicBackgroundService } from "../services/academicBackground.service";
 import { UserService } from "../services/user.service";
 import { plainToInstance } from "class-transformer";
 import { AcademicBackgroundDto } from "../dtos/AcademicBackground.dto";
 import { CategoryDto } from "../dtos/category.dto";
 import { TopicDto } from "../dtos/topic.dto";
-
+import { UserTopicDto } from "../dtos/userTopic.dto";
 export class AcademicBackgroundController {
   private academicBackgroundService: AcademicBackgroundService;
   private userService: UserService;
@@ -311,6 +309,152 @@ export class AcademicBackgroundController {
       res
         .status(204)
         .json({ message: "Academic background deleted successfully" });
+    } catch (error: any) {
+      if (error.message === "Error fetching user") {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+  async addTopicToUser(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = req.params.id;
+      const topicId = Number(req.params.topicId);
+
+      if (isNaN(topicId)) {
+        res.status(400).json({ error: "Invalid topic ID" });
+        return;
+      }
+
+      const user = await this.userService.getUserById(userId);
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      const existingUserTopic =
+        await this.academicBackgroundService.getUserTopicByUserIdAndTopicId(
+          userId,
+          topicId
+        );
+      if (existingUserTopic) {
+        res.status(409).json({ error: "Topic already added to user" });
+        return;
+      }
+
+      const topic = await this.academicBackgroundService.getTopicById(topicId);
+      if (!topic) {
+        res.status(404).json({ error: "Topic not found" });
+        return;
+      }
+      const userTopic = {
+        user: user,
+        topic: topic,
+        price: req.body.price,
+      };
+      await this.academicBackgroundService.addTopicToUser(userTopic);
+      res.status(200).json({ message: "Topic added to user successfully" });
+    } catch (error: any) {
+      if (error.message === "Error fetching user") {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+
+  async updateUserTopicPrice(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = req.params.id;
+      const topicId = Number(req.params.topicId);
+
+      if (isNaN(topicId)) {
+        res.status(400).json({ error: "Invalid topic ID" });
+        return;
+      }
+
+      const user = await this.userService.getUserById(userId);
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+
+      const userTopic =
+        await this.academicBackgroundService.getUserTopicByUserIdAndTopicId(
+          userId,
+          topicId
+        );
+      if (!userTopic) {
+        res.status(404).json({ error: "Topic not assigned to this user" });
+        return;
+      }
+      userTopic.price = req.body.price;
+      await this.academicBackgroundService.updateUserTopic(userTopic);
+      res
+        .status(200)
+        .json({ message: "User topic price updated successfully" });
+    } catch (error: any) {
+      if (error.message === "Error fetching user") {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+
+  async deleteUserTopic(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = req.params.id;
+      const topicId = Number(req.params.topicId);
+
+      if (isNaN(topicId)) {
+        res.status(400).json({ error: "Invalid topic ID" });
+        return;
+      }
+
+      const user = await this.userService.getUserById(userId);
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+
+      const userTopic =
+        await this.academicBackgroundService.getUserTopicByUserIdAndTopicId(
+          userId,
+          topicId
+        );
+      if (!userTopic) {
+        res.status(404).json({ error: "Topic not assigned to this user" });
+        return;
+      }
+
+      await this.academicBackgroundService.deleteUserTopic(
+        Number(userTopic.id)
+      );
+      res.status(204).json({ message: "User topic deleted successfully" });
+    } catch (error: any) {
+      if (error.message === "Error fetching user") {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      console.error(error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+
+  async getTopicsByUserId(req: Request, res: Response): Promise<void> {
+    try {
+      const id = req.params.id;
+      const user = await this.userService.getUserById(id);
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      const topics = await this.academicBackgroundService.getTopicsByUserId(id);
+      const topicDtos = plainToInstance(UserTopicDto, topics, {
+        excludeExtraneousValues: true,
+      });
+      res.status(200).json(topicDtos);
     } catch (error: any) {
       if (error.message === "Error fetching user") {
         res.status(404).json({ error: "User not found" });

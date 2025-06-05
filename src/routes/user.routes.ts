@@ -51,17 +51,36 @@ router.post(
 );
 
 router.post(
-  "/:id/topics",
+  "/:id/topics/:topicId",
   AuthMiddleware.verifyToken,
   ValidationMiddleware.validate(addTopicToUserValidationSchema),
-  async (req, res) => await userController.addTopicToUser(req, res)
+  async (req, res) =>
+    await academicBackgroundController.addTopicToUser(req, res)
+);
+
+// Update topic price for user
+router.put(
+  "/:id/topics/:topicId",
+  AuthMiddleware.verifyToken,
+  ValidationMiddleware.validate(addTopicToUserValidationSchema),
+  async (req, res) =>
+    await academicBackgroundController.updateUserTopicPrice(req, res)
+);
+
+// Delete topic from user
+router.delete(
+  "/:id/topics/:topicId",
+  AuthMiddleware.verifyToken,
+  async (req, res) =>
+    await academicBackgroundController.deleteUserTopic(req, res)
 );
 
 // Get topics by user id
 router.get(
   "/:id/topics",
   AuthMiddleware.verifyToken,
-  async (req, res) => await userController.getTopicsByUserId(req, res)
+  async (req, res) =>
+    await academicBackgroundController.getTopicsByUserId(req, res)
 );
 
 // Get user plan

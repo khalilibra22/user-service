@@ -148,7 +148,6 @@ export const checkPermissionsValidationSchema = Joi.object({
 });
 
 export const addTopicToUserValidationSchema = Joi.object({
-  topicId: Joi.number().integer().positive().required(),
   price: Joi.number().positive().required(),
 });
 
