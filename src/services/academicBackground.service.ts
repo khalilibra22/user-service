@@ -189,4 +189,12 @@ export class AcademicBackgroundService {
       throw new Error("Error updating topic");
     }
   }
+
+  async deleteAcademicBackground(id: number): Promise<void> {
+    try {
+      await this.academicBackgroundRepo.softDelete(id);
+    } catch (error) {
+      throw new Error("Error deleting academic background");
+    }
+  }
 }

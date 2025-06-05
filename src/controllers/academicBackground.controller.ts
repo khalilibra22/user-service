@@ -279,4 +279,44 @@ export class AcademicBackgroundController {
       res.status(500).json({ error: "Internal Server Error" });
     }
   }
+
+  async deleteAcademicBackground(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = req.params.id;
+      const academicBackgroundId = Number(req.params.academicBackgroundId);
+
+      if (isNaN(academicBackgroundId)) {
+        res.status(400).json({ error: "Invalid academic background ID" });
+        return;
+      }
+
+      const user = await this.userService.getUserById(userId);
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+
+      const academicBackground =
+        await this.academicBackgroundService.getAcademicBackgroundById(
+          academicBackgroundId
+        );
+      if (!academicBackground) {
+        res.status(404).json({ error: "Academic background not found" });
+        return;
+      }
+
+      await this.academicBackgroundService.deleteAcademicBackground(
+        academicBackgroundId
+      );
+      res
+        .status(204)
+        .json({ message: "Academic background deleted successfully" });
+    } catch (error: any) {
+      if (error.message === "Error fetching user") {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
 }

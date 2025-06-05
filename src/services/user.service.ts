@@ -151,17 +151,21 @@ export class UserService {
   }
 
   // Get payment method by type
-  async getPaymentMethodByType(
-    type: string
+  async getPaymentMethodByTypeAndUserId(
+    type: string,
+    userId: string
   ): Promise<PaymentMethodModel | undefined> {
     try {
       return await this.payementMethodRepo.findOne({
         where: {
           type: type,
+          user: {
+            id: userId,
+          },
         },
       });
     } catch (error) {
-      throw new Error("Error fetching payment method by type");
+      throw new Error("Error fetching payment method by type and user ID");
     }
   }
 

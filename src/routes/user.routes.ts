@@ -198,6 +198,14 @@ router.put(
     await academicBackgroundController.updateAcademicBackground(req, res)
 );
 
+// Delete user's academic background
+router.delete(
+  "/:id/academic-backgrounds/:academicBackgroundId",
+  AuthMiddleware.verifyToken,
+  async (req, res) =>
+    await academicBackgroundController.deleteAcademicBackground(req, res)
+);
+
 // Get user's academic background by user ID
 router.get(
   "/:id/academic-backgrounds",

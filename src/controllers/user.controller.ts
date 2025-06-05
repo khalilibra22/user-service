@@ -242,9 +242,11 @@ export class UserController {
         res.status(404).json({ error: "User not found" });
         return;
       }
-      const payementMethod = await this.userService.getPaymentMethodByType(
-        req.body.type
-      );
+      const payementMethod =
+        await this.userService.getPaymentMethodByTypeAndUserId(
+          req.body.type,
+          id
+        );
       if (payementMethod) {
         res.status(409).json({ error: "Payment method already exists" });
         return;
