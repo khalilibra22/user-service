@@ -19,6 +19,8 @@ import { PaymentMethodModel } from "./paymentMethod.model";
 import { UserTopicModel } from "./userTopic.model";
 import { PlanModel } from "./plan.model";
 import { SubscriptionModel } from "./subscription.model";
+import { AvailabilityModel } from "./availability.model";
+import { AvailabilityExceptionModel } from "./availabilityException.model";
 
 @Entity("users")
 export class UserModel {
@@ -140,6 +142,15 @@ export class UserModel {
     (academicBackground) => academicBackground.user
   )
   academicBackgrounds?: AcademicBackgroundModel[];
+
+  @OneToMany(() => AvailabilityModel, (availability) => availability.user)
+  availabilities?: AvailabilityModel[];
+
+  @OneToMany(
+    () => AvailabilityExceptionModel,
+    (availabilityException) => availabilityException.user
+  )
+  availabilityExceptions?: AvailabilityExceptionModel[];
 
   @OneToMany(() => PaymentMethodModel, (paymentMethod) => paymentMethod.user)
   paymentMethods?: PaymentMethodModel[];

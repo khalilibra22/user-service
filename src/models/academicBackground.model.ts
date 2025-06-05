@@ -14,6 +14,9 @@ export class AcademicBackgroundModel {
   @PrimaryGeneratedColumn()
   id?: number;
 
+  @Column({ default: "education" })
+  type?: string; //"exprience" | "education" | "certification";
+
   @Column()
   title?: string;
 
@@ -32,11 +35,11 @@ export class AcademicBackgroundModel {
   @Column({ nullable: true })
   institution?: string;
 
-  @Column()
-  ordering?: number;
-
   @Column({ nullable: true })
-  certificate?: string;
+  location?: string;
+
+  @Column({ nullable: true, name: "document_url" })
+  documentUrl?: string;
 
   @ManyToOne(() => UserModel, (user) => user.academicBackgrounds)
   user?: UserModel;

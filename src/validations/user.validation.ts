@@ -131,6 +131,7 @@ export const loginValidationSchema = Joi.object({
 
 export const changeEmailSchema = Joi.object({
   email: Joi.string().email().required(),
+  password: passwordValidation,
 });
 
 export const resetPasswordSchema = Joi.object({

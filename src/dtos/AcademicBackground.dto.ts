@@ -7,6 +7,9 @@ export class AcademicBackgroundDto {
   id?: number;
 
   @Expose()
+  type?: string;
+
+  @Expose()
   title?: string;
 
   @Expose()
@@ -19,17 +22,17 @@ export class AcademicBackgroundDto {
   endDate?: Date;
 
   @Expose()
-  isVerified?: boolean;
-
-  @Expose()
   institution?: string;
 
   @Expose()
-  ordering?: number;
+  location?: string;
 
   @Expose()
   @Transform(({ value }) => (value ? getImageUrl(value) : undefined))
-  certificate?: string;
+  documentUrl?: string;
+
+  @Expose()
+  isVerified?: boolean;
 
   @Exclude()
   @Type(() => UserDto)

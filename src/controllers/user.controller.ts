@@ -242,21 +242,20 @@ export class UserController {
         res.status(404).json({ error: "User not found" });
         return;
       }
-      const isPermitted = PermissionMiddleware.checkPermission(
-        user.role,
-        Permission.PAYMENT_METHOD_CRUD
+      const payementMethod = await this.userService.getPaymentMethodByType(
+        req.body.type
       );
-      if (!isPermitted) {
-        res.status(403).json({ error: "Unauthorized" });
+      if (payementMethod) {
+        res.status(409).json({ error: "Payment method already exists" });
         return;
       }
       const paymentMethodBody = { ...req.body, user: user };
-      const payementMethod = await this.userService.addPaymentMethod(
+      const createdPayementMethod = await this.userService.addPaymentMethod(
         paymentMethodBody
       );
       const paymentMethodDto = plainToInstance(
         PaymentMethodDto,
-        payementMethod,
+        createdPayementMethod,
         {
           excludeExtraneousValues: true,
         }
@@ -346,6 +345,38 @@ export class UserController {
     } catch (error: any) {
       if (error.message === "Error fetching user") {
         res.status(404).json({ error: "User not found" });
+        return;
+      }
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+
+  // Delete payment method
+  async deletePaymentMethod(req: Request, res: Response): Promise<void> {
+    try {
+      const id = req.params.id;
+      const user = await this.userService.getUserById(id);
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      const paymentMethodId = req.params.paymentMethodId;
+      const paymentMethod = await this.userService.getPaymentMethodById(
+        paymentMethodId
+      );
+      if (!paymentMethod) {
+        res.status(404).json({ error: "Payment method not found" });
+        return;
+      }
+      await this.userService.deletePaymentMethod(paymentMethodId);
+      res.status(204).json({ message: "Payment method deleted successfully" });
+    } catch (error: any) {
+      if (error.message === "Error fetching user") {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      if (error.message === "Error fetching payment method") {
+        res.status(404).json({ error: "Payment method not found" });
         return;
       }
       res.status(500).json({ error: "Internal Server Error" });
@@ -484,15 +515,25 @@ export class UserController {
         res.status(404).json({ error: "User not found" });
         return;
       }
+      const { email, password } = req.body;
       // check email if already exists
-      const existingUser = await this.userService.getUserByEmail(
-        req.body.email
-      );
+      const existingUser = await this.userService.getUserByEmail(email);
       if (existingUser && existingUser.id !== id) {
         res.status(409).json({ error: "Email already exists." });
         return;
       }
-      user.email = req.body.email;
+      // check password if provided
+      if (password) {
+        const isAuthenticated = await AuthMiddleware.comparePasswords(
+          password,
+          user.password ?? ""
+        );
+        if (!isAuthenticated) {
+          res.status(400).json({ error: "Password is incorrect" });
+          return;
+        }
+      }
+      user.email = email;
       await this.userService.updateUser(id, user);
       res.status(200).json({ message: "Email updated successfully" });
     } catch (error: any) {

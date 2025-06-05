@@ -189,13 +189,93 @@ export class AcademicBackgroundController {
           excludeExtraneousValues: true,
         }
       );
-      res.status(200).json(academicBackgroundDtos);
+
+      // Group DTOs by type
+      const groupedByType = academicBackgroundDtos.reduce(
+        (acc: any, dto: any) => {
+          const type = dto.type || "other";
+          if (!acc[type]) {
+            acc[type] = [];
+          }
+          acc[type].push(dto);
+          return acc;
+        },
+        {}
+      );
+
+      res.status(200).json(groupedByType);
     } catch (error: any) {
       console.error(error);
       if (error.message === "Error fetching user") {
         res.status(404).json({ error: "User not found" });
         return;
       }
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+
+  async deleteTopic(req: Request, res: Response): Promise<void> {
+    try {
+      const topicId = Number(req.params.topicId);
+      if (isNaN(topicId)) {
+        res.status(400).json({ error: "Invalid topic ID" });
+        return;
+      }
+      const topic = await this.academicBackgroundService.getTopicById(topicId);
+      if (!topic) {
+        res.status(404).json({ error: "Topic not found" });
+        return;
+      }
+      await this.academicBackgroundService.deleteTopic(topicId);
+      res.status(204).json({ message: "Topic deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+
+  async updateTopic(req: Request, res: Response): Promise<void> {
+    try {
+      const topicId = Number(req.params.topicId);
+      if (isNaN(topicId)) {
+        res.status(400).json({ error: "Invalid topic ID" });
+        return;
+      }
+      const topic = await this.academicBackgroundService.getTopicById(topicId);
+      if (!topic) {
+        res.status(404).json({ error: "Topic not found" });
+        return;
+      }
+      const topicData = { ...topic, ...req.body };
+      await this.academicBackgroundService.updateTopic(topicData);
+      res.status(200).json({
+        message: "Topic updated successfully",
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+
+  async toggleTopicStatus(req: Request, res: Response): Promise<void> {
+    try {
+      const topicId = Number(req.params.topicId);
+      if (isNaN(topicId)) {
+        res.status(400).json({ error: "Invalid topic ID" });
+        return;
+      }
+      const topic = await this.academicBackgroundService.getTopicById(topicId);
+      if (!topic) {
+        res.status(404).json({ error: "Topic not found" });
+        return;
+      }
+      topic.isActived = !topic.isActived; // Toggle the status
+      await this.academicBackgroundService.updateTopic(topic);
+
+      res.status(200).json({
+        message: `Topic status updated to ${
+          topic.isActived ? "active" : "inactive"
+        }`,
+      });
+    } catch (error) {
       res.status(500).json({ error: "Internal Server Error" });
     }
   }
