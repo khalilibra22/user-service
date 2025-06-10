@@ -463,4 +463,47 @@ export class AcademicBackgroundController {
       res.status(500).json({ error: "Internal Server Error" });
     }
   }
+
+  async toggleUserTopicStatus(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = req.params.id;
+      const topicId = Number(req.params.topicId);
+
+      if (isNaN(topicId)) {
+        res.status(400).json({ error: "Invalid topic ID" });
+        return;
+      }
+
+      const user = await this.userService.getUserById(userId);
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+
+      const userTopic =
+        await this.academicBackgroundService.getUserTopicByUserIdAndTopicId(
+          userId,
+          topicId
+        );
+      if (!userTopic) {
+        res.status(404).json({ error: "Topic not assigned to this user" });
+        return;
+      }
+
+      userTopic.isActive = !userTopic.isActive;
+      await this.academicBackgroundService.updateUserTopic(userTopic);
+
+      res.status(200).json({
+        message: `User topic status updated to ${
+          userTopic.isActive ? "active" : "inactive"
+        }`,
+      });
+    } catch (error: any) {
+      if (error.message === "Error fetching user") {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
 }

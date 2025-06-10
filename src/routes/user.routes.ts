@@ -297,4 +297,12 @@ router.get(
     await availabilityController.getTeacherAvailabilityExceptions(req, res)
 );
 
+// Toggle topic status for user
+router.patch(
+  "/:id/topics/:topicId/toggle-status",
+  AuthMiddleware.verifyToken,
+  async (req, res) =>
+    await academicBackgroundController.toggleUserTopicStatus(req, res)
+);
+
 export { router as userRouter };
