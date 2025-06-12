@@ -25,7 +25,7 @@ export const availabilitySchema = Joi.object({
     .messages({
       "string.pattern.base": "End time must be in HH:MM format",
     }),
-  isFree: Joi.boolean().optional(),
+  isFree: Joi.boolean().valid(true).optional(),
   //isRecurring: Joi.boolean().default(false),
 });
 

@@ -24,7 +24,7 @@ export class UserTopicModel {
   @Column({ type: "decimal", precision: 10, scale: 2 })
   price?: number;
 
-  @Column({ name: "is_active", type: "boolean", default: false })
+  @Column({ name: "is_active", type: "boolean", default: true })
   isActive?: boolean;
 
   @CreateDateColumn({ type: "timestamp" })

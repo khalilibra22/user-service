@@ -265,12 +265,12 @@ export class AcademicBackgroundController {
         res.status(404).json({ error: "Topic not found" });
         return;
       }
-      topic.isActived = !topic.isActived; // Toggle the status
+      topic.isActive = !topic.isActive; // Toggle the status
       await this.academicBackgroundService.updateTopic(topic);
 
       res.status(200).json({
         message: `Topic status updated to ${
-          topic.isActived ? "active" : "inactive"
+          topic.isActive ? "active" : "inactive"
         }`,
       });
     } catch (error) {

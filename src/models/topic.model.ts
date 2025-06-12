@@ -19,8 +19,8 @@ export class TopicModel {
   @Column()
   name?: string;
 
-  @Column({ default: true, name: "is_actived" })
-  isActived!: boolean;
+  @Column({ default: true, name: "is_active" })
+  isActive?: boolean;
 
   @Column({ nullable: true })
   description?: string;
