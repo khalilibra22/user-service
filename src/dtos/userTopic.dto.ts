@@ -10,6 +10,9 @@ export class UserTopicDto {
   price?: number;
 
   @Expose()
+  isActive?: boolean;
+
+  @Expose()
   @Type(() => TopicDto)
   topic?: TopicDto;
 

@@ -189,4 +189,50 @@ export class AcademicBackgroundService {
       throw new Error("Error updating topic");
     }
   }
+
+  async deleteAcademicBackground(id: number): Promise<void> {
+    try {
+      await this.academicBackgroundRepo.softDelete(id);
+    } catch (error) {
+      throw new Error("Error deleting academic background");
+    }
+  }
+
+  async getUserTopicByUserIdAndTopicId(
+    userId: string,
+    topicId: number
+  ): Promise<UserTopicModel | undefined> {
+    try {
+      return await this.userTopicRepo.findOne({
+        where: {
+          user: {
+            id: userId,
+          },
+          topic: {
+            id: topicId,
+          },
+        },
+        //relations: ["topic", "user"],
+      });
+    } catch (error) {
+      throw new Error("Error fetching user topic by user id and topic id");
+    }
+  }
+
+  async updateUserTopic(userTopic: UserTopicModel): Promise<void> {
+    try {
+      await this.userTopicRepo.save(userTopic);
+    } catch (error) {
+      throw new Error("Error updating user topic");
+    }
+  }
+
+  async deleteUserTopic(id: number): Promise<void> {
+    try {
+      await this.userTopicRepo.softDelete(id);
+    } catch (error) {
+      console.error(error);
+      throw new Error("Error deleting user topic");
+    }
+  }
 }

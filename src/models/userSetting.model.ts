@@ -1,9 +1,12 @@
 import {
   Column,
+  CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   JoinColumn,
   OneToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from "typeorm";
 import { UserModel } from "./user.model";
 
@@ -24,4 +27,13 @@ export class UserSettingModel {
   @OneToOne(() => UserModel, (user) => user.settings, { onDelete: "CASCADE" })
   @JoinColumn({ name: "user_id" })
   user?: UserModel;
+
+  @CreateDateColumn({ type: "timestamp" })
+  createdAt?: Date;
+
+  @UpdateDateColumn({ type: "timestamp" })
+  updatedAt?: Date;
+
+  @DeleteDateColumn({ type: "timestamp" })
+  deletedAt?: Date;
 }

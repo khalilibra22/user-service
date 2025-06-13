@@ -51,17 +51,36 @@ router.post(
 );
 
 router.post(
-  "/:id/topics",
+  "/:id/topics/:topicId",
   AuthMiddleware.verifyToken,
   ValidationMiddleware.validate(addTopicToUserValidationSchema),
-  async (req, res) => await userController.addTopicToUser(req, res)
+  async (req, res) =>
+    await academicBackgroundController.addTopicToUser(req, res)
+);
+
+// Update topic price for user
+router.put(
+  "/:id/topics/:topicId",
+  AuthMiddleware.verifyToken,
+  ValidationMiddleware.validate(addTopicToUserValidationSchema),
+  async (req, res) =>
+    await academicBackgroundController.updateUserTopicPrice(req, res)
+);
+
+// Delete topic from user
+router.delete(
+  "/:id/topics/:topicId",
+  AuthMiddleware.verifyToken,
+  async (req, res) =>
+    await academicBackgroundController.deleteUserTopic(req, res)
 );
 
 // Get topics by user id
 router.get(
   "/:id/topics",
   AuthMiddleware.verifyToken,
-  async (req, res) => await userController.getTopicsByUserId(req, res)
+  async (req, res) =>
+    await academicBackgroundController.getTopicsByUserId(req, res)
 );
 
 // Get user plan
@@ -198,6 +217,14 @@ router.put(
     await academicBackgroundController.updateAcademicBackground(req, res)
 );
 
+// Delete user's academic background
+router.delete(
+  "/:id/academic-backgrounds/:academicBackgroundId",
+  AuthMiddleware.verifyToken,
+  async (req, res) =>
+    await academicBackgroundController.deleteAcademicBackground(req, res)
+);
+
 // Get user's academic background by user ID
 router.get(
   "/:id/academic-backgrounds",
@@ -268,6 +295,14 @@ router.get(
   AuthMiddleware.verifyToken,
   async (req, res) =>
     await availabilityController.getTeacherAvailabilityExceptions(req, res)
+);
+
+// Toggle topic status for user
+router.patch(
+  "/:id/topics/:topicId/toggle-status",
+  AuthMiddleware.verifyToken,
+  async (req, res) =>
+    await academicBackgroundController.toggleUserTopicStatus(req, res)
 );
 
 export { router as userRouter };

@@ -1,4 +1,4 @@
-import { Expose, Type } from "class-transformer";
+import { Expose } from "class-transformer";
 
 export class TopicDto {
   @Expose()
@@ -8,7 +8,7 @@ export class TopicDto {
   name?: string;
 
   @Expose()
-  isActived?: boolean;
+  isActive?: boolean;
 
   @Expose()
   description?: string;

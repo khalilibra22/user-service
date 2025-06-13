@@ -1,4 +1,4 @@
-import { Expose } from "class-transformer";
+import { Expose, Transform } from "class-transformer";
 
 export class AvailabilityDto {
   @Expose()
@@ -15,4 +15,8 @@ export class AvailabilityDto {
 
   @Expose()
   isAvailable?: boolean;
+
+  @Expose()
+  @Transform(({ value }) => (value ? value : undefined))
+  isFree?: boolean;
 }

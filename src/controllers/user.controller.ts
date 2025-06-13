@@ -138,74 +138,6 @@ export class UserController {
     }
   }
 
-  async addTopicToUser(req: Request, res: Response): Promise<void> {
-    try {
-      const id = req.params.id;
-      const user = await this.userService.getUserById(id);
-      if (!user) {
-        res.status(404).json({ error: "User not found" });
-        return;
-      }
-      const isPermitted = PermissionMiddleware.checkPermission(
-        user.role,
-        Permission.TEACHER_CRUD
-      );
-      if (!isPermitted) {
-        res.status(403).json({ error: "Unauthorized" });
-        return;
-      }
-      const topicId = req.body.topicId;
-      const topic = await this.academicBackgroundService.getTopicById(topicId);
-      if (!topic) {
-        res.status(404).json({ error: "Topic not found" });
-        return;
-      }
-      const userTopic: UserTopicModel = {
-        user: user,
-        topic: topic,
-        price: req.body.price,
-      };
-      await this.academicBackgroundService.addTopicToUser(userTopic);
-      res.status(200).json({ message: "Topic added to user successfully" });
-    } catch (error: any) {
-      if (error.message === "Error fetching user") {
-        res.status(404).json({ error: "User not found" });
-        return;
-      }
-      res.status(500).json({ error: "Internal Server Error" });
-    }
-  }
-
-  async getTopicsByUserId(req: Request, res: Response): Promise<void> {
-    try {
-      const id = req.params.id;
-      const user = await this.userService.getUserById(id);
-      if (!user) {
-        res.status(404).json({ error: "User not found" });
-        return;
-      }
-      const isPermitted = PermissionMiddleware.checkPermission(
-        user.role,
-        Permission.TEACHER_CRUD
-      );
-      if (!isPermitted) {
-        res.status(403).json({ error: "Unauthorized" });
-        return;
-      }
-      const topics = await this.academicBackgroundService.getTopicsByUserId(id);
-      const topicDtos = plainToInstance(UserTopicDto, topics, {
-        excludeExtraneousValues: true,
-      });
-      res.status(200).json(topicDtos);
-    } catch (error: any) {
-      if (error.message === "Error fetching user") {
-        res.status(404).json({ error: "User not found" });
-        return;
-      }
-      res.status(500).json({ error: "Internal Server Error" });
-    }
-  }
-
   // Get user plan
   async getUserPlan(req: Request, res: Response): Promise<void> {
     try {
@@ -242,9 +174,11 @@ export class UserController {
         res.status(404).json({ error: "User not found" });
         return;
       }
-      const payementMethod = await this.userService.getPaymentMethodByType(
-        req.body.type
-      );
+      const payementMethod =
+        await this.userService.getPaymentMethodByTypeAndUserId(
+          req.body.type,
+          id
+        );
       if (payementMethod) {
         res.status(409).json({ error: "Payment method already exists" });
         return;
