@@ -17,6 +17,9 @@ export class AvailabilityDto {
   isAvailable?: boolean;
 
   @Expose()
+  isActive?: boolean;
+
+  @Expose()
   @Transform(({ value }) => (value ? value : undefined))
   isFree?: boolean;
 }

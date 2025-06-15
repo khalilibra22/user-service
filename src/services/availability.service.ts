@@ -135,4 +135,28 @@ export class AvailabilityService {
       throw new Error("Error fetching teachers availability exceptions");
     }
   }
+
+  async deactivateAllAvailabilities(teacherId: string): Promise<void> {
+    try {
+      await this.aviabilityRepo.update(
+        { user: { id: teacherId } },
+        { isActive: false }
+      );
+    } catch (error) {
+      console.error(error);
+      throw new Error("Error deactivating all availabilities");
+    }
+  }
+
+  async activateAllAvailabilities(teacherId: string): Promise<void> {
+    try {
+      await this.aviabilityRepo.update(
+        { user: { id: teacherId } },
+        { isActive: true }
+      );
+    } catch (error) {
+      console.error(error);
+      throw new Error("Error activating all availabilities");
+    }
+  }
 }
