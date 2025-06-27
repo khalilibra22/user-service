@@ -297,6 +297,30 @@ router.get(
     await availabilityController.getTeacherAvailabilityExceptions(req, res)
 );
 
+// Toggle availability status
+router.patch(
+  "/:id/availabilities/:availabilityId/toggle-status",
+  AuthMiddleware.verifyToken,
+  async (req, res) =>
+    await availabilityController.toggleAvailabilityStatus(req, res)
+);
+
+// Deactivate all availabilities for user
+router.patch(
+  "/:id/availabilities/deactivate-all",
+  AuthMiddleware.verifyToken,
+  async (req, res) =>
+    await availabilityController.deactivateAllAvailabilities(req, res)
+);
+
+// Activate all availabilities for user
+router.patch(
+  "/:id/availabilities/activate-all",
+  AuthMiddleware.verifyToken,
+  async (req, res) =>
+    await availabilityController.activateAllAvailabilities(req, res)
+);
+
 // Toggle topic status for user
 router.patch(
   "/:id/topics/:topicId/toggle-status",

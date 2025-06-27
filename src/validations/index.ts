@@ -32,7 +32,11 @@ export const teachingModesValidation = Joi.when("role", {
 
 export const passwordValidation = Joi.string()
   .min(6)
-  .pattern(new RegExp("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]+$")) // At least one letter & one number
+  .pattern(
+    new RegExp(
+      "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d@\\-_!#$%^&*()+={}\\[\\]:;\"'<>,.?/~`|\\\\]+$"
+    )
+  ) // At least one letter & one number, special characters allowed
   .required()
   .messages({
     "string.pattern.base":

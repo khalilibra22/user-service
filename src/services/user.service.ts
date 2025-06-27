@@ -2,13 +2,16 @@ import { UserModel } from "../models/user.model";
 import { AppDataSource } from "../config/database";
 import { PaymentMethodModel } from "../models/paymentMethod.model";
 import { UserRole } from "../enums/userRoles.enum";
+import { UserSettingModel } from "../models/userSetting.model";
 
 export class UserService {
   userRepo: any;
   payementMethodRepo: any;
+  userSettingRepo: any;
   constructor() {
     this.userRepo = AppDataSource.getRepository(UserModel);
     this.payementMethodRepo = AppDataSource.getRepository(PaymentMethodModel);
+    this.userSettingRepo = AppDataSource.getRepository(UserSettingModel);
   }
 
   async createUser(user: UserModel): Promise<UserModel> {
@@ -20,12 +23,23 @@ export class UserService {
     }
   }
 
+  async createUserSetting(
+    userSetting: UserSettingModel
+  ): Promise<UserSettingModel> {
+    try {
+      return await this.userSettingRepo.save(userSetting);
+    } catch (error) {
+      throw new Error("Error creating user setting");
+    }
+  }
+
   async getUserById(id: string): Promise<UserModel | undefined> {
     try {
       return await this.userRepo.findOne({
         where: {
           id: id,
         },
+        relations: ["settings"],
       });
     } catch (error) {
       throw new Error("Error fetching user");

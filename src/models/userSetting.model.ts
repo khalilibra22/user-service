@@ -13,16 +13,19 @@ import { UserModel } from "./user.model";
 @Entity("user_settings")
 export class UserSettingModel {
   @PrimaryGeneratedColumn()
-  id!: number;
+  id?: number;
 
   @Column({ name: "dark_mode", default: false })
-  darkMode!: boolean;
+  darkMode?: boolean;
+
+  @Column({ name: "notifications", default: true })
+  notifications?: boolean;
 
   @Column({ name: "email_notifications", default: true })
-  emailNotifications!: boolean;
+  emailNotifications?: boolean;
 
   @Column({ name: "is_accept_terms", default: false })
-  isAcceptTerms!: boolean;
+  isAcceptTerms?: boolean;
 
   @OneToOne(() => UserModel, (user) => user.settings, { onDelete: "CASCADE" })
   @JoinColumn({ name: "user_id" })

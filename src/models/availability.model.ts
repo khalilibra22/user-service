@@ -34,6 +34,9 @@ export class AvailabilityModel {
   @Column({ name: "is_free", type: "boolean", default: false })
   isFree?: boolean;
 
+  @Column({ name: "is_active", type: "boolean", default: true })
+  isActive?: boolean;
+
   @ManyToOne(() => UserModel, (user) => user.availabilities)
   //@JoinColumn({ name: "teacherId" })
   user?: UserModel;

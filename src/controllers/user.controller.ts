@@ -30,14 +30,6 @@ export class UserController {
         res.status(404).json({ error: "User not found" });
         return;
       }
-      const isPermitted = PermissionMiddleware.checkPermission(
-        user.role,
-        Permission.USER_CRUD
-      );
-      if (!isPermitted) {
-        res.status(403).json({ error: "Unauthorized" });
-        return;
-      }
       let userDto;
       if (user.role === UserRole.STUDENT || user.role === UserRole.ADMIN) {
         userDto = plainToInstance(MinimalUserDto, user, {
@@ -210,14 +202,6 @@ export class UserController {
       const user = await this.userService.getUserById(id);
       if (!user) {
         res.status(404).json({ error: "User not found" });
-        return;
-      }
-      const isPermitted = PermissionMiddleware.checkPermission(
-        user.role,
-        Permission.PAYMENT_METHOD_CRUD
-      );
-      if (!isPermitted) {
-        res.status(403).json({ error: "Unauthorized" });
         return;
       }
       const paymentMethodId = req.params.paymentMethodId;

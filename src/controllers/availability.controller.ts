@@ -258,4 +258,85 @@ export class AvailabilityController {
         .json({ error: "Failed to update availability exception" });
     }
   }
+
+  // Toggle availability isActive status
+  async toggleAvailabilityStatus(req: Request, res: Response): Promise<void> {
+    try {
+      const { id, availabilityId } = req.params;
+      const user = await this.userService.getUserById(id);
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      const availability = await this.availabilityService.getAvailabilityById(
+        availabilityId
+      );
+      if (!availability) {
+        res.status(404).json({ error: "Availability not found" });
+        return;
+      }
+      const updateData = { ...availability, isActive: !availability.isActive };
+      await this.availabilityService.updateAvailability(updateData);
+      res.status(200).json({
+        message: "Availability status toggled successfully",
+      });
+    } catch (error: any) {
+      if (error.message === "Error fetching user") {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      res.status(500).json({ error: "Failed to toggle availability status" });
+    }
+  }
+
+  // Toggle all availability isActive status
+  async deactivateAllAvailabilities(
+    req: Request,
+    res: Response
+  ): Promise<void> {
+    try {
+      const { id } = req.params;
+      const user = await this.userService.getUserById(id);
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+
+      await this.availabilityService.deactivateAllAvailabilities(id);
+      res.status(200).json({
+        message: "All availabilities deactivated successfully",
+      });
+    } catch (error: any) {
+      if (error.message === "Error fetching user") {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      res
+        .status(500)
+        .json({ error: "Failed to toggle all availability statuses" });
+    }
+  }
+
+  // Activate all availability status
+  async activateAllAvailabilities(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const user = await this.userService.getUserById(id);
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+
+      await this.availabilityService.activateAllAvailabilities(id);
+      res.status(200).json({
+        message: "All availabilities activated successfully",
+      });
+    } catch (error: any) {
+      if (error.message === "Error fetching user") {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      res.status(500).json({ error: "Failed to activate all availabilities" });
+    }
+  }
 }

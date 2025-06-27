@@ -117,6 +117,15 @@ export class UserModel {
   @Column({ nullable: true })
   website?: string;
 
+  @Column({ name: "dark_mode", default: false })
+  darkMode?: boolean;
+
+  @Column({ name: "notifications", default: true })
+  notifications?: boolean;
+
+  @Column({ name: "email_notifications", default: true })
+  emailNotifications?: boolean;
+
   @Column({ default: false, name: "is_approved" })
   isApproved?: boolean;
 
