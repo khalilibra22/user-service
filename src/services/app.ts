@@ -10,6 +10,7 @@ import { subscriptionRouter } from "../routes/subscription.routes";
 import session from "express-session";
 import passport from "passport";
 import "../config/passport";
+import { availabilityRouter } from "../routes/availability.routes";
 
 dotenv.config();
 
@@ -44,9 +45,10 @@ app.use("/auth", authRouter);
 app.use("/users", userRouter);
 app.use("/categories", categoriesRouter); // Assuming you have a route for academic background
 app.use("/subscriptions", subscriptionRouter); // Assuming you have a route for subscriptions
+app.use("/availabilities", availabilityRouter); // Assuming you have a route for availabilities
 
 app.get("/", (req: Request, res: Response) => {
-  res.send("Hello World!");
+  res.send("Running...");
 });
 
 app.listen(port, () => {
