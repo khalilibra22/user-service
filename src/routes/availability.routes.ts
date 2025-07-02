@@ -10,4 +10,12 @@ router.post("/check", async (req, res) =>
   availabilityController.checkAvailabilitiesByIds(req, res)
 );
 
+//updateAvailabilitiesToUnavailable
+router.patch(
+  "/bulk-unavailable",
+  //AuthMiddleware.verifyToken,
+  async (req, res) =>
+    availabilityController.updateAvailabilitiesToUnavailable(req, res)
+);
+
 export { router as availabilityRouter };
