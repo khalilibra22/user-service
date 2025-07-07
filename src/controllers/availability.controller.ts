@@ -4,6 +4,7 @@ import { AvailabilityDto } from "../dtos/availability.dto";
 import { plainToInstance } from "class-transformer";
 import { UserService } from "../services/user.service";
 import { AvailabilityExceptionDto } from "../dtos/availabilityException.dto";
+import { boolean } from "joi";
 
 export class AvailabilityController {
   private availabilityService: AvailabilityService;
@@ -337,6 +338,116 @@ export class AvailabilityController {
         return;
       }
       res.status(500).json({ error: "Failed to activate all availabilities" });
+    }
+  }
+
+  // Check availabilities by IDs
+  async checkAvailabilitiesByIds(req: Request, res: Response): Promise<void> {
+    try {
+      const { availabilityIds } = req.body;
+
+      if (!availabilityIds || !Array.isArray(availabilityIds)) {
+        res.status(400).json({ error: "Availability IDs array is required" });
+        return;
+      }
+
+      if (availabilityIds.length === 0) {
+        res
+          .status(400)
+          .json({ error: "Availability IDs array cannot be empty" });
+        return;
+      }
+
+      const availabilities = await Promise.all(
+        availabilityIds.map(async (availabilityId) => {
+          const availability =
+            await this.availabilityService.getAvailabilityById(availabilityId);
+          return availability;
+        })
+      );
+
+      // Filter out null/undefined availabilities
+      const validAvailabilities = availabilities.filter(
+        (availability) => availability !== null && availability !== undefined
+      );
+
+      if (validAvailabilities.length !== availabilityIds.length) {
+        res.status(404).json({
+          message: "Some availabilities not found",
+          found: validAvailabilities.length,
+          requested: availabilityIds.length,
+        });
+        return;
+      }
+
+      // Check if all availabilities are active
+      const inactiveAvailabilities = validAvailabilities.filter(
+        (availability) => !availability.isAvailable
+      );
+      if (inactiveAvailabilities.length > 0) {
+        res.status(400).json({
+          message: "Some availabilities are not available",
+          inactiveCount: inactiveAvailabilities.length,
+        });
+        return;
+      }
+
+      const availabilityDtos = plainToInstance(
+        AvailabilityDto,
+        validAvailabilities,
+        {
+          excludeExtraneousValues: true,
+        }
+      );
+
+      res.status(200).json(availabilityDtos);
+    } catch (error: any) {
+      console.error("Error checking availabilities:", error);
+      res.status(500).json({ error: "Failed to check availabilities" });
+    }
+  }
+
+  async updateAvailabilitiesToUnavailable(
+    req: Request,
+    res: Response
+  ): Promise<void> {
+    try {
+      const { availabilityIds } = req.body;
+
+      if (!availabilityIds || !Array.isArray(availabilityIds)) {
+        res.status(400).json({ error: "Availability IDs array is required" });
+        return;
+      }
+
+      if (availabilityIds.length === 0) {
+        res
+          .status(400)
+          .json({ error: "Availability IDs array cannot be empty" });
+        return;
+      }
+
+      const updatePromises = availabilityIds.map(async (availabilityId) => {
+        const availability = await this.availabilityService.getAvailabilityById(
+          availabilityId
+        );
+        if (availability) {
+          const updateData = { ...availability, isAvailable: false };
+          return await this.availabilityService.updateAvailability(updateData);
+        }
+        return null;
+      });
+
+      const results = await Promise.all(updatePromises);
+      const updatedCount = results.filter((result) => result !== null).length;
+
+      res.status(200).json({
+        message: "Availabilities updated successfully",
+        updatedCount,
+        requestedCount: availabilityIds.length,
+      });
+    } catch (error: any) {
+      //console.error("Error updating availabilities:", error);
+      res.status(500).json({ error: "Failed to update availabilities" });
     }
   }
 }
