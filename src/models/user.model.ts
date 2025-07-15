@@ -21,6 +21,7 @@ import { PlanModel } from "./plan.model";
 import { SubscriptionModel } from "./subscription.model";
 import { AvailabilityModel } from "./availability.model";
 import { AvailabilityExceptionModel } from "./availabilityException.model";
+import { CouponModel } from "./coupon.model";
 
 @Entity("users")
 export class UserModel {
@@ -151,6 +152,9 @@ export class UserModel {
     (academicBackground) => academicBackground.user
   )
   academicBackgrounds?: AcademicBackgroundModel[];
+
+  @OneToMany(() => CouponModel, (coupon) => coupon.user)
+  coupons?: CouponModel[];
 
   @OneToMany(() => AvailabilityModel, (availability) => availability.user)
   availabilities?: AvailabilityModel[];
