@@ -17,8 +17,8 @@ export class CouponModel {
   @Column({ unique: true })
   code?: string;
 
-  @Column()
-  description?: string;
+  @Column({ nullable: true })
+  name?: string;
 
   @Column({
     type: "enum",
@@ -28,7 +28,7 @@ export class CouponModel {
   type?: "percentage" | "amount";
 
   @Column("decimal", { precision: 5, scale: 2, nullable: true })
-  discountPercentage?: number;
+  discountValue?: number;
 
   @Column("decimal", { precision: 10, scale: 2, nullable: true })
   maxDiscountAmount?: number;

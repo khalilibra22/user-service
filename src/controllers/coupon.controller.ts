@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import { CouponService } from "../services/coupon.service";
 import { UserService } from "../services/user.service";
+import { CouponDto } from "../dtos/coupon.dto";
+import { plainToInstance } from "class-transformer";
 
 export class CouponController {
   private couponService: CouponService;
@@ -24,7 +26,10 @@ export class CouponController {
         user: user,
       };
       const coupon = await this.couponService.createCoupon(couponData);
-      res.status(201).json(coupon);
+      const couponDto = plainToInstance(CouponDto, coupon, {
+        excludeExtraneousValues: true,
+      });
+      res.status(201).json(couponDto);
     } catch (error) {
       res.status(500).json({ error: "Internal Server Error" });
     }
@@ -69,6 +74,11 @@ export class CouponController {
         res.status(400).json({ error: "Invalid coupon ID" });
         return;
       }
+      const coupon = await this.couponService.getCouponById(id);
+      if (!coupon) {
+        res.status(404).json({ error: "Coupon not found" });
+        return;
+      }
       await this.couponService.deleteCoupon(id);
       res.status(204).send();
     } catch (error) {
@@ -88,7 +98,10 @@ export class CouponController {
         res.status(404).json({ error: "Coupon not found" });
         return;
       }
-      res.status(200).json(coupon);
+      const couponDto = plainToInstance(CouponDto, coupon, {
+        excludeExtraneousValues: true,
+      });
+      res.status(200).json(couponDto);
     } catch (error) {
       res.status(500).json({ error: "Internal Server Error" });
     }
@@ -103,7 +116,10 @@ export class CouponController {
         return;
       }
       const coupons = await this.couponService.getUserCoupons(userId);
-      res.status(200).json(coupons);
+      const couponDtos = plainToInstance(CouponDto, coupons, {
+        excludeExtraneousValues: true,
+      });
+      res.status(200).json(couponDtos);
     } catch (error) {
       res.status(500).json({ error: "Internal Server Error" });
     }

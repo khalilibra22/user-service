@@ -24,6 +24,7 @@ import {
   availabilitySchema,
 } from "../validations/availability.validation";
 import { CouponController } from "../controllers/coupon.controller";
+import { couponValidationSchema } from "../validations/coupon.validation";
 
 const router = express.Router();
 
@@ -331,13 +332,17 @@ router.patch(
     await academicBackgroundController.toggleUserTopicStatus(req, res)
 );
 
-router.post("/:id/coupons", AuthMiddleware.verifyToken, async (req, res) =>
-  couponController.createCoupon(req, res)
+router.post(
+  "/:id/coupons",
+  AuthMiddleware.verifyToken,
+  ValidationMiddleware.validate(couponValidationSchema),
+  async (req, res) => couponController.createCoupon(req, res)
 );
 
 router.put(
   "/:id/coupons/:couponId",
   AuthMiddleware.verifyToken,
+  ValidationMiddleware.validate(couponValidationSchema),
   async (req, res) => couponController.updateCoupon(req, res)
 );
 
