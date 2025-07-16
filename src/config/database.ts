@@ -12,6 +12,7 @@ import { PlanModel } from "../models/plan.model";
 import { SubscriptionModel } from "../models/subscription.model";
 import { AvailabilityModel } from "../models/availability.model";
 import { AvailabilityExceptionModel } from "../models/availabilityException.model";
+import { CouponModel } from "../models/coupon.model";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -34,6 +35,7 @@ export const AppDataSource = new DataSource({
     SubscriptionModel,
     AvailabilityModel,
     AvailabilityExceptionModel,
+    CouponModel,
   ],
   synchronize: true,
 });
