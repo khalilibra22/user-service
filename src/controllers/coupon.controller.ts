@@ -30,8 +30,13 @@ export class CouponController {
         excludeExtraneousValues: true,
       });
       res.status(201).json(couponDto);
-    } catch (error) {
-      res.status(500).json({ error: "Internal Server Error" });
+    } catch (error: any) {
+      if (error?.message?.includes("Error creating coupon")) {
+        res.status(409).json({ error: "Coupon code already exists" });
+        return;
+      } else {
+        res.status(500).json({ error: "Internal Server Error" });
+      }
     }
   }
   async updateCoupon(req: Request, res: Response): Promise<void> {
@@ -62,7 +67,11 @@ export class CouponController {
       };
       await this.couponService.updateCoupon(updatedCouponData);
       res.status(200).json({ message: "Coupon updated successfully" });
-    } catch (error) {
+    } catch (error: any) {
+      if (error?.message?.includes("Error updating coupon")) {
+        res.status(409).json({ error: "Coupon code already exists" });
+        return;
+      }
       res.status(500).json({ error: "Internal Server Error" });
     }
   }

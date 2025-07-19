@@ -1,4 +1,4 @@
-import { Expose, Type } from "class-transformer";
+import { Expose, Transform, Type } from "class-transformer";
 
 export class CouponDto {
   @Expose()
@@ -27,4 +27,13 @@ export class CouponDto {
 
   @Expose()
   isActive?: boolean;
+
+  @Expose()
+  applicableResource?: string;
+
+  @Expose()
+  @Transform(({ value }) => {
+    return value === null ? undefined : value;
+  })
+  resourceIds?: string[];
 }

@@ -15,4 +15,16 @@ export const couponValidationSchema = Joi.object({
     })
     .required(),
   isActive: Joi.boolean().required(),
+  applicableResource: Joi.string()
+    .valid("group", "live", "prerecorded", "one-on-one", "all")
+    .required(),
+  resourceIds: Joi.array()
+    .items(Joi.string())
+    .min(1)
+    .when("applicableResource", {
+      is: "all",
+      then: Joi.forbidden(),
+      otherwise: Joi.required(),
+    })
+    .allow(null),
 });
