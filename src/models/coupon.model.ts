@@ -30,6 +30,16 @@ export class CouponModel {
   @Column("decimal", { precision: 5, scale: 2, nullable: true })
   discountValue?: number;
 
+  @Column({
+    type: "enum",
+    enum: ["group", "live", "prerecorded", "one-on-one", "all"],
+    default: "all",
+  })
+  applicableResource?: "group" | "live" | "prerecorded" | "one-on-one" | "all";
+
+  @Column("simple-array", { nullable: true })
+  resourceIds?: number[];
+
   @Column("decimal", { precision: 10, scale: 2, nullable: true })
   maxDiscountAmount?: number;
 
