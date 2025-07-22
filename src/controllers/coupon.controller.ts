@@ -21,6 +21,14 @@ export class CouponController {
         res.status(404).json({ error: "User not found" });
         return;
       }
+      const existingCoupon = await this.couponService.checkUserCoupon(
+        userId,
+        req.body.code
+      );
+      if (existingCoupon) {
+        res.status(409).json({ error: "Coupon code already exists" });
+        return;
+      }
       const couponData = {
         ...req.body,
         user: user,
@@ -58,6 +66,15 @@ export class CouponController {
       const coupon = await this.couponService.getCouponById(couponId);
       if (!coupon) {
         res.status(404).json({ error: "Coupon not found" });
+        return;
+      }
+
+      const existingCoupon = await this.couponService.checkUserCoupon(
+        userId,
+        req.body.code
+      );
+      if (existingCoupon && coupon?.code !== req.body.code) {
+        res.status(409).json({ error: "Coupon code already exists" });
         return;
       }
       const updatedCouponData = {
