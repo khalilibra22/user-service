@@ -67,4 +67,21 @@ export class CouponService {
       throw new Error("Error fetching user coupons");
     }
   }
+
+  async checkUserCoupon(userId: string, couponCode: number): Promise<boolean> {
+    try {
+      const coupon = await this.couponRepo.findOne({
+        where: {
+          code: couponCode,
+          user: {
+            id: userId,
+          },
+        },
+      });
+      return !!coupon;
+    } catch (error) {
+      console.error(error);
+      throw new Error("Error checking user coupon");
+    }
+  }
 }

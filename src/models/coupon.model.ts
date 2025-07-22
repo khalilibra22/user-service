@@ -14,7 +14,7 @@ export class CouponModel {
   @PrimaryGeneratedColumn()
   id?: number;
 
-  @Column({ unique: true })
+  @Column()
   code?: string;
 
   @Column({ nullable: true })
@@ -27,7 +27,7 @@ export class CouponModel {
   })
   type?: "percentage" | "amount";
 
-  @Column("decimal", { precision: 5, scale: 2, nullable: true })
+  @Column("decimal", { precision: 15, scale: 2, nullable: true })
   discountValue?: number;
 
   @Column({
