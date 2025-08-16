@@ -12,6 +12,7 @@ import passport from "passport";
 import "../config/passport";
 import { availabilityRouter } from "../routes/availability.routes";
 import { couponRouter } from "../routes/coupon.routes";
+import { searchRouter } from "../routes/search.routes";
 
 dotenv.config();
 
@@ -48,6 +49,8 @@ app.use("/categories", categoriesRouter); // Assuming you have a route for acade
 app.use("/subscriptions", subscriptionRouter); // Assuming you have a route for subscriptions
 app.use("/availabilities", availabilityRouter); // Assuming you have a route for availabilities
 app.use("/coupons", couponRouter); // Assuming you have a route for coupons
+
+app.use("/search", searchRouter);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Running...");
