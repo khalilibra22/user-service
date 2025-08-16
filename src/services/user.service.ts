@@ -3,6 +3,7 @@ import { AppDataSource } from "../config/database";
 import { PaymentMethodModel } from "../models/paymentMethod.model";
 import { UserRole } from "../enums/userRoles.enum";
 import { UserSettingModel } from "../models/userSetting.model";
+import { In } from "typeorm";
 
 export class UserService {
   userRepo: any;
@@ -220,6 +221,30 @@ export class UserService {
       });
     } catch (error) {
       throw new Error("Error fetching users");
+    }
+  }
+
+  async searchTeachersAndAcademies(
+    page: number,
+    limit: number
+  ): Promise<UserModel[]> {
+    try {
+      return await this.userRepo.find({
+        where: {
+          role: In([UserRole.TEACHER, UserRole.ACADEMY]),
+          topics: {
+            isActive: true,
+            topic: {
+              isActive: true,
+            },
+          },
+        },
+        relations: ["topics", "topics.topic"],
+        skip: (page - 1) * limit,
+        take: limit,
+      });
+    } catch (error) {
+      throw new Error("Error searching teachers and academies");
     }
   }
 }
