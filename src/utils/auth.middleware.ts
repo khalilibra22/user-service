@@ -4,6 +4,7 @@ import { Request, Response, NextFunction } from "express";
 import { UserModel } from "../models/user.model";
 import { UserRole } from "../enums/userRoles.enum";
 import { UserDto } from "../dtos/user.dto";
+import { permissions, Action, Resource } from "../config/permissions";
 
 class AuthMiddleware {
   private static saltRounds = 10;
@@ -69,6 +70,7 @@ class AuthMiddleware {
       }
 
       const decoded = await AuthMiddleware.decodeToken(token);
+      req.body.user = decoded;
       next();
     } catch (error) {
       res.status(401).json({ message: "Invalid or expired token" });
@@ -91,6 +93,31 @@ class AuthMiddleware {
         reject(error);
       }
     });
+  }
+
+  static authorize(resource: Resource, action: Action) {
+    return (req: Request, res: Response, next: NextFunction): void => {
+      try {
+        const user = req.body.user;
+        delete req.body.user;
+        // set by your token middleware
+        if (!user) {
+          res.status(401).json({ message: "Unauthorized" });
+          return;
+        }
+
+        const roleId = (user.roles ?? 4) as keyof typeof permissions;
+        const rolePermissions = permissions[roleId];
+
+        if (rolePermissions && rolePermissions[resource]?.includes(action)) {
+          next();
+          return;
+        }
+        res.status(403).json({ message: "Forbidden" });
+      } catch (error) {
+        res.status(500).json({ message: "Server error" });
+      }
+    };
   }
 }
 export { AuthMiddleware };

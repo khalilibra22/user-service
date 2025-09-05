@@ -1,13 +1,10 @@
 import { Request, Response } from "express";
 import { UserService } from "../services/user.service";
 import { UserDto } from "../dtos/user.dto";
-import { PermissionMiddleware } from "../utils/permission.middleware";
 import { Permission } from "../enums/permission.enum";
 import { getPermission } from "../utils";
 import { AcademicBackgroundService } from "../services/academicBackground.service";
-import { UserTopicModel } from "../models/userTopic.model";
 import { plainToInstance } from "class-transformer";
-import { UserTopicDto } from "../dtos/userTopic.dto";
 import { PaymentMethodDto } from "../dtos/paymentMethod.dto";
 import { UserRole } from "../enums/userRoles.enum";
 import { MinimalUserDto } from "../dtos/minimalUser.dto";
@@ -116,14 +113,7 @@ export class UserController {
         res.status(404).json({ error: "User not found" });
         return;
       }
-      const isPermitted = PermissionMiddleware.checkPermission(
-        user.role,
-        permission
-      );
-      if (!isPermitted) {
-        res.status(403).json({ error: "Unauthorized" });
-        return;
-      }
+
       res.status(200).json({ message: "Authorized" });
     } catch (error) {
       res.status(500).json({ error: "Internal Server Error" });
@@ -137,14 +127,6 @@ export class UserController {
       const user = await this.userService.getUserById(id);
       if (!user) {
         res.status(404).json({ error: "User not found" });
-        return;
-      }
-      const isPermitted = PermissionMiddleware.checkPermission(
-        user.role,
-        Permission.SUBSCRIPTION
-      );
-      if (!isPermitted) {
-        res.status(403).json({ error: "Unauthorized" });
         return;
       }
       const userPlan = await this.userService.getUserPlan(id);
@@ -239,14 +221,6 @@ export class UserController {
       const user = await this.userService.getUserById(id);
       if (!user) {
         res.status(404).json({ error: "User not found" });
-        return;
-      }
-      const isPermitted = PermissionMiddleware.checkPermission(
-        user.role,
-        Permission.PAYMENT_METHOD_CRUD
-      );
-      if (!isPermitted) {
-        res.status(403).json({ error: "Unauthorized" });
         return;
       }
       const paymentMethods = await this.userService.getPaymentMethodsByUserId(
@@ -402,14 +376,6 @@ export class UserController {
       const user = await this.userService.getUserById(id);
       if (!user) {
         res.status(404).json({ error: "User not found" });
-        return;
-      }
-      const isPermitted = PermissionMiddleware.checkPermission(
-        user.role,
-        Permission.USER_CRUD
-      );
-      if (!isPermitted) {
-        res.status(403).json({ error: "Unauthorized" });
         return;
       }
       user.phoneNumber = req.body.phoneNumber;

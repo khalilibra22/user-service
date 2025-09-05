@@ -335,6 +335,7 @@ router.patch(
 router.post(
   "/:id/coupons",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.authorize("coupons", "create"),
   ValidationMiddleware.validate(couponValidationSchema),
   async (req, res) => couponController.createCoupon(req, res)
 );
