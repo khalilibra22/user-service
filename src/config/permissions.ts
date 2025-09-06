@@ -58,7 +58,7 @@ export const permissions: Record<UserRole, Record<Resource, Action[]>> = {
   },
   [UserRole.ACADEMY]: {
     availabilities: [],
-    coupons: ["create", "read", "update", "delete", "activate", "deactivate"],
+    coupons: [],
     academic_backgrounds: [],
     users: ["create", "read", "update", "delete", "invite"],
     payment_methods: [],

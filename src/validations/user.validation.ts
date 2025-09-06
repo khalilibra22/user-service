@@ -12,48 +12,48 @@ export const userValidationSchema = Joi.object({
   phoneNumber: phoneNumberValidation,
   password: passwordValidation,
   role: Joi.number()
-    .valid(...Object.values(UserRole))
+    .valid(UserRole.TEACHER, UserRole.STUDENT, UserRole.ACADEMY)
     .required(),
 
   // Fields forbidden for Admins (0) and Students (2)
   state: Joi.when("role", {
-    is: Joi.valid(UserRole.SUPERVISOR, UserRole.STUDENT),
+    is: Joi.valid(UserRole.STUDENT),
     then: Joi.forbidden(),
     otherwise: Joi.string().required(),
   }),
   district: Joi.when("role", {
-    is: Joi.valid(UserRole.SUPERVISOR, UserRole.STUDENT),
+    is: Joi.valid(UserRole.STUDENT),
     then: Joi.forbidden(),
     otherwise: Joi.string().required(),
   }),
   city: Joi.when("role", {
-    is: Joi.valid(UserRole.SUPERVISOR, UserRole.STUDENT),
+    is: Joi.valid(UserRole.STUDENT),
     then: Joi.forbidden(),
     otherwise: Joi.string().required(),
   }),
   zipcode: Joi.when("role", {
-    is: Joi.valid(UserRole.SUPERVISOR, UserRole.STUDENT),
+    is: Joi.valid(UserRole.STUDENT),
     then: Joi.forbidden(),
     otherwise: Joi.string().required(),
   }),
   address: Joi.when("role", {
-    is: Joi.valid(UserRole.SUPERVISOR, UserRole.STUDENT),
+    is: Joi.valid(UserRole.STUDENT),
     then: Joi.forbidden(),
     otherwise: Joi.string().required(),
   }),
   teachingModes: teachingModesValidation,
   bio: Joi.when("role", {
-    is: Joi.valid(UserRole.SUPERVISOR, UserRole.STUDENT),
+    is: Joi.valid(UserRole.STUDENT),
     then: Joi.forbidden(),
     otherwise: Joi.string().required(),
   }),
   profilePicture: Joi.when("role", {
-    is: Joi.valid(UserRole.SUPERVISOR, UserRole.STUDENT),
+    is: Joi.valid(UserRole.STUDENT),
     then: Joi.forbidden(),
     otherwise: Joi.object().optional(),
   }),
   certificate: Joi.when("role", {
-    is: Joi.valid(UserRole.SUPERVISOR, UserRole.STUDENT),
+    is: Joi.valid(UserRole.STUDENT),
     then: Joi.forbidden(),
     otherwise: Joi.object().optional(),
   }),
@@ -63,60 +63,60 @@ export const updateUserValidationSchema = Joi.object({
   fullname: Joi.string().required(),
   phoneNumber: phoneNumberValidation,
   role: Joi.number()
-    .valid(...Object.values(UserRole))
+    .valid(UserRole.TEACHER, UserRole.STUDENT, UserRole.ACADEMY)
     .required(),
   state: Joi.when("role", {
-    is: Joi.valid(UserRole.SUPERVISOR, UserRole.STUDENT),
+    is: Joi.valid(UserRole.STUDENT),
     then: Joi.forbidden(),
     otherwise: Joi.string().required(),
   }),
   district: Joi.when("role", {
-    is: Joi.valid(UserRole.SUPERVISOR, UserRole.STUDENT),
+    is: Joi.valid(UserRole.STUDENT),
     then: Joi.forbidden(),
     otherwise: Joi.string().required(),
   }),
   city: Joi.when("role", {
-    is: Joi.valid(UserRole.SUPERVISOR, UserRole.STUDENT),
+    is: Joi.valid(UserRole.STUDENT),
     then: Joi.forbidden(),
     otherwise: Joi.string().required(),
   }),
   zipcode: Joi.when("role", {
-    is: Joi.valid(UserRole.SUPERVISOR, UserRole.STUDENT),
+    is: Joi.valid(UserRole.STUDENT),
     then: Joi.forbidden(),
     otherwise: Joi.string().required(),
   }),
   address: Joi.when("role", {
-    is: Joi.valid(UserRole.SUPERVISOR, UserRole.STUDENT),
+    is: Joi.valid(UserRole.STUDENT),
     then: Joi.forbidden(),
     otherwise: Joi.string().required(),
   }),
   address2: Joi.when("role", {
-    is: Joi.valid(UserRole.SUPERVISOR, UserRole.STUDENT),
+    is: Joi.valid(UserRole.STUDENT),
     then: Joi.forbidden(),
     otherwise: Joi.string().optional(),
   }),
   timeSlot: Joi.when("role", {
-    is: Joi.valid(UserRole.SUPERVISOR, UserRole.STUDENT),
+    is: Joi.valid(UserRole.STUDENT),
     then: Joi.forbidden(),
     otherwise: Joi.number().required(),
   }),
   pushNotifications: Joi.when("role", {
-    is: Joi.valid(UserRole.SUPERVISOR, UserRole.STUDENT),
+    is: Joi.valid(UserRole.STUDENT),
     then: Joi.forbidden(),
     otherwise: Joi.boolean().required(),
   }),
   gender: Joi.when("role", {
-    is: Joi.valid(UserRole.SUPERVISOR, UserRole.STUDENT, UserRole.ACADEMY),
+    is: Joi.valid(UserRole.STUDENT, UserRole.ACADEMY),
     then: Joi.forbidden(),
     otherwise: Joi.string().required(),
   }),
   language: Joi.when("role", {
-    is: Joi.valid(UserRole.SUPERVISOR, UserRole.STUDENT),
+    is: Joi.valid(UserRole.STUDENT),
     then: Joi.forbidden(),
     otherwise: Joi.string().optional(),
   }),
   bio: Joi.when("role", {
-    is: Joi.valid(UserRole.SUPERVISOR, UserRole.STUDENT),
+    is: Joi.valid(UserRole.STUDENT),
     then: Joi.forbidden(),
     otherwise: Joi.string().required(),
   }),
@@ -187,41 +187,41 @@ export const createUserValidationSchema = Joi.object({
   isActive: Joi.boolean().required(),
   isApproved: Joi.boolean().required(),
   role: Joi.number()
-    .valid(...Object.values(UserRole))
+    .valid(UserRole.TEACHER, UserRole.STUDENT, UserRole.ACADEMY)
     .required(),
   state: Joi.when("role", {
-    is: Joi.valid(UserRole.SUPERVISOR, UserRole.STUDENT),
+    is: Joi.valid(UserRole.STUDENT),
     then: Joi.forbidden(),
     otherwise: Joi.string().required(),
   }),
   city: Joi.when("role", {
-    is: Joi.valid(UserRole.SUPERVISOR, UserRole.STUDENT),
+    is: Joi.valid(UserRole.STUDENT),
     then: Joi.forbidden(),
     otherwise: Joi.string().required(),
   }),
   zipcode: Joi.when("role", {
-    is: Joi.valid(UserRole.SUPERVISOR, UserRole.STUDENT),
+    is: Joi.valid(UserRole.STUDENT),
     then: Joi.forbidden(),
     otherwise: Joi.string().required(),
   }),
   address2: Joi.when("role", {
-    is: Joi.valid(UserRole.SUPERVISOR, UserRole.STUDENT),
+    is: Joi.valid(UserRole.STUDENT),
     then: Joi.forbidden(),
     otherwise: Joi.string().optional(),
   }),
   teachingModes: teachingModesValidation,
   bio: Joi.when("role", {
-    is: Joi.valid(UserRole.SUPERVISOR, UserRole.STUDENT),
+    is: Joi.valid(UserRole.STUDENT),
     then: Joi.forbidden(),
     otherwise: Joi.string().required(),
   }),
   gender: Joi.when("role", {
-    is: Joi.valid(UserRole.SUPERVISOR, UserRole.STUDENT),
+    is: Joi.valid(UserRole.STUDENT),
     then: Joi.forbidden(),
     otherwise: Joi.string().required(),
   }),
   language: Joi.when("role", {
-    is: Joi.valid(UserRole.SUPERVISOR, UserRole.STUDENT),
+    is: Joi.valid(UserRole.STUDENT),
     then: Joi.forbidden(),
     otherwise: Joi.string().optional(),
   }),

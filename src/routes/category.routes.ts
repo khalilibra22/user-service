@@ -25,7 +25,7 @@ router.get(
 );
 
 router.post(
-  "/:id/subjects",
+  "/:categoryId/subjects",
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("catalogs", "create"),
   ValidationMiddleware.validate(taxonomyValidationSchema),
@@ -33,7 +33,7 @@ router.post(
 );
 
 router.post(
-  "/:id/subjects/:subjectId/topics",
+  "/:categoryId/subjects/:subjectId/topics",
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("catalogs", "create"),
   ValidationMiddleware.validate(taxonomyValidationSchema),
@@ -41,14 +41,14 @@ router.post(
 );
 
 router.delete(
-  "/:id/subjects/:subjectId/topics/:topicId",
+  "/:categoryId/subjects/:subjectId/topics/:topicId",
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("catalogs", "delete"),
   async (req, res) => await academicBackgroundController.deleteTopic(req, res)
 );
 
 router.put(
-  "/:id/subjects/:subjectId/topics/:topicId",
+  "/:categoryId/subjects/:subjectId/topics/:topicId",
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("catalogs", "update"),
   ValidationMiddleware.validate(taxonomyValidationSchema),
@@ -56,7 +56,7 @@ router.put(
 );
 
 router.patch(
-  "/:id/subjects/:subjectId/topics/:topicId/toggle-status",
+  "/:categoryId/subjects/:subjectId/topics/:topicId/toggle-status",
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("catalogs", "update"),
   async (req, res) =>

@@ -62,7 +62,7 @@ export class AcademicBackgroundController {
   async createSubject(req: Request, res: Response): Promise<void> {
     try {
       const subject = req.body;
-      const categoryId = req.params.id;
+      const categoryId = req.params.categoryId;
       const category = await this.academicBackgroundService.getCategoryById(
         categoryId
       );
@@ -86,7 +86,7 @@ export class AcademicBackgroundController {
   async createTopic(req: Request, res: Response): Promise<void> {
     try {
       const topic = req.body;
-      const categoryId = req.params.id;
+      const categoryId = req.params.categoryId;
       const subjectId = req.params.subjectId;
       const category = await this.academicBackgroundService.getCategoryById(
         categoryId

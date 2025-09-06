@@ -101,6 +101,11 @@ class AuthMiddleware {
       try {
         const user = req.body.user;
         delete req.body.user;
+
+        if (req.params.id && req.params.id !== user.id) {
+          res.status(401).json({ message: "Unauthorized" });
+          return;
+        }
         // set by your token middleware
         if (!user) {
           res.status(401).json({ message: "Unauthorized" });
@@ -110,7 +115,6 @@ class AuthMiddleware {
         const roleId = (user.roles ??
           UserRole.GUEST) as keyof typeof permissions;
         const rolePermissions = permissions[roleId];
-
         if (rolePermissions && rolePermissions[resource]?.includes(action)) {
           next();
           return;
