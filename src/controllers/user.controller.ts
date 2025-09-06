@@ -1,9 +1,6 @@
 import { Request, Response } from "express";
 import { UserService } from "../services/user.service";
 import { UserDto } from "../dtos/user.dto";
-import { Permission } from "../enums/permission.enum";
-import { getPermission } from "../utils";
-import { AcademicBackgroundService } from "../services/academicBackground.service";
 import { plainToInstance } from "class-transformer";
 import { PaymentMethodDto } from "../dtos/paymentMethod.dto";
 import { UserRole } from "../enums/userRoles.enum";
@@ -13,10 +10,8 @@ import { UserContactInfoDto } from "../dtos/userContactInfo.dto";
 
 export class UserController {
   private userService: UserService;
-  private academicBackgroundService: AcademicBackgroundService;
   constructor() {
     this.userService = new UserService();
-    this.academicBackgroundService = new AcademicBackgroundService();
   }
 
   async getUserById(req: Request, res: Response): Promise<void> {
@@ -28,7 +23,7 @@ export class UserController {
         return;
       }
       let userDto;
-      if (user.role === UserRole.STUDENT || user.role === UserRole.ADMIN) {
+      if (user.role === UserRole.STUDENT || user.role === UserRole.SUPERVISOR) {
         userDto = plainToInstance(MinimalUserDto, user, {
           excludeExtraneousValues: true,
         });
@@ -95,27 +90,6 @@ export class UserController {
         res.status(404).json({ error: "User not found" });
         return;
       }
-      res.status(500).json({ error: "Internal Server Error" });
-    }
-  }
-
-  async checkPermissions(req: Request, res: Response): Promise<void> {
-    try {
-      const id = req.params.id;
-      const permissionParam = Number(req.body.permission);
-      const permission = getPermission(permissionParam);
-      if (!permission) {
-        res.status(400).json({ error: "Permission is required" });
-        return;
-      }
-      const user = await this.userService.getUserById(id);
-      if (!user) {
-        res.status(404).json({ error: "User not found" });
-        return;
-      }
-
-      res.status(200).json({ message: "Authorized" });
-    } catch (error) {
       res.status(500).json({ error: "Internal Server Error" });
     }
   }
@@ -337,7 +311,7 @@ export class UserController {
       const admins = await this.userService.getAllUsers(
         page,
         limit,
-        UserRole.ADMIN
+        UserRole.SUPERVISOR
       );
       const adminDtos = plainToInstance(MinimalUserDto, admins, {
         excludeExtraneousValues: true,

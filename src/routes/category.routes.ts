@@ -11,6 +11,7 @@ const academicBackgroundController = new AcademicBackgroundController();
 router.post(
   "/",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.authorize("catalogs", "create"),
   ValidationMiddleware.validate(taxonomyValidationSchema),
   async (req, res) =>
     await academicBackgroundController.createCategory(req, res)
@@ -19,12 +20,14 @@ router.post(
 router.get(
   "/",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.authorize("catalogs", "list"),
   async (req, res) => await academicBackgroundController.getCategories(req, res)
 );
 
 router.post(
   "/:id/subjects",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.authorize("catalogs", "create"),
   ValidationMiddleware.validate(taxonomyValidationSchema),
   async (req, res) => await academicBackgroundController.createSubject(req, res)
 );
@@ -32,6 +35,7 @@ router.post(
 router.post(
   "/:id/subjects/:subjectId/topics",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.authorize("catalogs", "create"),
   ValidationMiddleware.validate(taxonomyValidationSchema),
   async (req, res) => await academicBackgroundController.createTopic(req, res)
 );
@@ -39,12 +43,14 @@ router.post(
 router.delete(
   "/:id/subjects/:subjectId/topics/:topicId",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.authorize("catalogs", "delete"),
   async (req, res) => await academicBackgroundController.deleteTopic(req, res)
 );
 
 router.put(
   "/:id/subjects/:subjectId/topics/:topicId",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.authorize("catalogs", "update"),
   ValidationMiddleware.validate(taxonomyValidationSchema),
   async (req, res) => await academicBackgroundController.updateTopic(req, res)
 );
@@ -52,6 +58,7 @@ router.put(
 router.patch(
   "/:id/subjects/:subjectId/topics/:topicId/toggle-status",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.authorize("catalogs", "update"),
   async (req, res) =>
     await academicBackgroundController.toggleTopicStatus(req, res)
 );

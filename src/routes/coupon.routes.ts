@@ -6,13 +6,17 @@ const router = express.Router();
 
 const couponController = new CouponController();
 
-router.get("/:id", AuthMiddleware.verifyToken, async (req, res) =>
-  couponController.getCouponById(req, res)
+router.get(
+  "/:id",
+  AuthMiddleware.verifyToken,
+  AuthMiddleware.authorize("coupons", "read"),
+  async (req, res) => couponController.getCouponById(req, res)
 );
 
 router.patch(
   "/:id/toggle-status",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.authorize("coupons", "toggle"),
   async (req, res) => couponController.toggleCouponStatus(req, res)
 );
 

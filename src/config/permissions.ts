@@ -1,41 +1,106 @@
-// permissions.ts
-export type Action = "create" | "read" | "update" | "delete";
-export type Resource =
-  | "availabilities"
-  | "coupons"
-  | "users"
-  | "academic_backgrounds"; // example
+import { UserRole } from "../enums/userRoles.enum";
+import { Action, Resource } from "../utils/permissionTypes";
 
-// Define roles and what they can do
-export const permissions: Record<string, Record<Resource, Action[]>> = {
-  0: {
-    availabilities: ["create", "read", "update", "delete"],
-    coupons: ["create", "read", "update", "delete"],
+export const permissions: Record<UserRole, Record<Resource, Action[]>> = {
+  [UserRole.SUPERVISOR]: {
+    availabilities: ["create", "read", "update", "delete", "toggle", "list"],
+    coupons: ["create", "read", "update", "delete", "toggle", "list"],
+    users: ["create", "read", "update", "delete", "list", "invite", "overview"],
+    academic_backgrounds: ["create", "read", "update", "delete", "list"],
+    payment_methods: ["create", "read", "update", "delete", "list"],
+    subscriptions: [
+      "create",
+      "read",
+      "update",
+      "delete",
+      "subscribe",
+      "cancel",
+      "view",
+    ],
+    catalogs: [
+      "create",
+      "read",
+      "update",
+      "delete",
+      "pick",
+      "toggle",
+      "adjust",
+      "drop",
+      "view",
+      "list",
+    ],
+  },
+  [UserRole.TEACHER]: {
+    availabilities: ["create", "read", "update", "delete", "toggle", "list"],
+    coupons: ["create", "read", "update", "delete", "toggle", "list"],
+    academic_backgrounds: ["create", "read", "update", "delete", "list"],
     users: ["create", "read", "update", "delete"],
-    academic_backgrounds: ["create", "read", "update", "delete"],
+    payment_methods: [
+      "create",
+      "read",
+      "update",
+      "delete",
+      "activate",
+      "deactivate",
+      "list",
+    ],
+    subscriptions: ["subscribe", "cancel", "view"],
+    catalogs: ["pick", "toggle", "adjust", "drop", "view", "list"],
   },
-  1: {
-    availabilities: ["create", "read", "update", "delete"],
-    coupons: ["create", "read", "update", "delete"],
-    academic_backgrounds: ["create", "read", "update", "delete"],
-    users: [],
-  },
-  2: {
+  [UserRole.STUDENT]: {
     availabilities: ["read"],
-    coupons: ["read"],
+    coupons: ["read", "use"],
     academic_backgrounds: ["read"],
-    users: [],
+    users: ["create", "read", "update", "delete"],
+    payment_methods: [],
+    subscriptions: [],
+    catalogs: [],
   },
-  3: {
-    availabilities: ["create", "read", "update", "delete"],
-    coupons: ["create", "read", "update", "delete"],
+  [UserRole.ACADEMY]: {
+    availabilities: [],
+    coupons: ["create", "read", "update", "delete", "activate", "deactivate"],
     academic_backgrounds: [],
-    users: [],
+    users: ["create", "read", "update", "delete", "invite"],
+    payment_methods: [],
+    subscriptions: ["subscribe", "cancel", "view"],
+    catalogs: ["pick", "toggle", "list"],
   },
-  4: {
+  [UserRole.ADMIN]: {
+    availabilities: ["create", "read", "update", "delete", "toggle", "list"],
+    coupons: ["create", "read", "update", "delete", "toggle", "list"],
+    academic_backgrounds: ["create", "read", "update", "delete", "list"],
+    users: ["create", "read", "update", "delete", "list", "invite"],
+    payment_methods: ["create", "read", "update", "delete", "list"],
+    subscriptions: ["subscribe", "cancel", "view"],
+    catalogs: [
+      "create",
+      "read",
+      "update",
+      "delete",
+      "pick",
+      "toggle",
+      "adjust",
+      "drop",
+      "view",
+      "list",
+    ],
+  },
+  [UserRole.ACADEMY_TEACHER]: {
     availabilities: [],
     coupons: [],
     academic_backgrounds: [],
     users: [],
+    payment_methods: [],
+    subscriptions: [],
+    catalogs: [],
+  },
+  [UserRole.GUEST]: {
+    availabilities: [],
+    coupons: [],
+    academic_backgrounds: [],
+    users: [],
+    payment_methods: [],
+    subscriptions: [],
+    catalogs: [],
   },
 };

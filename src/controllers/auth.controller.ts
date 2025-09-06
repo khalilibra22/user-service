@@ -38,7 +38,7 @@ export class AuthController {
       let userDto;
       if (
         createdUser.role === UserRole.STUDENT ||
-        createdUser.role === UserRole.ADMIN
+        createdUser.role === UserRole.SUPERVISOR
       ) {
         userDto = plainToInstance(MinimalUserDto, createdUser, {
           excludeExtraneousValues: true,

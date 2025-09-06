@@ -14,6 +14,7 @@ const subscriptionController = new SubscriptionController();
 router.post(
   "/plans",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.authorize("subscriptions", "create"),
   ValidationMiddleware.validate(planSValdationSchema),
   async (req, res) => await subscriptionController.createPlan(req, res)
 );
@@ -24,6 +25,7 @@ router.post(
 router.post(
   "/:planId",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.authorize("subscriptions", "subscribe"),
   ValidationMiddleware.validate(userSubscriptionValidationSchema),
   async (req, res) => await subscriptionController.createSubscription(req, res)
 );
@@ -31,12 +33,14 @@ router.post(
 router.get(
   "/plans",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.authorize("subscriptions", "view"),
   async (req, res) => await subscriptionController.getPlans(req, res)
 );
 
 router.get(
   "/active",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.authorize("catalogs", "list"),
   async (req, res) =>
     await subscriptionController.getActiveSubscriptions(req, res)
 );

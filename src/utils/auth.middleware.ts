@@ -4,7 +4,8 @@ import { Request, Response, NextFunction } from "express";
 import { UserModel } from "../models/user.model";
 import { UserRole } from "../enums/userRoles.enum";
 import { UserDto } from "../dtos/user.dto";
-import { permissions, Action, Resource } from "../config/permissions";
+import { permissions } from "../config/permissions";
+import { Action, Resource } from "./permissionTypes";
 
 class AuthMiddleware {
   private static saltRounds = 10;
@@ -106,7 +107,8 @@ class AuthMiddleware {
           return;
         }
 
-        const roleId = (user.roles ?? 4) as keyof typeof permissions;
+        const roleId = (user.roles ??
+          UserRole.GUEST) as keyof typeof permissions;
         const rolePermissions = permissions[roleId];
 
         if (rolePermissions && rolePermissions[resource]?.includes(action)) {
