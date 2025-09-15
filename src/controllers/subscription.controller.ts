@@ -1,7 +1,5 @@
 import { Request, Response } from "express";
 import { UserService } from "../services/user.service";
-import { PermissionMiddleware } from "../utils/permission.middleware";
-import { Permission } from "../enums/permission.enum";
 import { SubscriptionService } from "../services/subscription.service";
 import { getDurationInMonths } from "../utils";
 import { plainToInstance } from "class-transformer";
@@ -34,14 +32,6 @@ export class SubscriptionController {
       const user = await this.userService.getUserById(userId);
       if (!user) {
         res.status(404).json({ error: "User not found" });
-        return;
-      }
-      const isPermitted = PermissionMiddleware.checkPermission(
-        user.role,
-        Permission.SUBSCRIPTION
-      );
-      if (!isPermitted) {
-        res.status(403).json({ error: "Unauthorized" });
         return;
       }
       const planId = req.params.planId;

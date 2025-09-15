@@ -114,7 +114,7 @@ export class CouponController {
 
   async getCouponById(req: Request, res: Response): Promise<void> {
     try {
-      const id = Number(req.params.id);
+      const id = Number(req.params.couponId);
       if (isNaN(id)) {
         res.status(400).json({ error: "Invalid coupon ID" });
         return;
@@ -153,7 +153,7 @@ export class CouponController {
 
   async toggleCouponStatus(req: Request, res: Response): Promise<void> {
     try {
-      const id = Number(req.params.id);
+      const id = Number(req.params.couponId);
       if (isNaN(id)) {
         res.status(400).json({ error: "Invalid coupon ID" });
         return;

@@ -3,7 +3,7 @@ import { TeachingMode } from "../enums/teachingModes.enum";
 import { UserRole } from "../enums/userRoles.enum";
 
 export const teachingModesValidation = Joi.when("role", {
-  is: Joi.valid(UserRole.ADMIN, UserRole.STUDENT),
+  is: Joi.valid(UserRole.SUPERVISOR, UserRole.STUDENT),
   then: Joi.forbidden(),
   otherwise: Joi.array()
     .items(Joi.number().valid(...Object.values(TeachingMode))) // Teaching modes must be valid numbers
