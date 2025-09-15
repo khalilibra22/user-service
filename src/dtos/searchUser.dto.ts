@@ -52,4 +52,12 @@ export class SearchUserDto {
   @Expose()
   @Type(() => UserTopicDto)
   topics?: UserTopicDto[];
+
+  // feild for is available or not
+  @Expose()
+  @Transform(({ obj }) => {
+    if (!obj.availabilities) return undefined;
+    return obj.availabilities?.some((a: any) => a.isAvailable);
+  })
+  isAvailable?: boolean;
 }

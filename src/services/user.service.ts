@@ -239,7 +239,7 @@ export class UserService {
             },
           },
         },
-        relations: ["topics", "topics.topic"],
+        relations: ["topics", "topics.topic", "availabilities"],
         skip: (page - 1) * limit,
         take: limit,
       });
