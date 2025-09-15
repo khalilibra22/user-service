@@ -392,4 +392,9 @@ router.get(
   async (req, res) => couponController.getUserCoupons(req, res)
 );
 
+router.get(
+  "/:id/minimal",
+  async (req, res) => await userController.getUserMinimalInfo(req, res)
+);
+
 export { router as userRouter };

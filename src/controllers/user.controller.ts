@@ -479,4 +479,25 @@ export class UserController {
       res.status(500).json({ error: "Internal Server Error" });
     }
   }
+
+  async getUserMinimalInfo(req: Request, res: Response): Promise<void> {
+    try {
+      const id = req.params.id;
+      const user = await this.userService.getUserById(id);
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      const userDto = plainToInstance(MinimalUserDto, user, {
+        excludeExtraneousValues: true,
+      });
+      res.status(200).json(userDto);
+    } catch (error: any) {
+      if (error.message === "Error fetching user") {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
 }
