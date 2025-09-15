@@ -103,12 +103,12 @@ class AuthMiddleware {
         delete req.body.user;
 
         if (req.params.id && req.params.id !== user.id) {
-          res.status(401).json({ message: "Unauthorized" });
+          res.status(403).json({ message: "Forbidden" });
           return;
         }
         // set by your token middleware
         if (!user) {
-          res.status(401).json({ message: "Unauthorized" });
+          res.status(403).json({ message: "Forbidden" });
           return;
         }
 
