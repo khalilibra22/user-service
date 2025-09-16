@@ -104,3 +104,51 @@ export const permissions: Record<UserRole, Record<Resource, Action[]>> = {
     catalogs: [],
   },
 };
+
+export const privileges: Record<string, Record<Resource, Action[]>> = {
+  ["POST"]: {
+    availabilities: [],
+    coupons: [],
+    academic_backgrounds: [],
+    users: [],
+    payment_methods: [],
+    subscriptions: [],
+    catalogs: [],
+  },
+  ["GET"]: {
+    availabilities: ["list"],
+    coupons: [],
+    academic_backgrounds: [],
+    users: [],
+    payment_methods: [],
+    subscriptions: [],
+    catalogs: [],
+  },
+  ["PATCH"]: {
+    availabilities: [],
+    coupons: [],
+    academic_backgrounds: [],
+    users: [],
+    payment_methods: [],
+    subscriptions: [],
+    catalogs: [],
+  },
+  ["DELETE"]: {
+    availabilities: [],
+    coupons: [],
+    academic_backgrounds: [],
+    users: [],
+    payment_methods: [],
+    subscriptions: [],
+    catalogs: [],
+  },
+  ["PUT"]: {
+    availabilities: [],
+    coupons: [],
+    academic_backgrounds: [],
+    users: [],
+    payment_methods: [],
+    subscriptions: [],
+    catalogs: [],
+  },
+};
