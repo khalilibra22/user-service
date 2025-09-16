@@ -101,7 +101,7 @@ class AuthMiddleware {
       try {
         const user = req.body.user;
         delete req.body.user;
-        const hasAccess = AuthMiddleware.grantAccess(
+        const hasAccess = AuthMiddleware.checkMethodPrivileges(
           req.method,
           resource,
           action
@@ -134,7 +134,7 @@ class AuthMiddleware {
     };
   }
 
-  private static grantAccess(
+  private static checkMethodPrivileges(
     method: string,
     resource: Resource,
     action: Action
