@@ -6,11 +6,18 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  Index,
 } from "typeorm";
 import { PlanModel } from "./plan.model";
 import { UserModel } from "./user.model";
 
 @Entity("subscriptions")
+@Index("IDX_subscriptions_status", ["status"])
+@Index("IDX_subscriptions_start_date", ["startDate"])
+@Index("IDX_subscriptions_end_date", ["endDate"])
+@Index("IDX_subscriptions_created_at", ["createdAt"])
+@Index("IDX_subscriptions_status_end_date", ["status", "endDate"])
+@Index("IDX_subscriptions_user_status", ["user", "status"])
 export class SubscriptionModel {
   @PrimaryGeneratedColumn()
   id?: number;

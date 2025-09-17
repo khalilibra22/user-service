@@ -10,6 +10,7 @@ import {
   ManyToMany,
   JoinTable,
   ManyToOne,
+  Index,
 } from "typeorm";
 import { UserRole } from "../enums/userRoles.enum";
 import { TeachingMode } from "../enums/teachingModes.enum";
@@ -24,6 +25,15 @@ import { AvailabilityExceptionModel } from "./availabilityException.model";
 import { CouponModel } from "./coupon.model";
 
 @Entity("users")
+@Index("IDX_users_role", ["role"])
+@Index("IDX_users_email", ["email"])
+@Index("IDX_users_google_id", ["googleId"])
+@Index("IDX_users_is_active", ["isActive"])
+@Index("IDX_users_is_approved", ["isApproved"])
+@Index("IDX_users_created_at", ["createdAt"])
+@Index("IDX_users_role_active", ["role", "isActive"])
+@Index("IDX_users_role_approved", ["role", "isApproved"])
+@Index("IDX_users_location", ["state", "city", "district"])
 export class UserModel {
   @PrimaryGeneratedColumn("uuid")
   id?: string;

@@ -6,10 +6,20 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
   ManyToOne,
+  Index,
 } from "typeorm";
 import { UserModel } from "./user.model";
 
 @Entity("coupons")
+@Index("IDX_coupons_code", ["code"])
+@Index("IDX_coupons_user_id", ["user"])
+@Index("IDX_coupons_type", ["type"])
+@Index("IDX_coupons_is_active", ["isActive"])
+@Index("IDX_coupons_start_date", ["startDate"])
+@Index("IDX_coupons_expiry_date", ["expiryDate"])
+@Index("IDX_coupons_code_active", ["code", "isActive"])
+@Index("IDX_coupons_user_active", ["user", "isActive"])
+@Index("IDX_coupons_dates_active", ["startDate", "expiryDate", "isActive"])
 export class CouponModel {
   @PrimaryGeneratedColumn()
   id?: number;

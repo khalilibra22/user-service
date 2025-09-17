@@ -6,10 +6,15 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  Index,
 } from "typeorm";
 import { UserModel } from "./user.model";
 
 @Entity("payment_methods")
+@Index("IDX_payment_methods_user_id", ["user"])
+@Index("IDX_payment_methods_type", ["type"])
+@Index("IDX_payment_methods_is_actived", ["isActived"])
+@Index("IDX_payment_methods_user_type", ["user", "type"])
 export class PaymentMethodModel {
   @PrimaryGeneratedColumn("uuid")
   id?: string;
