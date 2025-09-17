@@ -1,5 +1,5 @@
 import express from "express";
-import { ValidationMiddleware } from "../utils/validation.middleware";
+import { ValidationMiddleware } from "../../utils/validation.middleware";
 import {
   addTopicToUserValidationSchema,
   changeEmailSchema,
@@ -9,21 +9,21 @@ import {
   paymentMethodValidationSchema,
   updateUserPhoneNumberValidationSchema,
   updateUserValidationSchema,
-} from "../validations/user.validation";
-import { UserController } from "../controllers/user.controller";
-import { AuthMiddleware } from "../utils/auth.middleware";
-import { AcademicBackgroundController } from "../controllers/academicBackground.controller";
+} from "../../validations/user.validation";
+import { UserController } from "../../controllers/user.controller";
+import { AuthMiddleware } from "../../utils/auth.middleware";
+import { AcademicBackgroundController } from "../../controllers/academicBackground.controller";
 import {
   academicBackgroundSchema,
   updateAcademicBackgroundSchema,
-} from "../validations/academicBackground.validation";
-import { AvailabilityController } from "../controllers/availability.controller";
+} from "../../validations/academicBackground.validation";
+import { AvailabilityController } from "../../controllers/availability.controller";
 import {
   availabilityExceptionSchema,
   availabilitySchema,
-} from "../validations/availability.validation";
-import { CouponController } from "../controllers/coupon.controller";
-import { couponValidationSchema } from "../validations/coupon.validation";
+} from "../../validations/availability.validation";
+import { CouponController } from "../../controllers/coupon.controller";
+import { couponValidationSchema } from "../../validations/coupon.validation";
 
 const router = express.Router();
 

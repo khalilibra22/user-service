@@ -1,11 +1,11 @@
-import * as grpc from '@grpc/grpc-js';
+import * as grpc from "@grpc/grpc-js";
 
 export class GrpcApiKeyMiddleware {
   private static readonly API_KEYS = new Set([
-    process.env.USER_SERVICE_API_KEY || 'user-service-key-123',
-    process.env.BOOKING_SERVICE_API_KEY || 'booking-service-key-456',
-    process.env.PAYMENT_SERVICE_API_KEY || 'payment-service-key-789',
-    process.env.NOTIFICATION_SERVICE_API_KEY || 'notification-service-key-101',
+    process.env.USER_SERVICE_API_KEY || "user-service-key-123",
+    process.env.BOOKING_SERVICE_API_KEY || "booking-service-key-456",
+    process.env.PAYMENT_SERVICE_API_KEY || "payment-service-key-789",
+    process.env.NOTIFICATION_SERVICE_API_KEY || "notification-service-key-101",
     // Add more service keys as needed
   ]);
 
@@ -15,21 +15,21 @@ export class GrpcApiKeyMiddleware {
   static validateApiKey(call: grpc.ServerUnaryCall<any, any>): boolean {
     try {
       const metadata = call.metadata;
-      const apiKey = metadata.get('x-api-key')[0] as string;
-      
+      const apiKey = metadata.get("x-api-key")[0] as string;
+
       if (!apiKey) {
-        console.warn('gRPC call without API key from:', call.getPeer());
+        console.warn("gRPC call without API key from:", call.getPeer());
         return false;
       }
 
       const isValid = this.API_KEYS.has(apiKey);
       if (!isValid) {
-        console.warn('gRPC call with invalid API key from:', call.getPeer());
+        console.warn("gRPC call with invalid API key from:", call.getPeer());
       }
-      
+
       return isValid;
     } catch (error) {
-      console.error('Error validating API key:', error);
+      console.error("Error validating API key:", error);
       return false;
     }
   }
@@ -44,17 +44,17 @@ export class GrpcApiKeyMiddleware {
       if (!this.validateApiKey(call)) {
         return callback({
           code: grpc.status.UNAUTHENTICATED,
-          message: 'Invalid or missing API key'
+          message: "Invalid or missing API key",
         });
       }
-      
+
       try {
         await handler(call, callback);
       } catch (error: any) {
-        console.error('Error in secured gRPC handler:', error);
+        console.error("Error in secured gRPC handler:", error);
         callback({
           code: grpc.status.INTERNAL,
-          message: error.message || 'Internal server error'
+          message: error.message || "Internal server error",
         });
       }
     };
@@ -72,7 +72,7 @@ export class GrpcApiKeyMiddleware {
    */
   static addApiKey(key: string): void {
     this.API_KEYS.add(key);
-    console.log('Added new API key for service authentication');
+    console.log("Added new API key for service authentication");
   }
 
   /**
@@ -81,7 +81,7 @@ export class GrpcApiKeyMiddleware {
   static removeApiKey(key: string): boolean {
     const removed = this.API_KEYS.delete(key);
     if (removed) {
-      console.log('Removed API key from service authentication');
+      console.log("Removed API key from service authentication");
     }
     return removed;
   }

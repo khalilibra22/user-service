@@ -1,8 +1,8 @@
 import express from "express";
-import { ValidationMiddleware } from "../utils/validation.middleware";
-import { AuthMiddleware } from "../utils/auth.middleware";
-import { AcademicBackgroundController } from "../controllers/academicBackground.controller";
-import { taxonomyValidationSchema } from "../validations/academicBackground.validation";
+import { ValidationMiddleware } from "../../utils/validation.middleware";
+import { AuthMiddleware } from "../../utils/auth.middleware";
+import { AcademicBackgroundController } from "../../controllers/academicBackground.controller";
+import { taxonomyValidationSchema } from "../../validations/academicBackground.validation";
 
 const router = express.Router();
 

@@ -1,13 +1,13 @@
 import express from "express";
-import { AuthController } from "../controllers/auth.controller";
-import { ValidationMiddleware } from "../utils/validation.middleware";
+import { AuthController } from "../../controllers/auth.controller";
+import { ValidationMiddleware } from "../../utils/validation.middleware";
 import {
   changeEmailSchema,
   loginValidationSchema,
   resetPasswordSchema,
   userValidationSchema,
-} from "../validations/user.validation";
-import { upload } from "../config/multer";
+} from "../../validations/user.validation";
+import { upload } from "../../config/multer";
 import passport from "passport";
 
 const router = express.Router();

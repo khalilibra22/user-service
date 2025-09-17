@@ -1,11 +1,11 @@
 import express from "express";
-import { ValidationMiddleware } from "../utils/validation.middleware";
-import { AuthMiddleware } from "../utils/auth.middleware";
-import { SubscriptionController } from "../controllers/subscription.controller";
+import { ValidationMiddleware } from "../../utils/validation.middleware";
+import { AuthMiddleware } from "../../utils/auth.middleware";
+import { SubscriptionController } from "../../controllers/subscription.controller";
 import {
   planSValdationSchema,
   userSubscriptionValidationSchema,
-} from "../validations/subscription.validation";
+} from "../../validations/subscription.validation";
 
 const router = express.Router();
 
