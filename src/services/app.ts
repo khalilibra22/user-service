@@ -13,6 +13,7 @@ import "../config/passport";
 import { availabilityRouter } from "../routes/availability.routes";
 import { couponRouter } from "../routes/coupon.routes";
 import { searchRouter } from "../routes/search.routes";
+import GrpcServer from "../grpc";
 
 dotenv.config();
 
@@ -58,6 +59,7 @@ app.get("/", (req: Request, res: Response) => {
 
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
+  new GrpcServer().start();
 });
 
 export default app;
