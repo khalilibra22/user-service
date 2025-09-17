@@ -1,22 +1,9 @@
 import * as grpc from '@grpc/grpc-js';
-import * as protoLoader from '@grpc/proto-loader';
-import path from 'path';
 import { UserService } from '../services/user.service';
 import { AcademicBackgroundService } from '../services/academicBackground.service';
 import { AvailabilityService } from '../services/availability.service';
-import { GrpcApiKeyMiddleware } from './middleware/apikey.middleware';
-
-// Load the protobuf
-const PROTO_PATH = path.join(__dirname, '../../proto/user.proto');
-const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
-  keepCase: true,
-  longs: String,
-  enums: String,
-  defaults: true,
-  oneofs: true,
-});
-
-const userProto = grpc.loadPackageDefinition(packageDefinition).user as any;
+import { GrpcApiKeyMiddleware } from './middleware/api-key.middleware';
+import { userProto, PROTO_PATH } from './config/setup';
 
 export class GrpcUserService {
   private userService: UserService;
@@ -36,6 +23,7 @@ export class GrpcUserService {
       fullname: user.fullname || '',
       email: user.email || '',
       phoneNumber: user.phoneNumber || '',
+      address: user.address || '',
       role: user.role || 0,
     };
   }
@@ -61,6 +49,7 @@ export class GrpcUserService {
       endTime: availability.endTime || '',
       isAvailable: availability.isAvailable || false,
       isActive: availability.isActive || false,
+      isFree: availability.isFree || false,
     };
   }
 
@@ -300,15 +289,7 @@ export class GrpcUserService {
 
   // Get proto service for server binding
   static getProtoService() {
-    const PROTO_PATH = path.join(__dirname, '../../proto/user.proto');
-    const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
-      keepCase: true,
-      longs: String,
-      enums: String,
-      defaults: true,
-      oneofs: true,
-    });
-    const userProto = grpc.loadPackageDefinition(packageDefinition).user as any;
+   
     return userProto.UserService;
   }
 }

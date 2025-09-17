@@ -2,24 +2,14 @@ syntax = "proto3";
 
 package user;
 
-// User Role Enum
-enum UserRole {
-  SUPERVISOR = 0;
-  TEACHER = 1;
-  STUDENT = 2;
-  ACADEMY = 3;
-  ACADEMY_TEACHER = 4;
-  ADMIN = 5;
-  GUEST = 6;
-}
-
 // Minimal User Data for inter-service communication
 message MinimalUser {
   string id = 1;
   string fullname = 2;
   string email = 3;
   string phoneNumber = 4;
-  UserRole role = 5;
+  string address = 5;
+  int32 role = 6;
 }
 
 message Topic{
@@ -42,6 +32,7 @@ message Availability {
   string endTime = 4;
   bool isAvailable = 5;
   bool isActive = 6;
+  bool isFree = 7;
 }
 
 // Request/Response Messages
