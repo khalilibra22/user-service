@@ -1,9 +1,9 @@
 import { AppDataSource } from "../config/database";
-import { AcademicBackgroundModel } from "../models/academicBackground.model";
+import { AcademicBackgroundModel } from "../models/academic-background.model";
 import { CategoryModel } from "../models/category.model";
 import { SubjectModel } from "../models/subject.model";
 import { TopicModel } from "../models/topic.model";
-import { UserTopicModel } from "../models/userTopic.model";
+import { UserTopicModel } from "../models/user-topic.model";
 
 export class AcademicBackgroundService {
   academicBackgroundRepo: any;
@@ -236,9 +236,7 @@ export class AcademicBackgroundService {
     }
   }
 
-  async getUserTopicById(
-    id: number
-  ): Promise<UserTopicModel | undefined> {
+  async getUserTopicById(id: number): Promise<UserTopicModel | undefined> {
     try {
       return await this.userTopicRepo.findOne({
         where: {
@@ -250,5 +248,4 @@ export class AcademicBackgroundService {
       throw new Error("Error fetching user topic by user id and topic id");
     }
   }
-
 }

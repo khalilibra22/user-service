@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
-import { AcademicBackgroundService } from "../services/academicBackground.service";
+import { AcademicBackgroundService } from "../services/academic-background.service";
 import { UserService } from "../services/user.service";
 import { plainToInstance } from "class-transformer";
-import { AcademicBackgroundDto } from "../dtos/AcademicBackground.dto";
+import { AcademicBackgroundDto } from "../dtos/academic-background.dto";
 import { CategoryDto } from "../dtos/category.dto";
 import { TopicDto } from "../dtos/topic.dto";
-import { UserTopicDto } from "../dtos/userTopic.dto";
+import { UserTopicDto } from "../dtos/user-topic.dto";
 export class AcademicBackgroundController {
   private academicBackgroundService: AcademicBackgroundService;
   private userService: UserService;

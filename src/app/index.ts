@@ -1,3 +1,4 @@
+import "../utils/subscription-checker";
 import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import GrpcServer from "../grpc";

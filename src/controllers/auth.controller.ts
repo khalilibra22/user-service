@@ -4,7 +4,7 @@ import { AuthMiddleware } from "../utils/auth.middleware";
 import { UserDto } from "../dtos/user.dto";
 import { plainToInstance } from "class-transformer";
 import { UserRole } from "../enums/userRoles.enum";
-import { MinimalUserDto } from "../dtos/minimalUser.dto";
+import { MinimalUserDto } from "../dtos/minimal-user.dto";
 export class AuthController {
   private userService: UserService;
   constructor() {

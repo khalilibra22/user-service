@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { TeachingMode } from "../enums/teachingModes.enum";
+import { TeachingMode } from "../enums/teaching-modes.enum";
 import { UserRole } from "../enums/userRoles.enum";
 
 export const teachingModesValidation = Joi.when("role", {

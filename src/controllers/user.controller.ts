@@ -2,11 +2,11 @@ import { Request, Response } from "express";
 import { UserService } from "../services/user.service";
 import { UserDto } from "../dtos/user.dto";
 import { plainToInstance } from "class-transformer";
-import { PaymentMethodDto } from "../dtos/paymentMethod.dto";
+import { PaymentMethodDto } from "../dtos/payment-method.dto";
 import { UserRole } from "../enums/userRoles.enum";
-import { MinimalUserDto } from "../dtos/minimalUser.dto";
+import { MinimalUserDto } from "../dtos/minimal-user.dto";
 import { AuthMiddleware } from "../utils/auth.middleware";
-import { UserContactInfoDto } from "../dtos/userContactInfo.dto";
+import { UserContactInfoDto } from "../dtos/user-contact-info.dto";
 
 export class UserController {
   private userService: UserService;

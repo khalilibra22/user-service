@@ -3,7 +3,7 @@ import { AvailabilityService } from "../services/availability.service";
 import { AvailabilityDto } from "../dtos/availability.dto";
 import { plainToInstance } from "class-transformer";
 import { UserService } from "../services/user.service";
-import { AvailabilityExceptionDto } from "../dtos/availabilityException.dto";
+import { AvailabilityExceptionDto } from "../dtos/availability-exception.dto";
 import { boolean } from "joi";
 
 export class AvailabilityController {

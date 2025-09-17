@@ -12,11 +12,11 @@ import {
 } from "../../validations/user.validation";
 import { UserController } from "../../controllers/user.controller";
 import { AuthMiddleware } from "../../utils/auth.middleware";
-import { AcademicBackgroundController } from "../../controllers/academicBackground.controller";
+import { AcademicBackgroundController } from "../../controllers/academic-background.controller";
 import {
   academicBackgroundSchema,
   updateAcademicBackgroundSchema,
-} from "../../validations/academicBackground.validation";
+} from "../../validations/academic-background.validation";
 import { AvailabilityController } from "../../controllers/availability.controller";
 import {
   availabilityExceptionSchema,

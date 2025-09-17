@@ -5,7 +5,7 @@ import { UserModel } from "../models/user.model";
 import { UserRole } from "../enums/userRoles.enum";
 import { UserDto } from "../dtos/user.dto";
 import { permissions, privileges } from "../config/permissions";
-import { Action, Resource } from "./permissionTypes";
+import { Action, Resource } from "./permission-types";
 
 class AuthMiddleware {
   private static saltRounds = 10;

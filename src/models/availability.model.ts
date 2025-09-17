@@ -10,7 +10,7 @@ import {
   Index,
 } from "typeorm";
 import { UserModel } from "./user.model";
-import { DayOfWeek } from "../enums/dayOfWeek.enum";
+import { DayOfWeek } from "../enums/day-of-week.enum";
 
 @Entity("availabilities")
 @Index("IDX_availabilities_user_id", ["user"])

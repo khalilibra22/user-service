@@ -1,6 +1,6 @@
 import { AppDataSource } from "../config/database";
 import { AvailabilityModel } from "../models/availability.model";
-import { AvailabilityExceptionModel } from "../models/availabilityException.model";
+import { AvailabilityExceptionModel } from "../models/availability-exception.model";
 
 export class AvailabilityService {
   aviabilityRepo: any;

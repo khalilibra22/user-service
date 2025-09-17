@@ -1,6 +1,6 @@
 import { Expose, Type } from "class-transformer";
-import { MinimalPlanDto } from "./minimalPlan.dto";
-import { MinimalUserDto } from "./minimalUser.dto";
+import { MinimalPlanDto } from "./minimal-plan.dto";
+import { MinimalUserDto } from "./minimal-user.dto";
 
 export class SubscriptionDto {
   @Expose()

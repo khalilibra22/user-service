@@ -1,4 +1,3 @@
-import "../utils/subscriptionChecker";
 import express from "express";
 import { authRouter } from "../routes/v1/auth.routes";
 import { availabilityRouter } from "../routes/v1/availability.routes";

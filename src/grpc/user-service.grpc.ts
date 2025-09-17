@@ -1,6 +1,6 @@
 import * as grpc from "@grpc/grpc-js";
 import { UserService } from "../services/user.service";
-import { AcademicBackgroundService } from "../services/academicBackground.service";
+import { AcademicBackgroundService } from "../services/academic-background.service";
 import { AvailabilityService } from "../services/availability.service";
 import { GrpcApiKeyMiddleware } from "./middleware/api-key.middleware";
 import { userProto, PROTO_PATH } from "./config/setup";
