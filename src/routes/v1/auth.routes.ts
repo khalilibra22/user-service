@@ -21,29 +21,29 @@ router.post(
     { name: "certificate", maxCount: 1 },
   ]),
   ValidationMiddleware.validate(userValidationSchema),
-  async (req, res) => await authController.register(req, res)
+  authController.register
 );
 router.post(
   "/login",
   ValidationMiddleware.validate(loginValidationSchema),
-  async (req, res) => await authController.login(req, res)
+  authController.login
 );
 
 router.post(
   "/forgot-password",
   ValidationMiddleware.validate(changeEmailSchema),
-  async (req, res) => await authController.forgotPassword(req, res)
+  authController.forgotPassword
 );
 
 router.post(
   "/reset-password",
   ValidationMiddleware.validate(resetPasswordSchema),
-  async (req, res) => await authController.resetPassword(req, res)
+  authController.resetPassword
 );
 
 router.get(
   "/verify-email",
-  async (req, res) => await authController.verifyEmail(req, res)
+  authController.verifyEmail
 );
 
 router.get(
@@ -59,12 +59,12 @@ router.get(
     failureRedirect: "/auth/failure",
     session: true,
   }),
-  async (req, res) => await authController.googleLogin(req, res)
+  authController.googleLogin
 );
 
 router.get(
   "/logout",
-  async (req, res) => await authController.logout(req, res)
+  authController.logout
 );
 
 router.get("/failure", (req, res) => {

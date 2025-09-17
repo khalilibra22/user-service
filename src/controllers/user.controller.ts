@@ -14,7 +14,7 @@ export class UserController {
     this.userService = new UserService();
   }
 
-  async getUserById(req: Request, res: Response): Promise<void> {
+  getUserById = async (req: Request, res: Response): Promise<void> => {
     try {
       const id = req.params.id;
       const user = await this.userService.getUserById(id);
@@ -32,9 +32,7 @@ export class UserController {
           excludeExtraneousValues: true,
         });
       }
-      // const userDto = plainToInstance(UserDto, user, {
-      //   excludeExtraneousValues: true,
-      // });
+
       res.status(200).json(userDto);
     } catch (error: any) {
       if (error.message === "Error fetching user") {
@@ -46,7 +44,7 @@ export class UserController {
     }
   }
 
-  async updateUser(req: Request, res: Response): Promise<void> {
+  updateUser = async (req: Request, res: Response): Promise<void> => {
     try {
       const id = req.params.id;
       const user = await this.userService.getUserById(id);
@@ -54,15 +52,6 @@ export class UserController {
         res.status(404).json({ error: "User not found" });
         return;
       }
-      // const isPermitted = PermissionMiddleware.checkPermission(
-      //   user.role,
-      //   Permission.USER_CRUD
-      // );
-      // if (!isPermitted) {
-      //   res.status(403).json({ error: "Unauthorized" });
-      //   return;
-      // }
-      //delete req.body.role;
       const updatedUser = { ...user, ...req.body };
       await this.userService.updateUser(id, updatedUser);
       res.status(200).json({ message: "User updated successfully" });
@@ -75,7 +64,7 @@ export class UserController {
     }
   }
 
-  async deleteUser(req: Request, res: Response): Promise<void> {
+  deleteUser = async (req: Request, res: Response): Promise<void> => {
     try {
       const id = req.params.id;
       const user = await this.userService.getUserById(id);
@@ -95,7 +84,7 @@ export class UserController {
   }
 
   // Get user plan
-  async getUserPlan(req: Request, res: Response): Promise<void> {
+  getUserPlan = async (req: Request, res: Response): Promise<void> => {
     try {
       const id = req.params.id;
       const user = await this.userService.getUserById(id);
@@ -114,7 +103,7 @@ export class UserController {
     }
   }
   // Add payemnt method
-  async addPaymentMethod(req: Request, res: Response): Promise<void> {
+  addPaymentMethod = async (req: Request, res: Response): Promise<void> => {
     try {
       const id = req.params.id;
       const user = await this.userService.getUserById(id);
@@ -152,7 +141,7 @@ export class UserController {
     }
   }
   //Update payment method
-  async updatePaymentMethod(req: Request, res: Response): Promise<void> {
+  updatePaymentMethod = async (req: Request, res: Response): Promise<void> => {
     try {
       const id = req.params.id;
       const user = await this.userService.getUserById(id);
@@ -189,7 +178,7 @@ export class UserController {
   }
 
   // Get payment methods by user id
-  async getPaymentMethodsByUserId(req: Request, res: Response): Promise<void> {
+  getPaymentMethodsByUserId = async (req: Request, res: Response): Promise<void> => {
     try {
       const id = req.params.id;
       const user = await this.userService.getUserById(id);
@@ -218,7 +207,7 @@ export class UserController {
   }
 
   // Delete payment method
-  async deletePaymentMethod(req: Request, res: Response): Promise<void> {
+  deletePaymentMethod = async (req: Request, res: Response): Promise<void> => {
     try {
       const id = req.params.id;
       const user = await this.userService.getUserById(id);
@@ -250,7 +239,7 @@ export class UserController {
   }
 
   //  get All Teachers using pagination
-  async getAllTeachers(req: Request, res: Response): Promise<void> {
+  getAllTeachers = async (req: Request, res: Response): Promise<void> => {
     try {
       const page = Number(req.query.page) || 1;
       const limit = Number(req.query.limit) || 10;
@@ -268,7 +257,7 @@ export class UserController {
     }
   }
 
-  async getAllStudents(req: Request, res: Response): Promise<void> {
+  getAllStudents = async (req: Request, res: Response): Promise<void> => {
     try {
       const page = Number(req.query.page) || 1;
       const limit = Number(req.query.limit) || 10;
@@ -286,7 +275,7 @@ export class UserController {
     }
   }
 
-  async getAllAcademies(req: Request, res: Response): Promise<void> {
+  getAllAcademies = async (req: Request, res: Response): Promise<void> => {
     try {
       const page = Number(req.query.page) || 1;
       const limit = Number(req.query.limit) || 10;
@@ -304,7 +293,7 @@ export class UserController {
     }
   }
 
-  async getAllAdmins(req: Request, res: Response): Promise<void> {
+  getAllAdmins = async (req: Request, res: Response): Promise<void> => {
     try {
       const page = Number(req.query.page) || 1;
       const limit = Number(req.query.limit) || 10;
@@ -323,7 +312,7 @@ export class UserController {
   }
 
   // create user by admin
-  async createUser(req: Request, res: Response): Promise<void> {
+  createUser = async (req: Request, res: Response): Promise<void> => {
     try {
       const { email, password } = req.body;
       const user = await this.userService.getUserByEmail(email);
@@ -344,7 +333,7 @@ export class UserController {
   }
 
   //update user's phone number
-  async updateUserPhoneNumber(req: Request, res: Response): Promise<void> {
+  updateUserPhoneNumber = async (req: Request, res: Response): Promise<void> => {
     try {
       const id = req.params.id;
       const user = await this.userService.getUserById(id);
@@ -365,7 +354,7 @@ export class UserController {
   }
 
   //update user's email
-  async updateUserEmail(req: Request, res: Response): Promise<void> {
+  updateUserEmail = async (req: Request, res: Response): Promise<void> => {
     try {
       const id = req.params.id;
       const user = await this.userService.getUserById(id);
@@ -404,7 +393,7 @@ export class UserController {
   }
 
   // update user's password
-  async updateUserPassword(req: Request, res: Response): Promise<void> {
+  updateUserPassword = async (req: Request, res: Response): Promise<void> => {
     try {
       const id = req.params.id;
       const user = await this.userService.getUserById(id);
@@ -435,7 +424,7 @@ export class UserController {
   }
 
   //update user's contact information
-  async updateUserContactInfo(req: Request, res: Response): Promise<void> {
+  updateUserContactInfo = async (req: Request, res: Response): Promise<void> => {
     try {
       const id = req.params.id;
       const user = await this.userService.getUserById(id);
@@ -459,7 +448,7 @@ export class UserController {
   }
 
   //get user contact information
-  async getUserContactInfo(req: Request, res: Response): Promise<void> {
+  getUserContactInfo = async (req: Request, res: Response): Promise<void> => {
     try {
       const id = req.params.id;
       const user = await this.userService.getUserById(id);
@@ -480,7 +469,7 @@ export class UserController {
     }
   }
 
-  async getUserMinimalInfo(req: Request, res: Response): Promise<void> {
+  getUserMinimalInfo = async (req: Request, res: Response): Promise<void> => {
     try {
       const id = req.params.id;
       const user = await this.userService.getUserById(id);

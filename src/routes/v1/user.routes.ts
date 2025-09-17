@@ -37,14 +37,14 @@ router.put(
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("users", "update"),
   ValidationMiddleware.validate(updateUserValidationSchema),
-  async (req, res) => await userController.updateUser(req, res)
+  userController.updateUser
 );
 
 router.get(
   "/:id/details",
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("users", "read"),
-  async (req, res) => await userController.getUserById(req, res)
+  userController.getUserById
 );
 
 router.post(
@@ -53,7 +53,7 @@ router.post(
   AuthMiddleware.authorize("catalogs", "pick"),
   ValidationMiddleware.validate(addTopicToUserValidationSchema),
   async (req, res) =>
-    await academicBackgroundController.addTopicToUser(req, res)
+    academicBackgroundController.addTopicToUser(req, res)
 );
 
 // Update topic price for user
@@ -63,7 +63,7 @@ router.put(
   AuthMiddleware.authorize("catalogs", "adjust"),
   ValidationMiddleware.validate(addTopicToUserValidationSchema),
   async (req, res) =>
-    await academicBackgroundController.updateUserTopicPrice(req, res)
+    academicBackgroundController.updateUserTopicPrice(req, res)
 );
 
 // Delete topic from user
@@ -72,7 +72,7 @@ router.delete(
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("catalogs", "drop"),
   async (req, res) =>
-    await academicBackgroundController.deleteUserTopic(req, res)
+    academicBackgroundController.deleteUserTopic(req, res)
 );
 
 // Get topics by user id
@@ -81,7 +81,7 @@ router.get(
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("catalogs", "view"),
   async (req, res) =>
-    await academicBackgroundController.getTopicsByUserId(req, res)
+    academicBackgroundController.getTopicsByUserId(req, res)
 );
 
 // Get user plan
@@ -89,7 +89,7 @@ router.get(
   "/:id/plans",
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("subscriptions", "view"),
-  async (req, res) => await userController.getUserPlan(req, res)
+  userController.getUserPlan
 );
 
 //Add payment method to user
@@ -98,7 +98,7 @@ router.post(
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("payment_methods", "create"),
   ValidationMiddleware.validate(paymentMethodValidationSchema),
-  async (req, res) => await userController.addPaymentMethod(req, res)
+  userController.addPaymentMethod
 );
 
 // Update payment method
@@ -107,7 +107,7 @@ router.put(
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("payment_methods", "update"),
   ValidationMiddleware.validate(paymentMethodValidationSchema),
-  async (req, res) => await userController.updatePaymentMethod(req, res)
+  userController.updatePaymentMethod
 );
 
 // Get payment methods by user id
@@ -115,7 +115,7 @@ router.get(
   "/:id/payment-methods",
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("payment_methods", "list"),
-  async (req, res) => await userController.getPaymentMethodsByUserId(req, res)
+  userController.getPaymentMethodsByUserId
 );
 
 // Delete payment method
@@ -123,7 +123,7 @@ router.delete(
   "/:id/payment-methods/:paymentMethodId",
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("payment_methods", "delete"),
-  async (req, res) => await userController.deletePaymentMethod(req, res)
+  userController.deletePaymentMethod
 );
 
 // Get all teahers
@@ -131,28 +131,28 @@ router.get(
   "/teachers",
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("users", "list"),
-  async (req, res) => await userController.getAllTeachers(req, res)
+  userController.getAllTeachers
 );
 
 router.get(
   "/students",
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("users", "list"),
-  async (req, res) => await userController.getAllStudents(req, res)
+  userController.getAllStudents
 );
 
 router.get(
   "/academies",
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("users", "list"),
-  async (req, res) => await userController.getAllAcademies(req, res)
+  userController.getAllAcademies
 );
 
 router.get(
   "/admins",
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("users", "overview"),
-  async (req, res) => await userController.getAllAdmins(req, res)
+  userController.getAllAdmins
 );
 
 //create user
@@ -161,7 +161,7 @@ router.post(
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("users", "invite"),
   ValidationMiddleware.validate(createUserValidationSchema),
-  async (req, res) => await userController.createUser(req, res)
+  userController.createUser
 );
 
 //update user's phone number
@@ -170,7 +170,7 @@ router.patch(
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("users", "update"),
   ValidationMiddleware.validate(updateUserPhoneNumberValidationSchema),
-  async (req, res) => await userController.updateUserPhoneNumber(req, res)
+  userController.updateUserPhoneNumber
 );
 
 // delete user
@@ -178,7 +178,7 @@ router.delete(
   "/:id",
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("users", "delete"),
-  async (req, res) => await userController.deleteUser(req, res)
+  userController.deleteUser
 );
 
 // update user password
@@ -187,7 +187,7 @@ router.patch(
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("users", "update"),
   ValidationMiddleware.validate(changePasswordSchema),
-  async (req, res) => await userController.updateUserPassword(req, res)
+  userController.updateUserPassword
 );
 
 // update user email
@@ -196,7 +196,7 @@ router.patch(
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("users", "update"),
   ValidationMiddleware.validate(changeEmailSchema),
-  async (req, res) => await userController.updateUserEmail(req, res)
+  userController.updateUserEmail
 );
 
 // update user's contact information
@@ -205,7 +205,7 @@ router.patch(
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("users", "update"),
   ValidationMiddleware.validate(contactInfoValidationSchema),
-  async (req, res) => await userController.updateUserContactInfo(req, res)
+  userController.updateUserContactInfo
 );
 
 // Get user's contact information
@@ -213,7 +213,7 @@ router.get(
   "/:id/contact-info",
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("users", "read"),
-  async (req, res) => await userController.getUserContactInfo(req, res)
+  userController.getUserContactInfo
 );
 
 // Create user's academic background
@@ -223,7 +223,7 @@ router.post(
   AuthMiddleware.authorize("academic_backgrounds", "create"),
   ValidationMiddleware.validate(academicBackgroundSchema),
   async (req, res) =>
-    await academicBackgroundController.createAcademicBackground(req, res)
+    academicBackgroundController.createAcademicBackground(req, res)
 );
 
 // Update user's academic background
@@ -233,7 +233,7 @@ router.put(
   AuthMiddleware.authorize("academic_backgrounds", "update"),
   ValidationMiddleware.validate(updateAcademicBackgroundSchema),
   async (req, res) =>
-    await academicBackgroundController.updateAcademicBackground(req, res)
+    academicBackgroundController.updateAcademicBackground(req, res)
 );
 
 // Delete user's academic background
@@ -242,7 +242,7 @@ router.delete(
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("academic_backgrounds", "delete"),
   async (req, res) =>
-    await academicBackgroundController.deleteAcademicBackground(req, res)
+    academicBackgroundController.deleteAcademicBackground(req, res)
 );
 
 // Get user's academic background by user ID
@@ -251,7 +251,7 @@ router.get(
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("academic_backgrounds", "list"),
   async (req, res) =>
-    await academicBackgroundController.getAcademicBackgroundByUserId(req, res)
+    academicBackgroundController.getAcademicBackgroundByUserId(req, res)
 );
 
 // create availability
@@ -260,7 +260,7 @@ router.post(
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("availabilities", "create"),
   ValidationMiddleware.validate(availabilitySchema),
-  async (req, res) => await availabilityController.createAvailability(req, res)
+  availabilityController.createAvailability
 );
 
 // update availability
@@ -269,7 +269,7 @@ router.put(
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("availabilities", "update"),
   ValidationMiddleware.validate(availabilitySchema),
-  async (req, res) => await availabilityController.updateAvailability(req, res)
+  availabilityController.updateAvailability
 );
 
 // delete availability
@@ -277,7 +277,7 @@ router.delete(
   "/:id/availabilities/:availabilityId",
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("availabilities", "delete"),
-  async (req, res) => await availabilityController.deleteAvailability(req, res)
+  availabilityController.deleteAvailability
 );
 
 // get user's availability by user ID
@@ -286,7 +286,7 @@ router.get(
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("availabilities", "list"),
   async (req, res) =>
-    await availabilityController.getTeacherAvailability(req, res)
+    availabilityController.getTeacherAvailability(req, res)
 );
 
 router.post(
@@ -295,7 +295,7 @@ router.post(
   AuthMiddleware.authorize("availabilities", "create"),
   ValidationMiddleware.validate(availabilityExceptionSchema),
   async (req, res) =>
-    await availabilityController.createAvailabilityException(req, res)
+    availabilityController.createAvailabilityException(req, res)
 );
 
 // update availability exception
@@ -305,7 +305,7 @@ router.put(
   AuthMiddleware.authorize("availabilities", "update"),
   ValidationMiddleware.validate(availabilityExceptionSchema),
   async (req, res) =>
-    await availabilityController.updateAvailabilityException(req, res)
+    availabilityController.updateAvailabilityException(req, res)
 );
 
 // delete availability exception
@@ -314,7 +314,7 @@ router.delete(
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("availabilities", "delete"),
   async (req, res) =>
-    await availabilityController.deleteAvailabilityException(req, res)
+    availabilityController.deleteAvailabilityException(req, res)
 );
 
 // get user's availability exceptions by user ID
@@ -323,7 +323,7 @@ router.get(
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("availabilities", "list"),
   async (req, res) =>
-    await availabilityController.getTeacherAvailabilityExceptions(req, res)
+    availabilityController.getTeacherAvailabilityExceptions(req, res)
 );
 
 // Toggle availability status
@@ -332,7 +332,7 @@ router.patch(
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("availabilities", "toggle"),
   async (req, res) =>
-    await availabilityController.toggleAvailabilityStatus(req, res)
+    availabilityController.toggleAvailabilityStatus(req, res)
 );
 
 // Deactivate all availabilities for user
@@ -341,7 +341,7 @@ router.patch(
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("availabilities", "toggle"),
   async (req, res) =>
-    await availabilityController.deactivateAllAvailabilities(req, res)
+    availabilityController.deactivateAllAvailabilities(req, res)
 );
 
 // Activate all availabilities for user
@@ -350,7 +350,7 @@ router.patch(
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("availabilities", "toggle"),
   async (req, res) =>
-    await availabilityController.activateAllAvailabilities(req, res)
+    availabilityController.activateAllAvailabilities(req, res)
 );
 
 // Toggle topic status for user
@@ -359,7 +359,7 @@ router.patch(
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("catalogs", "toggle"),
   async (req, res) =>
-    await academicBackgroundController.toggleUserTopicStatus(req, res)
+    academicBackgroundController.toggleUserTopicStatus(req, res)
 );
 
 router.post(
@@ -367,7 +367,7 @@ router.post(
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("coupons", "create"),
   ValidationMiddleware.validate(couponValidationSchema),
-  async (req, res) => couponController.createCoupon(req, res)
+  couponController.createCoupon
 );
 
 router.put(
@@ -375,26 +375,26 @@ router.put(
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("coupons", "update"),
   ValidationMiddleware.validate(couponValidationSchema),
-  async (req, res) => couponController.updateCoupon(req, res)
+  couponController.updateCoupon
 );
 
 router.delete(
   "/:id/coupons/:couponId",
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("coupons", "delete"),
-  async (req, res) => couponController.deleteCoupon(req, res)
+  couponController.deleteCoupon
 );
 
 router.get(
   "/:id/coupons",
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("coupons", "list"),
-  async (req, res) => couponController.getUserCoupons(req, res)
+  couponController.getUserCoupons
 );
 
 router.get(
   "/:id/minimal",
-  async (req, res) => await userController.getUserMinimalInfo(req, res)
+  userController.getUserMinimalInfo
 );
 
 export { router as userRouter };

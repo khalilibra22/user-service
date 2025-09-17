@@ -4,16 +4,13 @@ import { AvailabilityController } from "../../controllers/availability.controlle
 const router = express.Router();
 
 const availabilityController = new AvailabilityController();
-router.post("/check", async (req, res) =>
-  availabilityController.checkAvailabilitiesByIds(req, res)
-);
+router.post("/check", availabilityController.checkAvailabilitiesByIds);
 
 //updateAvailabilitiesToUnavailable
 router.patch(
   "/bulk-unavailable",
   //AuthMiddleware.verifyToken,
-  async (req, res) =>
-    availabilityController.updateAvailabilitiesToUnavailable(req, res)
+  availabilityController.updateAvailabilitiesToUnavailable
 );
 
 export { router as availabilityRouter };

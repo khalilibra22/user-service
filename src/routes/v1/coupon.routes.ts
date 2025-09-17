@@ -10,14 +10,14 @@ router.get(
   "/:couponId",
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("coupons", "read"),
-  async (req, res) => couponController.getCouponById(req, res)
+  couponController.getCouponById
 );
 
 router.patch(
   "/:couponId/toggle-status",
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("coupons", "toggle"),
-  async (req, res) => couponController.toggleCouponStatus(req, res)
+  couponController.toggleCouponStatus
 );
 
 export { router as couponRouter };

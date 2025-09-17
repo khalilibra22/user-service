@@ -14,7 +14,7 @@ export class AvailabilityController {
     this.userService = new UserService();
   }
 
-  async getTeacherAvailability(req: Request, res: Response): Promise<void> {
+  getTeacherAvailability = async (req: Request, res: Response): Promise<void> => {
     try {
       const userId = req.params.id;
       const user = await this.userService.getUserById(userId);
@@ -38,7 +38,7 @@ export class AvailabilityController {
   }
 
   // Create new availability
-  async createAvailability(req: Request, res: Response): Promise<void> {
+  createAvailability = async (req: Request, res: Response): Promise<void> => {
     try {
       const id = req.params.id;
       const user = await this.userService.getUserById(id);
@@ -68,7 +68,7 @@ export class AvailabilityController {
   }
 
   // Update availability
-  async updateAvailability(req: Request, res: Response): Promise<void> {
+  updateAvailability = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id, availabilityId } = req.params;
       const user = await this.userService.getUserById(id);
@@ -96,7 +96,7 @@ export class AvailabilityController {
   }
 
   // Delete availability
-  async deleteAvailability(req: Request, res: Response): Promise<void> {
+  deleteAvailability = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id, availabilityId } = req.params;
       const user = await this.userService.getUserById(id);
@@ -123,10 +123,10 @@ export class AvailabilityController {
   }
 
   // Create availability exception
-  async createAvailabilityException(
+  createAvailabilityException = async (
     req: Request,
     res: Response
-  ): Promise<void> {
+  ): Promise<void> => {
     try {
       const id = req.params.id;
       const user = await this.userService.getUserById(id);
@@ -160,10 +160,10 @@ export class AvailabilityController {
   }
 
   // Get availability exceptions
-  async getTeacherAvailabilityExceptions(
+  getTeacherAvailabilityExceptions = async (
     req: Request,
     res: Response
-  ): Promise<void> {
+  ): Promise<void> => {
     try {
       const { id } = req.params;
       const user = await this.userService.getUserById(id);
@@ -192,10 +192,10 @@ export class AvailabilityController {
   }
 
   // Delete availability exception
-  async deleteAvailabilityException(
+  deleteAvailabilityException = async (
     req: Request,
     res: Response
-  ): Promise<void> {
+  ): Promise<void> => {
     try {
       const { id, exceptionId } = req.params;
       const user = await this.userService.getUserById(id);
@@ -225,10 +225,10 @@ export class AvailabilityController {
   }
 
   // update availability exception
-  async updateAvailabilityException(
+  updateAvailabilityException = async (
     req: Request,
     res: Response
-  ): Promise<void> {
+  ): Promise<void> => {
     try {
       const { id, exceptionId } = req.params;
       const user = await this.userService.getUserById(id);
@@ -261,7 +261,7 @@ export class AvailabilityController {
   }
 
   // Toggle availability isActive status
-  async toggleAvailabilityStatus(req: Request, res: Response): Promise<void> {
+  toggleAvailabilityStatus = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id, availabilityId } = req.params;
       const user = await this.userService.getUserById(id);
@@ -291,10 +291,10 @@ export class AvailabilityController {
   }
 
   // Toggle all availability isActive status
-  async deactivateAllAvailabilities(
+  deactivateAllAvailabilities = async (
     req: Request,
     res: Response
-  ): Promise<void> {
+  ): Promise<void> => {
     try {
       const { id } = req.params;
       const user = await this.userService.getUserById(id);
@@ -319,7 +319,7 @@ export class AvailabilityController {
   }
 
   // Activate all availability status
-  async activateAllAvailabilities(req: Request, res: Response): Promise<void> {
+  activateAllAvailabilities = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const user = await this.userService.getUserById(id);
@@ -342,7 +342,7 @@ export class AvailabilityController {
   }
 
   // Check availabilities by IDs
-  async checkAvailabilitiesByIds(req: Request, res: Response): Promise<void> {
+  checkAvailabilitiesByIds = async (req: Request, res: Response): Promise<void> => {
     try {
       const { availabilityIds } = req.body;
 
@@ -407,10 +407,10 @@ export class AvailabilityController {
     }
   }
 
-  async updateAvailabilitiesToUnavailable(
+  updateAvailabilitiesToUnavailable = async (
     req: Request,
     res: Response
-  ): Promise<void> {
+  ): Promise<void> => {
     try {
       const { availabilityIds } = req.body;
 

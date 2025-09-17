@@ -16,7 +16,7 @@ router.post(
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("subscriptions", "create"),
   ValidationMiddleware.validate(planSValdationSchema),
-  async (req, res) => await subscriptionController.createPlan(req, res)
+  subscriptionController.createPlan
 );
 
 // Create a new subscription for a specific plan
@@ -27,22 +27,21 @@ router.post(
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("subscriptions", "subscribe"),
   ValidationMiddleware.validate(userSubscriptionValidationSchema),
-  async (req, res) => await subscriptionController.createSubscription(req, res)
+  subscriptionController.createSubscription
 );
 
 router.get(
   "/plans",
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("subscriptions", "view"),
-  async (req, res) => await subscriptionController.getPlans(req, res)
+  subscriptionController.getPlans
 );
 
 router.get(
   "/active",
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("catalogs", "list"),
-  async (req, res) =>
-    await subscriptionController.getActiveSubscriptions(req, res)
+  subscriptionController.getActiveSubscriptions
 );
 
 export { router as subscriptionRouter };
