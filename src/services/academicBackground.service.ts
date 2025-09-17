@@ -235,4 +235,20 @@ export class AcademicBackgroundService {
       throw new Error("Error deleting user topic");
     }
   }
+
+  async getUserTopicById(
+    id: number
+  ): Promise<UserTopicModel | undefined> {
+    try {
+      return await this.userTopicRepo.findOne({
+        where: {
+          id: id,
+        },
+        relations: ["topic"],
+      });
+    } catch (error) {
+      throw new Error("Error fetching user topic by user id and topic id");
+    }
+  }
+
 }
