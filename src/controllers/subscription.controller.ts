@@ -14,7 +14,7 @@ export class SubscriptionController {
     this.userService = new UserService();
   }
 
-  async createPlan(req: Request, res: Response): Promise<void> {
+  createPlan = async (req: Request, res: Response): Promise<void> => {
     try {
       const plan = await this.subscriptionService.createPlan(req.body);
       const planDto = plainToInstance(PlanDto, plan, {
@@ -26,7 +26,7 @@ export class SubscriptionController {
     }
   }
 
-  async createSubscription(req: Request, res: Response): Promise<void> {
+  createSubscription = async (req: Request, res: Response): Promise<void> => {
     try {
       const userId = req.body.userId;
       const user = await this.userService.getUserById(userId);
@@ -68,7 +68,7 @@ export class SubscriptionController {
     }
   }
 
-  async getPlans(req: Request, res: Response): Promise<void> {
+  getPlans = async (req: Request, res: Response): Promise<void> => {
     try {
       const plans = await this.subscriptionService.getPlans();
       const planDtos = plainToInstance(PlanDto, plans, {
@@ -80,7 +80,7 @@ export class SubscriptionController {
     }
   }
 
-  async getActiveSubscriptions(req: Request, res: Response): Promise<void> {
+  getActiveSubscriptions = async (req: Request, res: Response): Promise<void> => {
     try {
       const subscriptions =
         await this.subscriptionService.getActiveSubscriptions();

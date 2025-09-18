@@ -4,13 +4,13 @@ import { AuthMiddleware } from "../utils/auth.middleware";
 import { UserDto } from "../dtos/user.dto";
 import { plainToInstance } from "class-transformer";
 import { UserRole } from "../enums/userRoles.enum";
-import { MinimalUserDto } from "../dtos/minimalUser.dto";
+import { MinimalUserDto } from "../dtos/minimal-user.dto";
 export class AuthController {
   private userService: UserService;
   constructor() {
     this.userService = new UserService();
   }
-  async register(req: Request, res: Response): Promise<void> {
+  register = async (req: Request, res: Response): Promise<void> => {
     try {
       const { email, password } = req.body;
       const user = await this.userService.getUserByEmail(email);
@@ -54,7 +54,7 @@ export class AuthController {
     }
   }
 
-  async login(req: Request, res: Response): Promise<void> {
+  login = async (req: Request, res: Response): Promise<void> => {
     try {
       const { email, password } = req.body;
       const user = await this.userService.getUserByEmail(email);
@@ -77,7 +77,7 @@ export class AuthController {
     }
   }
 
-  async forgotPassword(req: Request, res: Response): Promise<void> {
+  forgotPassword = async (req: Request, res: Response): Promise<void> => {
     try {
       const { email } = req.body;
       const user = await this.userService.getUserByEmail(email);
@@ -95,7 +95,7 @@ export class AuthController {
     }
   }
 
-  async resetPassword(req: Request, res: Response): Promise<void> {
+  resetPassword = async (req: Request, res: Response): Promise<void> => {
     try {
       const token = req.headers.authorization?.split(" ")[1];
       let decoded = null;
@@ -122,7 +122,7 @@ export class AuthController {
     }
   }
 
-  async verifyEmail(req: Request, res: Response): Promise<void> {
+  verifyEmail = async (req: Request, res: Response): Promise<void> => {
     try {
       //read token from query params
       const token = req.query.token as string;
@@ -148,7 +148,7 @@ export class AuthController {
     }
   }
 
-  async logout(req: Request, res: Response): Promise<void> {
+  logout = async (req: Request, res: Response): Promise<void> => {
     try {
       req.logout(() => {
         res.status(200).json({ message: "Logged out" });
@@ -159,7 +159,7 @@ export class AuthController {
   }
 
   // sign in with google
-  async googleLogin(req: Request, res: Response): Promise<void> {
+  googleLogin = async (req: Request, res: Response): Promise<void> => {
     try {
       const user = req.user as any;
       if (!user) {

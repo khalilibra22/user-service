@@ -1,17 +1,17 @@
 // src/config/ormconfig.ts
 import { DataSource } from "typeorm";
 import { UserModel } from "../models/user.model";
-import { UserSettingModel } from "../models/userSetting.model";
-import { AcademicBackgroundModel } from "../models/academicBackground.model";
+import { UserSettingModel } from "../models/user-setting.model";
+import { AcademicBackgroundModel } from "../models/academic-background.model";
 import { CategoryModel } from "../models/category.model";
 import { TopicModel } from "../models/topic.model";
-import { PaymentMethodModel } from "../models/paymentMethod.model";
+import { PaymentMethodModel } from "../models/payment-method.model";
 import { SubjectModel } from "../models/subject.model";
-import { UserTopicModel } from "../models/userTopic.model";
+import { UserTopicModel } from "../models/user-topic.model";
 import { PlanModel } from "../models/plan.model";
 import { SubscriptionModel } from "../models/subscription.model";
 import { AvailabilityModel } from "../models/availability.model";
-import { AvailabilityExceptionModel } from "../models/availabilityException.model";
+import { AvailabilityExceptionModel } from "../models/availability-exception.model";
 import { CouponModel } from "../models/coupon.model";
 
 export const AppDataSource = new DataSource({

@@ -1,8 +1,8 @@
 import { UserModel } from "../models/user.model";
 import { AppDataSource } from "../config/database";
-import { PaymentMethodModel } from "../models/paymentMethod.model";
+import { PaymentMethodModel } from "../models/payment-method.model";
 import { UserRole } from "../enums/userRoles.enum";
-import { UserSettingModel } from "../models/userSetting.model";
+import { UserSettingModel } from "../models/user-setting.model";
 import { In } from "typeorm";
 
 export class UserService {

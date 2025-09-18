@@ -1,8 +1,8 @@
 import express from "express";
-import { ValidationMiddleware } from "../utils/validation.middleware";
-import { AuthMiddleware } from "../utils/auth.middleware";
-import { AcademicBackgroundController } from "../controllers/academicBackground.controller";
-import { taxonomyValidationSchema } from "../validations/academicBackground.validation";
+import { ValidationMiddleware } from "../../utils/validation.middleware";
+import { AuthMiddleware } from "../../utils/auth.middleware";
+import { AcademicBackgroundController } from "../../controllers/academic-background.controller";
+import { taxonomyValidationSchema } from "../../validations/academic-background.validation";
 
 const router = express.Router();
 
@@ -13,15 +13,14 @@ router.post(
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("catalogs", "create"),
   ValidationMiddleware.validate(taxonomyValidationSchema),
-  async (req, res) =>
-    await academicBackgroundController.createCategory(req, res)
+  academicBackgroundController.createCategory
 );
 
 router.get(
   "/",
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("catalogs", "list"),
-  async (req, res) => await academicBackgroundController.getCategories(req, res)
+  academicBackgroundController.getCategories
 );
 
 router.post(
@@ -29,7 +28,7 @@ router.post(
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("catalogs", "create"),
   ValidationMiddleware.validate(taxonomyValidationSchema),
-  async (req, res) => await academicBackgroundController.createSubject(req, res)
+  academicBackgroundController.createSubject
 );
 
 router.post(
@@ -37,14 +36,14 @@ router.post(
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("catalogs", "create"),
   ValidationMiddleware.validate(taxonomyValidationSchema),
-  async (req, res) => await academicBackgroundController.createTopic(req, res)
+  academicBackgroundController.createTopic
 );
 
 router.delete(
   "/:categoryId/subjects/:subjectId/topics/:topicId",
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("catalogs", "delete"),
-  async (req, res) => await academicBackgroundController.deleteTopic(req, res)
+  academicBackgroundController.deleteTopic
 );
 
 router.put(
@@ -52,14 +51,13 @@ router.put(
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("catalogs", "update"),
   ValidationMiddleware.validate(taxonomyValidationSchema),
-  async (req, res) => await academicBackgroundController.updateTopic(req, res)
+  academicBackgroundController.updateTopic
 );
 
 router.patch(
   "/:categoryId/subjects/:subjectId/topics/:topicId/toggle-status",
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("catalogs", "update"),
-  async (req, res) =>
-    await academicBackgroundController.toggleTopicStatus(req, res)
+  academicBackgroundController.toggleTopicStatus
 );
 export { router as categoriesRouter };

@@ -7,11 +7,18 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  Index,
 } from "typeorm";
 import { UserModel } from "./user.model";
-import { DayOfWeek } from "../enums/dayOfWeek.enum";
+import { DayOfWeek } from "../enums/day-of-week.enum";
 
 @Entity("availabilities")
+@Index("IDX_availabilities_user_id", ["user"])
+@Index("IDX_availabilities_day_of_week", ["dayOfWeek"])
+@Index("IDX_availabilities_is_available", ["isAvailable"])
+@Index("IDX_availabilities_is_active", ["isActive"])
+@Index("IDX_availabilities_user_active", ["user", "isActive"])
+@Index("IDX_availabilities_user_available", ["user", "isAvailable"])
 export class AvailabilityModel {
   @PrimaryGeneratedColumn("uuid")
   id?: string;

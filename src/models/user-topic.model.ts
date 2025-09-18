@@ -6,11 +6,16 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  Index,
 } from "typeorm";
 import { TopicModel } from "./topic.model";
 import { UserModel } from "./user.model";
 
 @Entity("user_topics")
+@Index("IDX_user_topics_user_id", ["user"])
+@Index("IDX_user_topics_topic_id", ["topic"])
+@Index("IDX_user_topics_is_active", ["isActive"])
+@Index("IDX_user_topics_user_active", ["user", "isActive"])
 export class UserTopicModel {
   @PrimaryGeneratedColumn()
   id?: number;

@@ -1,6 +1,6 @@
 import { Expose, Transform, Type } from "class-transformer";
 import { UserRole } from "../enums/userRoles.enum";
-import { UserTopicDto } from "./userTopic.dto";
+import { UserTopicDto } from "./user-topic.dto";
 
 export class SearchUserDto {
   @Expose()

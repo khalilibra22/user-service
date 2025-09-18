@@ -12,6 +12,9 @@ export class MinimalUserDto {
   phoneNumber?: string;
 
   @Expose()
+  address?: string;
+
+  @Expose()
   email?: string;
 
   @Expose()

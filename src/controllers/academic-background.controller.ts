@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
-import { AcademicBackgroundService } from "../services/academicBackground.service";
+import { AcademicBackgroundService } from "../services/academic-background.service";
 import { UserService } from "../services/user.service";
 import { plainToInstance } from "class-transformer";
-import { AcademicBackgroundDto } from "../dtos/AcademicBackground.dto";
+import { AcademicBackgroundDto } from "../dtos/academic-background.dto";
 import { CategoryDto } from "../dtos/category.dto";
 import { TopicDto } from "../dtos/topic.dto";
-import { UserTopicDto } from "../dtos/userTopic.dto";
+import { UserTopicDto } from "../dtos/user-topic.dto";
 export class AcademicBackgroundController {
   private academicBackgroundService: AcademicBackgroundService;
   private userService: UserService;
@@ -14,7 +14,7 @@ export class AcademicBackgroundController {
     this.userService = new UserService();
   }
 
-  async createAcademicBackground(req: Request, res: Response): Promise<void> {
+  createAcademicBackground = async (req: Request, res: Response): Promise<void> => {
     try {
       const id = req.params.id;
       const user = await this.userService.getUserById(id);
@@ -45,7 +45,7 @@ export class AcademicBackgroundController {
     }
   }
 
-  async createCategory(req: Request, res: Response): Promise<void> {
+  createCategory = async (req: Request, res: Response): Promise<void> => {
     try {
       const category = req.body;
       const createdCategory =
@@ -59,7 +59,7 @@ export class AcademicBackgroundController {
     }
   }
 
-  async createSubject(req: Request, res: Response): Promise<void> {
+  createSubject = async (req: Request, res: Response): Promise<void> => {
     try {
       const subject = req.body;
       const categoryId = req.params.categoryId;
@@ -83,7 +83,7 @@ export class AcademicBackgroundController {
     }
   }
 
-  async createTopic(req: Request, res: Response): Promise<void> {
+  createTopic = async (req: Request, res: Response): Promise<void> => {
     try {
       const topic = req.body;
       const categoryId = req.params.categoryId;
@@ -115,7 +115,7 @@ export class AcademicBackgroundController {
     }
   }
 
-  async getCategories(req: Request, res: Response): Promise<void> {
+  getCategories = async (req: Request, res: Response): Promise<void> => {
     try {
       const categories =
         await this.academicBackgroundService.getAllCategories();
@@ -129,7 +129,7 @@ export class AcademicBackgroundController {
   }
 
   //update academic background
-  async updateAcademicBackground(req: Request, res: Response): Promise<void> {
+  updateAcademicBackground = async (req: Request, res: Response): Promise<void> => {
     try {
       const userId = req.params.id;
       const user = await this.userService.getUserById(userId);
@@ -212,7 +212,7 @@ export class AcademicBackgroundController {
     }
   }
 
-  async deleteTopic(req: Request, res: Response): Promise<void> {
+  deleteTopic = async (req: Request, res: Response): Promise<void> => {
     try {
       const topicId = Number(req.params.topicId);
       if (isNaN(topicId)) {
@@ -231,7 +231,7 @@ export class AcademicBackgroundController {
     }
   }
 
-  async updateTopic(req: Request, res: Response): Promise<void> {
+  updateTopic = async (req: Request, res: Response): Promise<void> => {
     try {
       const topicId = Number(req.params.topicId);
       if (isNaN(topicId)) {
@@ -253,7 +253,7 @@ export class AcademicBackgroundController {
     }
   }
 
-  async toggleTopicStatus(req: Request, res: Response): Promise<void> {
+  toggleTopicStatus = async (req: Request, res: Response): Promise<void> => {
     try {
       const topicId = Number(req.params.topicId);
       if (isNaN(topicId)) {
@@ -278,7 +278,7 @@ export class AcademicBackgroundController {
     }
   }
 
-  async deleteAcademicBackground(req: Request, res: Response): Promise<void> {
+  deleteAcademicBackground = async (req: Request, res: Response): Promise<void> => {
     try {
       const userId = req.params.id;
       const academicBackgroundId = Number(req.params.academicBackgroundId);
@@ -317,7 +317,7 @@ export class AcademicBackgroundController {
       res.status(500).json({ error: "Internal Server Error" });
     }
   }
-  async addTopicToUser(req: Request, res: Response): Promise<void> {
+  addTopicToUser = async (req: Request, res: Response): Promise<void> => {
     try {
       const userId = req.params.id;
       const topicId = Number(req.params.topicId);
@@ -363,7 +363,7 @@ export class AcademicBackgroundController {
     }
   }
 
-  async updateUserTopicPrice(req: Request, res: Response): Promise<void> {
+  updateUserTopicPrice = async (req: Request, res: Response): Promise<void> => {
     try {
       const userId = req.params.id;
       const topicId = Number(req.params.topicId);
@@ -402,7 +402,7 @@ export class AcademicBackgroundController {
     }
   }
 
-  async deleteUserTopic(req: Request, res: Response): Promise<void> {
+  deleteUserTopic = async (req: Request, res: Response): Promise<void> => {
     try {
       const userId = req.params.id;
       const topicId = Number(req.params.topicId);
@@ -442,7 +442,7 @@ export class AcademicBackgroundController {
     }
   }
 
-  async getTopicsByUserId(req: Request, res: Response): Promise<void> {
+  getTopicsByUserId = async (req: Request, res: Response): Promise<void> => {
     try {
       const id = req.params.id;
       const user = await this.userService.getUserById(id);
@@ -464,7 +464,7 @@ export class AcademicBackgroundController {
     }
   }
 
-  async toggleUserTopicStatus(req: Request, res: Response): Promise<void> {
+  toggleUserTopicStatus = async (req: Request, res: Response): Promise<void> => {
     try {
       const userId = req.params.id;
       const topicId = Number(req.params.topicId);

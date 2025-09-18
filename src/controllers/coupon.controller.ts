@@ -12,7 +12,7 @@ export class CouponController {
     this.userService = new UserService();
   }
 
-  async createCoupon(req: Request, res: Response): Promise<void> {
+  createCoupon = async (req: Request, res: Response): Promise<void> => {
     try {
       const userId = req.params.id;
 
@@ -47,7 +47,7 @@ export class CouponController {
       }
     }
   }
-  async updateCoupon(req: Request, res: Response): Promise<void> {
+  updateCoupon = async (req: Request, res: Response): Promise<void> => {
     try {
       const couponId = Number(req.params.couponId);
       const userId = req.params.id;
@@ -93,7 +93,7 @@ export class CouponController {
     }
   }
 
-  async deleteCoupon(req: Request, res: Response): Promise<void> {
+  deleteCoupon = async (req: Request, res: Response): Promise<void> => {
     try {
       const id = Number(req.params.couponId);
       if (isNaN(id)) {
@@ -112,7 +112,7 @@ export class CouponController {
     }
   }
 
-  async getCouponById(req: Request, res: Response): Promise<void> {
+  getCouponById = async (req: Request, res: Response): Promise<void> => {
     try {
       const id = Number(req.params.couponId);
       if (isNaN(id)) {
@@ -133,7 +133,7 @@ export class CouponController {
     }
   }
 
-  async getUserCoupons(req: Request, res: Response): Promise<void> {
+  getUserCoupons = async (req: Request, res: Response): Promise<void> => {
     try {
       const userId = req.params.id;
       const user = await this.userService.getUserById(userId);
@@ -151,7 +151,7 @@ export class CouponController {
     }
   }
 
-  async toggleCouponStatus(req: Request, res: Response): Promise<void> {
+  toggleCouponStatus = async (req: Request, res: Response): Promise<void> => {
     try {
       const id = Number(req.params.couponId);
       if (isNaN(id)) {

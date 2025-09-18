@@ -7,10 +7,15 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  Index,
 } from "typeorm";
 import { UserModel } from "./user.model";
 
 @Entity("availability_exceptions")
+@Index("IDX_availability_exceptions_user_id", ["user"])
+@Index("IDX_availability_exceptions_exception_date", ["exceptionDate"])
+@Index("IDX_availability_exceptions_is_available", ["isAvailable"])
+@Index("IDX_availability_exceptions_user_date", ["user", "exceptionDate"])
 export class AvailabilityExceptionModel {
   @PrimaryGeneratedColumn("uuid")
   id?: string;

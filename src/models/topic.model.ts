@@ -9,7 +9,7 @@ import {
   UpdateDateColumn,
 } from "typeorm";
 import { SubjectModel } from "./subject.model";
-import { UserTopicModel } from "./userTopic.model";
+import { UserTopicModel } from "./user-topic.model";
 
 @Entity("topics")
 export class TopicModel {

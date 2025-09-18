@@ -10,20 +10,30 @@ import {
   ManyToMany,
   JoinTable,
   ManyToOne,
+  Index,
 } from "typeorm";
 import { UserRole } from "../enums/userRoles.enum";
-import { TeachingMode } from "../enums/teachingModes.enum";
-import { UserSettingModel } from "./userSetting.model";
-import { AcademicBackgroundModel } from "./academicBackground.model";
-import { PaymentMethodModel } from "./paymentMethod.model";
-import { UserTopicModel } from "./userTopic.model";
+import { TeachingMode } from "../enums/teaching-modes.enum";
+import { UserSettingModel } from "./user-setting.model";
+import { AcademicBackgroundModel } from "./academic-background.model";
+import { PaymentMethodModel } from "./payment-method.model";
+import { UserTopicModel } from "./user-topic.model";
 import { PlanModel } from "./plan.model";
 import { SubscriptionModel } from "./subscription.model";
 import { AvailabilityModel } from "./availability.model";
-import { AvailabilityExceptionModel } from "./availabilityException.model";
+import { AvailabilityExceptionModel } from "./availability-exception.model";
 import { CouponModel } from "./coupon.model";
 
 @Entity("users")
+@Index("IDX_users_role", ["role"])
+@Index("IDX_users_email", ["email"])
+@Index("IDX_users_google_id", ["googleId"])
+@Index("IDX_users_is_active", ["isActive"])
+@Index("IDX_users_is_approved", ["isApproved"])
+@Index("IDX_users_created_at", ["createdAt"])
+@Index("IDX_users_role_active", ["role", "isActive"])
+@Index("IDX_users_role_approved", ["role", "isApproved"])
+@Index("IDX_users_location", ["state", "city", "district"])
 export class UserModel {
   @PrimaryGeneratedColumn("uuid")
   id?: string;

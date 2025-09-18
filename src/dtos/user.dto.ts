@@ -1,5 +1,5 @@
 import { Expose, Transform } from "class-transformer";
-import { TeachingMode } from "../enums/teachingModes.enum";
+import { TeachingMode } from "../enums/teaching-modes.enum";
 import { UserRole } from "../enums/userRoles.enum";
 import { getImageUrl } from "../utils";
 

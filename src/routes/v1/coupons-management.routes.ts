@@ -1,6 +1,6 @@
 import express from "express";
-import { AuthMiddleware } from "../utils/auth.middleware";
-import { CouponController } from "../controllers/coupon.controller";
+import { AuthMiddleware } from "../../utils/auth.middleware";
+import { CouponController } from "../../controllers/coupon.controller";
 
 const router = express.Router();
 
@@ -10,14 +10,14 @@ router.get(
   "/:couponId",
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("coupons", "read"),
-  async (req, res) => couponController.getCouponById(req, res)
+  couponController.getCouponById
 );
 
 router.patch(
   "/:couponId/toggle-status",
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("coupons", "toggle"),
-  async (req, res) => couponController.toggleCouponStatus(req, res)
+  couponController.toggleCouponStatus
 );
 
-export { router as couponRouter };
+export { router as couponManagementRouter };

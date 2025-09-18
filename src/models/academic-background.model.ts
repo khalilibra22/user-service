@@ -6,10 +6,16 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  Index,
 } from "typeorm";
 import { UserModel } from "./user.model";
 
 @Entity("academic_backgrounds")
+@Index("IDX_academic_backgrounds_user_id", ["user"])
+@Index("IDX_academic_backgrounds_type", ["type"])
+@Index("IDX_academic_backgrounds_is_verified", ["isVerified"])
+@Index("IDX_academic_backgrounds_start_date", ["startDate"])
+@Index("IDX_academic_backgrounds_end_date", ["endDate"])
 export class AcademicBackgroundModel {
   @PrimaryGeneratedColumn()
   id?: number;

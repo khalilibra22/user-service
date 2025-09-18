@@ -4,8 +4,8 @@ import { Request, Response, NextFunction } from "express";
 import { UserModel } from "../models/user.model";
 import { UserRole } from "../enums/userRoles.enum";
 import { UserDto } from "../dtos/user.dto";
-import { permissions } from "../config/permissions";
-import { Action, Resource } from "./permissionTypes";
+import { permissions, privileges } from "../config/permissions";
+import { Action, Resource } from "./permission-types";
 
 class AuthMiddleware {
   private static saltRounds = 10;
@@ -101,7 +101,15 @@ class AuthMiddleware {
       try {
         const user = req.body.user;
         delete req.body.user;
-
+        const hasAccess = AuthMiddleware.checkMethodPrivileges(
+          req.method,
+          resource,
+          action
+        );
+        if (hasAccess) {
+          next();
+          return;
+        }
         if (req.params.id && req.params.id !== user.id) {
           res.status(403).json({ message: "Forbidden" });
           return;
@@ -124,6 +132,22 @@ class AuthMiddleware {
         res.status(500).json({ message: "Server error" });
       }
     };
+  }
+
+  private static checkMethodPrivileges(
+    method: string,
+    resource: Resource,
+    action: Action
+  ): Boolean {
+    const methodPrivileges = privileges[method];
+    if (
+      methodPrivileges &&
+      methodPrivileges[resource] &&
+      methodPrivileges[resource].includes(action)
+    ) {
+      return true;
+    }
+    return false;
   }
 }
 export { AuthMiddleware };
