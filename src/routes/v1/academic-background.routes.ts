@@ -13,8 +13,7 @@ router.post(
     AuthMiddleware.verifyToken,
     AuthMiddleware.authorize("academic_backgrounds", "create"),
     ValidationMiddleware.validate(academicBackgroundSchema),
-    async (req, res) =>
-      academicBackgroundController.createAcademicBackground(req, res)
+    academicBackgroundController.createAcademicBackground
   );
   
   // Update user's academic background
@@ -23,8 +22,7 @@ router.post(
     AuthMiddleware.verifyToken,
     AuthMiddleware.authorize("academic_backgrounds", "update"),
     ValidationMiddleware.validate(updateAcademicBackgroundSchema),
-    async (req, res) =>
-      academicBackgroundController.updateAcademicBackground(req, res)
+    academicBackgroundController.updateAcademicBackground
   );
   
   // Delete user's academic background
@@ -32,17 +30,16 @@ router.post(
     "/:academicBackgroundId",
     AuthMiddleware.verifyToken,
     AuthMiddleware.authorize("academic_backgrounds", "delete"),
-    async (req, res) =>
-      academicBackgroundController.deleteAcademicBackground(req, res)
+    academicBackgroundController.deleteAcademicBackground
   );
+
   
   // Get user's academic background by user ID
   router.get(
     "/",
     AuthMiddleware.verifyToken,
     AuthMiddleware.authorize("academic_backgrounds", "list"),
-    async (req, res) =>
-      academicBackgroundController.getAcademicBackgroundByUserId(req, res)
+    academicBackgroundController.getAcademicBackgroundByUserId
   );
   
 export { router as academicBackgroundRouter };

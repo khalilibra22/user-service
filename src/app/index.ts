@@ -1,7 +1,6 @@
 import "../utils/subscription-checker";
 import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
-import GrpcServer from "../grpc";
 import { appV1 } from "./app-v1";
 
 const app = express();
@@ -27,7 +26,7 @@ app.get("/", (req: Request, res: Response) => {
 
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
-  new GrpcServer().start();
+  //new GrpcServer().start();
 });
 
 export default app;

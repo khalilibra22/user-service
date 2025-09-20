@@ -9,6 +9,7 @@ import { userRouter } from "../routes/v1/user.routes";
 import path from "path";
 import passport from "passport";
 import session from "express-session";
+import { inboundRouter } from "../routes/v1/inbound.routes";
 
 const app = express.Router();
 
@@ -30,5 +31,6 @@ app.use("/categories", categoriesRouter); // Assuming you have a route for acade
 app.use("/subscriptions", subscriptionRouter); // Assuming you have a route for subscriptions
 app.use("/coupons", couponManagementRouter); // Assuming you have a route for coupons
 app.use("/search", searchRouter);
+app.use("/inbounds", inboundRouter);
 
 export { app as appV1 };

@@ -506,4 +506,21 @@ export class AcademicBackgroundController {
       res.status(500).json({ error: "Internal Server Error" });
     }
   }
+
+  getUserTopicById = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const id = Number(req.params.id);
+      const userTopic = await this.academicBackgroundService.getUserTopicById(id);
+      if (!userTopic) {
+        res.status(404).json({ error: "User topic not found" });
+        return;
+      }
+      const userTopicDto = plainToInstance(UserTopicDto, userTopic, {
+        excludeExtraneousValues: true,
+      });
+      res.status(200).json(userTopicDto);
+    } catch (error: any) {
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
 }
