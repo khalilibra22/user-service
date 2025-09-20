@@ -15,17 +15,14 @@ router.get(
   userController.getUserMinimalInfo
 );
 
-router.get(
-    "/users/topics/:id",
-    academicBackgroundController.getUserTopicById
-  );
+router.get("/users/topics/:id", academicBackgroundController.getUserTopicById);
 
 router.post(
   "/availabilities/check",
   availabilityController.checkAvailabilitiesByIds
 );
 
-router.post(
+router.put(
   "/availabilities/update-to-unavailable",
   availabilityController.updateAvailabilitiesToUnavailable
 );
