@@ -4,7 +4,7 @@ import { AuthMiddleware } from "../../utils/auth.middleware";
 import { ValidationMiddleware } from "../../utils/validation.middleware";
 import { availabilitySchema } from "../../validations/availability.validation";
 
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 
 const availabilityController = new AvailabilityController();
 
