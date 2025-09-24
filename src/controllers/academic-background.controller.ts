@@ -14,7 +14,10 @@ export class AcademicBackgroundController {
     this.userService = new UserService();
   }
 
-  createAcademicBackground = async (req: Request, res: Response): Promise<void> => {
+  createAcademicBackground = async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
     try {
       const id = req.params.id;
       const user = await this.userService.getUserById(id);
@@ -43,7 +46,7 @@ export class AcademicBackgroundController {
       }
       res.status(500).json({ error: "Internal Server Error" });
     }
-  }
+  };
 
   createCategory = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -57,7 +60,7 @@ export class AcademicBackgroundController {
     } catch (error) {
       res.status(500).json({ error: "Internal Server Error" });
     }
-  }
+  };
 
   createSubject = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -81,7 +84,7 @@ export class AcademicBackgroundController {
     } catch (error) {
       res.status(500).json({ error: "Internal Server Error" });
     }
-  }
+  };
 
   createTopic = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -113,7 +116,7 @@ export class AcademicBackgroundController {
     } catch (error) {
       res.status(500).json({ error: "Internal Server Error" });
     }
-  }
+  };
 
   getCategories = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -126,10 +129,13 @@ export class AcademicBackgroundController {
     } catch (error) {
       res.status(500).json({ error: "Internal Server Error" });
     }
-  }
+  };
 
   //update academic background
-  updateAcademicBackground = async (req: Request, res: Response): Promise<void> => {
+  updateAcademicBackground = async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
     try {
       const userId = req.params.id;
       const user = await this.userService.getUserById(userId);
@@ -158,13 +164,13 @@ export class AcademicBackgroundController {
     } catch (error) {
       res.status(500).json({ error: "Internal Server Error" });
     }
-  }
+  };
 
   // get academic background by user ID
-  async getAcademicBackgroundByUserId(
+  getAcademicBackgroundByUserId = async (
     req: Request,
     res: Response
-  ): Promise<void> {
+  ): Promise<void> => {
     try {
       const userId = req.params.id;
       const user = await this.userService.getUserById(userId);
@@ -210,7 +216,7 @@ export class AcademicBackgroundController {
       }
       res.status(500).json({ error: "Internal Server Error" });
     }
-  }
+  };
 
   deleteTopic = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -229,7 +235,7 @@ export class AcademicBackgroundController {
     } catch (error) {
       res.status(500).json({ error: "Internal Server Error" });
     }
-  }
+  };
 
   updateTopic = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -251,7 +257,7 @@ export class AcademicBackgroundController {
     } catch (error) {
       res.status(500).json({ error: "Internal Server Error" });
     }
-  }
+  };
 
   toggleTopicStatus = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -276,9 +282,12 @@ export class AcademicBackgroundController {
     } catch (error) {
       res.status(500).json({ error: "Internal Server Error" });
     }
-  }
+  };
 
-  deleteAcademicBackground = async (req: Request, res: Response): Promise<void> => {
+  deleteAcademicBackground = async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
     try {
       const userId = req.params.id;
       const academicBackgroundId = Number(req.params.academicBackgroundId);
@@ -316,7 +325,7 @@ export class AcademicBackgroundController {
       }
       res.status(500).json({ error: "Internal Server Error" });
     }
-  }
+  };
   addTopicToUser = async (req: Request, res: Response): Promise<void> => {
     try {
       const userId = req.params.id;
@@ -361,7 +370,7 @@ export class AcademicBackgroundController {
       }
       res.status(500).json({ error: "Internal Server Error" });
     }
-  }
+  };
 
   updateUserTopicPrice = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -400,7 +409,7 @@ export class AcademicBackgroundController {
       }
       res.status(500).json({ error: "Internal Server Error" });
     }
-  }
+  };
 
   deleteUserTopic = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -440,7 +449,7 @@ export class AcademicBackgroundController {
       console.error(error);
       res.status(500).json({ error: "Internal Server Error" });
     }
-  }
+  };
 
   getTopicsByUserId = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -462,9 +471,12 @@ export class AcademicBackgroundController {
       }
       res.status(500).json({ error: "Internal Server Error" });
     }
-  }
+  };
 
-  toggleUserTopicStatus = async (req: Request, res: Response): Promise<void> => {
+  toggleUserTopicStatus = async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
     try {
       const userId = req.params.id;
       const topicId = Number(req.params.topicId);
@@ -505,12 +517,14 @@ export class AcademicBackgroundController {
       }
       res.status(500).json({ error: "Internal Server Error" });
     }
-  }
+  };
 
   getUserTopicById = async (req: Request, res: Response): Promise<void> => {
     try {
       const id = Number(req.params.id);
-      const userTopic = await this.academicBackgroundService.getUserTopicById(id);
+      const userTopic = await this.academicBackgroundService.getUserTopicById(
+        id
+      );
       if (!userTopic) {
         res.status(404).json({ error: "User topic not found" });
         return;
@@ -522,5 +536,5 @@ export class AcademicBackgroundController {
     } catch (error: any) {
       res.status(500).json({ error: "Internal Server Error" });
     }
-  }
+  };
 }
