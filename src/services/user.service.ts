@@ -242,6 +242,7 @@ export class UserService {
         relations: ["topics", "topics.topic", "availabilities"],
         skip: (page - 1) * limit,
         take: limit,
+        cache: true, // Enable caching for this query
       });
     } catch (error) {
       throw new Error("Error searching teachers and academies");
