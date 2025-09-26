@@ -22,7 +22,13 @@ export class SubscriptionService {
 
   async getPlanById(planId: string): Promise<PlanModel | null> {
     try {
-      return await this.planRepo.findOne({ where: { id: planId } });
+      return await this.planRepo.findOne({ 
+        where: { id: planId },
+        cache: {
+          id: `plan_${planId}`,
+          milliseconds: 1800000, // 30 minutes
+        },
+      });
     } catch (error) {
       throw new Error("Error fetching plan");
     }
@@ -30,7 +36,12 @@ export class SubscriptionService {
 
   async getPlans(): Promise<PlanModel[]> {
     try {
-      return await this.planRepo.find();
+      return await this.planRepo.find({
+        cache: {
+          id: 'all_plans',
+          milliseconds: 1800000, // 30 minutes
+        },
+      });
     } catch (error) {
       throw new Error("Error fetching plans");
     }
@@ -53,6 +64,10 @@ export class SubscriptionService {
       return await this.subscriptionRepo.find({
         where: { user: { id: userId }, isActive: true },
         relations: ["plan"],
+        cache: {
+          id: `active_subscriptions_${userId}`,
+          milliseconds: 300000, // 5 minutes
+        },
       });
     } catch (error) {
       throw new Error("Error fetching active subscriptions");
@@ -88,6 +103,10 @@ export class SubscriptionService {
       return await this.subscriptionRepo.find({
         where: { status: "active" },
         relations: ["user", "plan"],
+        cache: {
+          id: 'all_active_subscriptions',
+          milliseconds: 120000, // 2 minutes
+        },
       });
     } catch (error) {
       throw new Error("Error fetching active subscriptions");
