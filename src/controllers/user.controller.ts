@@ -17,7 +17,7 @@ export class UserController {
   getUserById = async (req: Request, res: Response): Promise<void> => {
     try {
       const id = req.params.id;
-      const user = await this.userService.getUserById(id);
+      const user = await this.userService.getUserByIdNoCache(id);
       if (!user) {
         res.status(404).json({ error: "User not found" });
         return;
@@ -42,12 +42,12 @@ export class UserController {
 
       res.status(500).json({ error: "Internal Server Error" });
     }
-  }
+  };
 
   updateUser = async (req: Request, res: Response): Promise<void> => {
     try {
       const id = req.params.id;
-      const user = await this.userService.getUserById(id);
+      const user = await this.userService.getUserByIdNoCache(id);
       if (!user) {
         res.status(404).json({ error: "User not found" });
         return;
@@ -62,12 +62,12 @@ export class UserController {
       }
       res.status(500).json({ error: "Internal Server Error" });
     }
-  }
+  };
 
   deleteUser = async (req: Request, res: Response): Promise<void> => {
     try {
       const id = req.params.id;
-      const user = await this.userService.getUserById(id);
+      const user = await this.userService.getUserByIdNoCache(id);
       if (!user) {
         res.status(404).json({ error: "User not found" });
         return;
@@ -81,7 +81,7 @@ export class UserController {
       }
       res.status(500).json({ error: "Internal Server Error" });
     }
-  }
+  };
 
   // Get user plan
   getUserPlan = async (req: Request, res: Response): Promise<void> => {
@@ -101,7 +101,7 @@ export class UserController {
       }
       res.status(500).json({ error: "Internal Server Error" });
     }
-  }
+  };
   // Add payemnt method
   addPaymentMethod = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -139,7 +139,7 @@ export class UserController {
       }
       res.status(500).json({ error: "Internal Server Error" });
     }
-  }
+  };
   //Update payment method
   updatePaymentMethod = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -175,10 +175,13 @@ export class UserController {
       }
       res.status(500).json({ error: "Internal Server Error" });
     }
-  }
+  };
 
   // Get payment methods by user id
-  getPaymentMethodsByUserId = async (req: Request, res: Response): Promise<void> => {
+  getPaymentMethodsByUserId = async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
     try {
       const id = req.params.id;
       const user = await this.userService.getUserById(id);
@@ -204,7 +207,7 @@ export class UserController {
       }
       res.status(500).json({ error: "Internal Server Error" });
     }
-  }
+  };
 
   // Delete payment method
   deletePaymentMethod = async (req: Request, res: Response): Promise<void> => {
@@ -236,7 +239,7 @@ export class UserController {
       }
       res.status(500).json({ error: "Internal Server Error" });
     }
-  }
+  };
 
   //  get All Teachers using pagination
   getAllTeachers = async (req: Request, res: Response): Promise<void> => {
@@ -255,7 +258,7 @@ export class UserController {
     } catch (error) {
       res.status(500).json({ error: "Internal Server Error" });
     }
-  }
+  };
 
   getAllStudents = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -273,7 +276,7 @@ export class UserController {
     } catch (error) {
       res.status(500).json({ error: "Internal Server Error" });
     }
-  }
+  };
 
   getAllAcademies = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -291,7 +294,7 @@ export class UserController {
     } catch (error) {
       res.status(500).json({ error: "Internal Server Error" });
     }
-  }
+  };
 
   getAllAdmins = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -309,7 +312,7 @@ export class UserController {
     } catch (error) {
       res.status(500).json({ error: "Internal Server Error" });
     }
-  }
+  };
 
   // create user by admin
   createUser = async (req: Request, res: Response): Promise<void> => {
@@ -330,10 +333,13 @@ export class UserController {
     } catch (error) {
       res.status(500).json({ error: "Internal Server Error" });
     }
-  }
+  };
 
   //update user's phone number
-  updateUserPhoneNumber = async (req: Request, res: Response): Promise<void> => {
+  updateUserPhoneNumber = async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
     try {
       const id = req.params.id;
       const user = await this.userService.getUserById(id);
@@ -351,7 +357,7 @@ export class UserController {
       }
       res.status(500).json({ error: "Internal Server Error" });
     }
-  }
+  };
 
   //update user's email
   updateUserEmail = async (req: Request, res: Response): Promise<void> => {
@@ -390,7 +396,7 @@ export class UserController {
       }
       res.status(500).json({ error: "Internal Server Error" });
     }
-  }
+  };
 
   // update user's password
   updateUserPassword = async (req: Request, res: Response): Promise<void> => {
@@ -421,10 +427,13 @@ export class UserController {
       }
       res.status(500).json({ error: "Internal Server Error" });
     }
-  }
+  };
 
   //update user's contact information
-  updateUserContactInfo = async (req: Request, res: Response): Promise<void> => {
+  updateUserContactInfo = async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
     try {
       const id = req.params.id;
       const user = await this.userService.getUserById(id);
@@ -445,7 +454,7 @@ export class UserController {
       }
       res.status(500).json({ error: "Internal Server Error" });
     }
-  }
+  };
 
   //get user contact information
   getUserContactInfo = async (req: Request, res: Response): Promise<void> => {
@@ -467,7 +476,7 @@ export class UserController {
       }
       res.status(500).json({ error: "Internal Server Error" });
     }
-  }
+  };
 
   getUserMinimalInfo = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -488,5 +497,34 @@ export class UserController {
       }
       res.status(500).json({ error: "Internal Server Error" });
     }
-  }
+  };
+
+  // Switch user role between student and teacher
+  switchUserRole = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const id = req.params.id;
+      const user = await this.userService.getUserByIdNoCache(id);
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      if (!user.isSwichable) {
+        res.status(400).json({ error: "User role cannot be switched" });
+        return;
+      }
+      const newRole: UserRole = user.role === UserRole.STUDENT ? UserRole.TEACHER : UserRole.STUDENT;
+      user.role = newRole;
+      await this.userService.updateUser(id, user);
+      const token = await AuthMiddleware.generateToken(user);
+      res
+        .status(200)
+        .json({ message: "Role switched successfully", newToken: token });
+    } catch (error: any) {
+      if (error.message === "Error fetching user") {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  };
 }

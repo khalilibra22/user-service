@@ -51,16 +51,31 @@ export class UserService {
     }
   }
 
+  async getUserByIdNoCache(id: string): Promise<UserModel | undefined> {
+    try {
+      return await this.userRepo.findOne({
+        where: {
+          id: id,
+        },
+        relations: ["settings"],
+        cache: false,
+      });
+    } catch (error) {
+      throw new Error("Error fetching user");
+    }
+  }
+
   async getUserByEmail(email: string): Promise<UserModel | undefined> {
     try {
       return await this.userRepo.findOne({
         where: {
           email: email,
         },
-        cache: {
-          id: `user_email_${email}`,
-          milliseconds: 300000, // 5 minutes
-        },
+        cache: false,
+        // cache: {
+        //   id: `user_email_${email}`,
+        //   milliseconds: 300000, // 5 minutes
+        // },
       });
     } catch (error) {
       throw new Error("Error fetching user");

@@ -50,7 +50,6 @@ router.get(
   userController.getUserPlan
 );
 
-
 // Get all teahers
 router.get(
   "/teachers",
@@ -141,9 +140,13 @@ router.get(
   userController.getUserContactInfo
 );
 
+router.get("/:id/minimal", userController.getUserMinimalInfo);
+
 router.get(
-  "/:id/minimal",
-  userController.getUserMinimalInfo
+  "/:id/switch-role",
+  AuthMiddleware.verifyToken,
+  AuthMiddleware.authorize("users", "update"),
+  userController.switchUserRole
 );
 
 export { router as userRouter };
