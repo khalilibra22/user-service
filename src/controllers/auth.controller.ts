@@ -32,6 +32,9 @@ export class AuthController {
 
       const hashedPassword = await AuthMiddleware.hashPassword(password);
       req.body.password = hashedPassword;
+      if (req.body.role == 1) {
+        req.body = { ...req.body, isSwichable: true }; // Set isSwichable to true for teachers
+      }
       const createdUser = await this.userService.createUser(req.body);
       const token = await AuthMiddleware.generateToken(createdUser);
       //const verificationLink = `http://localhost:5000/auth/verify-email?token=${token}`;
@@ -52,7 +55,7 @@ export class AuthController {
     } catch (error) {
       res.status(500).json({ error: "Internal Server Error" });
     }
-  }
+  };
 
   login = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -75,7 +78,7 @@ export class AuthController {
     } catch (error) {
       res.status(500).json({ error: "Internal Server Error" });
     }
-  }
+  };
 
   forgotPassword = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -93,7 +96,7 @@ export class AuthController {
     } catch (error) {
       res.status(500).json({ error: "Internal Server Error" });
     }
-  }
+  };
 
   resetPassword = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -120,7 +123,7 @@ export class AuthController {
     } catch (error) {
       res.status(500).json({ error: "Internal Server Error" });
     }
-  }
+  };
 
   verifyEmail = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -146,7 +149,7 @@ export class AuthController {
     } catch (error) {
       res.status(500).json({ error: "Internal Server Error" });
     }
-  }
+  };
 
   logout = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -156,7 +159,7 @@ export class AuthController {
     } catch (error) {
       res.status(500).json({ error: "Internal Server Error" });
     }
-  }
+  };
 
   // sign in with google
   googleLogin = async (req: Request, res: Response): Promise<void> => {
@@ -181,5 +184,5 @@ export class AuthController {
     } catch (error) {
       res.status(500).json({ error: "Internal Server Error" });
     }
-  }
+  };
 }

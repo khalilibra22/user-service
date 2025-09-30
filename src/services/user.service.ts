@@ -41,6 +41,24 @@ export class UserService {
           id: id,
         },
         relations: ["settings"],
+        cache: {
+          id: `user_${id}`,
+          milliseconds: 300000, // 5 minutes
+        },
+      });
+    } catch (error) {
+      throw new Error("Error fetching user");
+    }
+  }
+
+  async getUserByIdNoCache(id: string): Promise<UserModel | undefined> {
+    try {
+      return await this.userRepo.findOne({
+        where: {
+          id: id,
+        },
+        relations: ["settings"],
+        cache: false,
       });
     } catch (error) {
       throw new Error("Error fetching user");
@@ -53,6 +71,11 @@ export class UserService {
         where: {
           email: email,
         },
+        cache: false,
+        // cache: {
+        //   id: `user_email_${email}`,
+        //   milliseconds: 300000, // 5 minutes
+        // },
       });
     } catch (error) {
       throw new Error("Error fetching user");
@@ -82,6 +105,10 @@ export class UserService {
           id: id,
         },
         relations: ["permissions"],
+        cache: {
+          id: `user_permissions_${id}`,
+          milliseconds: 600000, // 10 minutes
+        },
       });
     } catch (error) {
       throw new Error("Error fetching user permissions");
@@ -104,6 +131,10 @@ export class UserService {
           id: id,
         },
         relations: ["plan"],
+        cache: {
+          id: `user_plan_${id}`,
+          milliseconds: 900000, // 15 minutes
+        },
       });
     } catch (error) {
       throw new Error("Error fetching user plan");
@@ -144,6 +175,10 @@ export class UserService {
             id: userId,
           },
         },
+        cache: {
+          id: `payment_methods_${userId}`,
+          milliseconds: 180000, // 3 minutes
+        },
       });
     } catch (error) {
       throw new Error("Error fetching payment methods");
@@ -158,6 +193,10 @@ export class UserService {
       return await this.payementMethodRepo.findOne({
         where: {
           id: id,
+        },
+        cache: {
+          id: `payment_method_${id}`,
+          milliseconds: 180000, // 3 minutes
         },
       });
     } catch (error) {
@@ -177,6 +216,10 @@ export class UserService {
           user: {
             id: userId,
           },
+        },
+        cache: {
+          id: `payment_method_${type}_${userId}`,
+          milliseconds: 180000, // 3 minutes
         },
       });
     } catch (error) {
@@ -200,6 +243,10 @@ export class UserService {
         where: {
           googleId: googleId,
         },
+        cache: {
+          id: `user_google_${googleId}`,
+          milliseconds: 300000, // 5 minutes
+        },
       });
     } catch (error) {
       throw new Error("Error fetching user by Google ID");
@@ -218,6 +265,10 @@ export class UserService {
         },
         skip: (page - 1) * limit,
         take: limit,
+        cache: {
+          id: `users_${role}_page_${page}_limit_${limit}`,
+          milliseconds: 120000, // 2 minutes
+        },
       });
     } catch (error) {
       throw new Error("Error fetching users");
@@ -242,6 +293,10 @@ export class UserService {
         relations: ["topics", "topics.topic", "availabilities"],
         skip: (page - 1) * limit,
         take: limit,
+        cache: {
+          id: `search_teachers_academies_page_${page}_limit_${limit}`,
+          milliseconds: 120000,
+        }, // Enable caching for this query
       });
     } catch (error) {
       throw new Error("Error searching teachers and academies");

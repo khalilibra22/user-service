@@ -88,6 +88,10 @@ export class AcademicBackgroundService {
         where: {
           id: id,
         },
+        cache: {
+          id: `category_${id}`,
+          milliseconds: 1800000, // 30 minutes
+        },
       });
     } catch (error) {
       throw new Error("Error fetching category");
@@ -100,6 +104,10 @@ export class AcademicBackgroundService {
         where: {
           id: id,
         },
+        cache: {
+          id: `subject_${id}`,
+          milliseconds: 1800000, // 30 minutes
+        },
       });
     } catch (error) {
       throw new Error("Error fetching subject");
@@ -111,6 +119,10 @@ export class AcademicBackgroundService {
       return await this.topicRepo.findOne({
         where: {
           id: id,
+        },
+        cache: {
+          id: `topic_${id}`,
+          milliseconds: 1800000, // 30 minutes
         },
       });
     } catch (error) {
@@ -140,6 +152,10 @@ export class AcademicBackgroundService {
           },
         },
         relations: ["topic"],
+        cache: {
+          id: `user_topics_${userId}`,
+          milliseconds: 300000, // 5 minutes
+        },
       });
     } catch (error) {
       throw new Error("Error fetching topics by user id");
@@ -151,6 +167,10 @@ export class AcademicBackgroundService {
     try {
       return await this.categoryRepo.find({
         relations: ["subjects", "subjects.topics"],
+        cache: {
+          id: 'all_categories',
+          milliseconds: 3600000, // 1 hour
+        },
       });
     } catch (error) {
       throw new Error("Error fetching categories");
@@ -167,6 +187,10 @@ export class AcademicBackgroundService {
           user: {
             id: userId,
           },
+        },
+        cache: {
+          id: `academic_backgrounds_${userId}`,
+          milliseconds: 600000, // 10 minutes
         },
       });
     } catch (error) {
@@ -243,6 +267,10 @@ export class AcademicBackgroundService {
           id: id,
         },
         relations: ["topic"],
+        cache: {
+          id: `user_topic_${id}`,
+          milliseconds: 300000, // 5 minutes
+        },
       });
     } catch (error) {
       throw new Error("Error fetching user topic by user id and topic id");

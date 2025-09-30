@@ -30,6 +30,10 @@ export class CouponService {
         where: {
           id: id,
         },
+        cache: {
+          id: `coupon_${id}`,
+          milliseconds: 900000, // 15 minutes
+        },
       });
     } catch (error) {
       throw new Error("Error fetching coupon");
@@ -38,7 +42,12 @@ export class CouponService {
 
   async getAllCoupons(): Promise<CouponModel[]> {
     try {
-      return await this.couponRepo.find();
+      return await this.couponRepo.find({
+        cache: {
+          id: 'all_coupons',
+          milliseconds: 900000, // 15 minutes
+        },
+      });
     } catch (error) {
       throw new Error("Error fetching coupons");
     }
@@ -61,6 +70,10 @@ export class CouponService {
             id: userId,
           },
         },
+        cache: {
+          id: `user_coupons_${userId}`,
+          milliseconds: 300000, // 5 minutes
+        },
       });
     } catch (error) {
       console.error(error);
@@ -76,6 +89,10 @@ export class CouponService {
           user: {
             id: userId,
           },
+        },
+        cache: {
+          id: `user_coupon_check_${userId}_${couponCode}`,
+          milliseconds: 180000, // 3 minutes
         },
       });
       return !!coupon;

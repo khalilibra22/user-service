@@ -71,4 +71,7 @@ export class UserDto {
 
   @Expose()
   isApproved?: boolean;
+
+  @Expose()
+  isSwichable?: boolean;
 }

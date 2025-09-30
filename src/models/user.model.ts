@@ -143,6 +143,9 @@ export class UserModel {
   @Column({ default: false, name: "is_active" })
   isActive?: boolean;
 
+  @Column({ default: false, name: "is_swichable" })
+  isSwichable?: boolean;
+
   @CreateDateColumn({ type: "timestamp" })
   createdAt?: Date;
 

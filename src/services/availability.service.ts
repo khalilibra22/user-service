@@ -111,6 +111,10 @@ export class AvailabilityService {
             id: teacherId,
           },
         },
+        cache: {
+          id: `teacher_availability_${teacherId}`,
+          milliseconds: 120000, // 2 minutes
+        },
       });
     } catch (error) {
       console.error(error);
@@ -128,6 +132,10 @@ export class AvailabilityService {
           user: {
             id: teacherId,
           },
+        },
+        cache: {
+          id: `teacher_availability_exceptions_${teacherId}`,
+          milliseconds: 120000, // 2 minutes
         },
       });
     } catch (error) {
