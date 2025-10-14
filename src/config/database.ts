@@ -50,10 +50,14 @@ export const AppDataSource = new DataSource({
   },
 });
 
+import { getLogger } from "../utils/logger";
+
+const logger = getLogger();
+
 AppDataSource.initialize()
   .then(() => {
-    console.log("Database connected");
+    logger.info("Database connected");
   })
   .catch((error) => {
-    console.error("Database connection error", error);
+    logger.error({ err: error }, "Database connection error");
   });

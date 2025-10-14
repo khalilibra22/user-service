@@ -5,6 +5,7 @@ import { getDurationInMonths } from "../utils";
 import { plainToInstance } from "class-transformer";
 import { PlanDto } from "../dtos/plan.dto";
 import { SubscriptionDto } from "../dtos/subscription.dto";
+import { getLogger } from "../utils/logger";
 
 export class SubscriptionController {
   private subscriptionService: SubscriptionService;
@@ -22,6 +23,7 @@ export class SubscriptionController {
       });
       res.status(201).json(planDto);
     } catch (error) {
+      (req.log || getLogger()).error({ err: error }, 'Error in subscription operation');
       res.status(500).json({ error: "Internal Server Error" });
     }
   }
@@ -64,6 +66,7 @@ export class SubscriptionController {
       await this.userService.updateUser(userId, user);
       res.status(201).json(subscriptionDto);
     } catch (error) {
+      (req.log || getLogger()).error({ err: error }, 'Error in subscription operation');
       res.status(500).json({ error: "Internal Server Error" });
     }
   }
@@ -76,6 +79,7 @@ export class SubscriptionController {
       });
       res.status(200).json(planDtos);
     } catch (error) {
+      (req.log || getLogger()).error({ err: error }, 'Error in subscription operation');
       res.status(500).json({ error: "Internal Server Error" });
     }
   }
@@ -89,6 +93,7 @@ export class SubscriptionController {
       });
       res.status(200).json(subscriptionDtos);
     } catch (error) {
+      (req.log || getLogger()).error({ err: error }, 'Error in subscription operation');
       res.status(500).json({ error: "Internal Server Error" });
     }
   }

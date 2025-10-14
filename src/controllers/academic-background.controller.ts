@@ -6,6 +6,8 @@ import { AcademicBackgroundDto } from "../dtos/academic-background.dto";
 import { CategoryDto } from "../dtos/category.dto";
 import { TopicDto } from "../dtos/topic.dto";
 import { UserTopicDto } from "../dtos/user-topic.dto";
+import { getLogger } from "../utils/logger";
+
 export class AcademicBackgroundController {
   private academicBackgroundService: AcademicBackgroundService;
   private userService: UserService;
@@ -40,6 +42,7 @@ export class AcademicBackgroundController {
       );
       res.status(201).json(academicBackgroundDto);
     } catch (error: any) {
+      (req.log || getLogger()).error({ err: error }, 'Error in academic background operation');
       if (error.message === "Error fetching user") {
         res.status(404).json({ error: "User not found" });
         return;
@@ -58,6 +61,7 @@ export class AcademicBackgroundController {
       });
       res.status(201).json(categoryDto);
     } catch (error) {
+      (req.log || getLogger()).error({ err: error }, 'Error in academic background operation');
       res.status(500).json({ error: "Internal Server Error" });
     }
   };
@@ -82,6 +86,7 @@ export class AcademicBackgroundController {
       });
       res.status(201).json(subjectDto);
     } catch (error) {
+      (req.log || getLogger()).error({ err: error }, 'Error in academic background operation');
       res.status(500).json({ error: "Internal Server Error" });
     }
   };
@@ -114,6 +119,7 @@ export class AcademicBackgroundController {
       });
       res.status(201).json(topicDto);
     } catch (error) {
+      (req.log || getLogger()).error({ err: error }, 'Error in academic background operation');
       res.status(500).json({ error: "Internal Server Error" });
     }
   };
@@ -127,6 +133,7 @@ export class AcademicBackgroundController {
       });
       res.status(200).json(categoriesDto);
     } catch (error) {
+      (req.log || getLogger()).error({ err: error }, 'Error in academic background operation');
       res.status(500).json({ error: "Internal Server Error" });
     }
   };
@@ -162,6 +169,7 @@ export class AcademicBackgroundController {
         .status(200)
         .json({ message: "Academic background updated successfully" });
     } catch (error) {
+      (req.log || getLogger()).error({ err: error }, 'Error in academic background operation');
       res.status(500).json({ error: "Internal Server Error" });
     }
   };
@@ -209,7 +217,7 @@ export class AcademicBackgroundController {
 
       res.status(200).json(groupedByType);
     } catch (error: any) {
-      console.error(error);
+      (req.log || getLogger()).error({ err: error }, 'Error fetching academic backgrounds');
       if (error.message === "Error fetching user") {
         res.status(404).json({ error: "User not found" });
         return;
@@ -233,6 +241,7 @@ export class AcademicBackgroundController {
       await this.academicBackgroundService.deleteTopic(topicId);
       res.status(204).json({ message: "Topic deleted successfully" });
     } catch (error) {
+      (req.log || getLogger()).error({ err: error }, 'Error in academic background operation');
       res.status(500).json({ error: "Internal Server Error" });
     }
   };
@@ -255,6 +264,7 @@ export class AcademicBackgroundController {
         message: "Topic updated successfully",
       });
     } catch (error) {
+      (req.log || getLogger()).error({ err: error }, 'Error in academic background operation');
       res.status(500).json({ error: "Internal Server Error" });
     }
   };
@@ -280,6 +290,7 @@ export class AcademicBackgroundController {
         }`,
       });
     } catch (error) {
+      (req.log || getLogger()).error({ err: error }, 'Error in academic background operation');
       res.status(500).json({ error: "Internal Server Error" });
     }
   };
@@ -319,6 +330,7 @@ export class AcademicBackgroundController {
         .status(204)
         .json({ message: "Academic background deleted successfully" });
     } catch (error: any) {
+      (req.log || getLogger()).error({ err: error }, 'Error in academic background operation');
       if (error.message === "Error fetching user") {
         res.status(404).json({ error: "User not found" });
         return;
@@ -364,6 +376,7 @@ export class AcademicBackgroundController {
       await this.academicBackgroundService.addTopicToUser(userTopic);
       res.status(200).json({ message: "Topic added to user successfully" });
     } catch (error: any) {
+      (req.log || getLogger()).error({ err: error }, 'Error in academic background operation');
       if (error.message === "Error fetching user") {
         res.status(404).json({ error: "User not found" });
         return;
@@ -403,6 +416,7 @@ export class AcademicBackgroundController {
         .status(200)
         .json({ message: "User topic price updated successfully" });
     } catch (error: any) {
+      (req.log || getLogger()).error({ err: error }, 'Error in academic background operation');
       if (error.message === "Error fetching user") {
         res.status(404).json({ error: "User not found" });
         return;
@@ -446,7 +460,7 @@ export class AcademicBackgroundController {
         res.status(404).json({ error: "User not found" });
         return;
       }
-      console.error(error);
+      (req.log || getLogger()).error({ err: error }, 'Error in academic background operation');
       res.status(500).json({ error: "Internal Server Error" });
     }
   };
@@ -465,6 +479,7 @@ export class AcademicBackgroundController {
       });
       res.status(200).json(topicDtos);
     } catch (error: any) {
+      (req.log || getLogger()).error({ err: error }, 'Error in academic background operation');
       if (error.message === "Error fetching user") {
         res.status(404).json({ error: "User not found" });
         return;
@@ -511,6 +526,7 @@ export class AcademicBackgroundController {
         }`,
       });
     } catch (error: any) {
+      (req.log || getLogger()).error({ err: error }, 'Error in academic background operation');
       if (error.message === "Error fetching user") {
         res.status(404).json({ error: "User not found" });
         return;
@@ -534,6 +550,7 @@ export class AcademicBackgroundController {
       });
       res.status(200).json(userTopicDto);
     } catch (error: any) {
+      (req.log || getLogger()).error({ err: error }, 'Error in academic background operation');
       res.status(500).json({ error: "Internal Server Error" });
     }
   };

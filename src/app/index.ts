@@ -2,6 +2,8 @@ import "../utils/subscription-checker";
 import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import { appV1 } from "./app-v1";
+import { requestLogger } from "../utils/request-logger.middleware";
+import { getLogger } from "../utils/logger";
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -9,6 +11,8 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 
 app.use(express.json());
+
+app.use(requestLogger);
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction): void => {
   if (err instanceof SyntaxError && err.name === "SyntaxError") {
@@ -24,8 +28,16 @@ app.get("/", (req: Request, res: Response) => {
   res.send("Running...");
 });
 
+// Global error handler
+app.use((err: any, req: Request, res: Response, _next: NextFunction): void => {
+  const log = req.log || getLogger();
+  log.error({ err }, 'Unhandled error');
+  res.status(err.status || 500).json({ error: err.message || 'Internal Server Error' });
+});
+
 app.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`);
+  const logger = getLogger();
+  logger.info(`Server running on http://localhost:${port}`);
   //new GrpcServer().start();
 });
 

@@ -2,6 +2,9 @@ import { LessThan, MoreThan } from "typeorm";
 import { AppDataSource } from "../config/database";
 import { PlanModel } from "../models/plan.model";
 import { SubscriptionModel } from "../models/subscription.model";
+import { getLogger } from "../utils/logger";
+
+const log = getLogger();
 
 export class SubscriptionService {
   subscriptionRepo: any;
@@ -16,6 +19,7 @@ export class SubscriptionService {
     try {
       return await this.planRepo.save(plan);
     } catch (error) {
+      log.error({ err: error, ctx: { service: 'SubscriptionService', op: 'createPlan' } }, 'Error creating plan');
       throw new Error("Error creating plan");
     }
   }
@@ -30,6 +34,7 @@ export class SubscriptionService {
         },
       });
     } catch (error) {
+      log.error({ err: error, ctx: { service: 'SubscriptionService', op: 'getPlanById', planId } }, 'Error fetching plan');
       throw new Error("Error fetching plan");
     }
   }
@@ -43,6 +48,7 @@ export class SubscriptionService {
         },
       });
     } catch (error) {
+      log.error({ err: error, ctx: { service: 'SubscriptionService', op: 'getPlans' } }, 'Error fetching plans');
       throw new Error("Error fetching plans");
     }
   }
@@ -53,6 +59,7 @@ export class SubscriptionService {
     try {
       return await this.subscriptionRepo.save(subscription);
     } catch (error) {
+      log.error({ err: error, ctx: { service: 'SubscriptionService', op: 'createSubscription' } }, 'Error creating subscription');
       throw new Error("Error creating subscription");
     }
   }
@@ -70,6 +77,7 @@ export class SubscriptionService {
         },
       });
     } catch (error) {
+      log.error({ err: error, ctx: { service: 'SubscriptionService', op: 'getActiveSubscriptionsByUserId', userId } }, 'Error fetching active subscriptions');
       throw new Error("Error fetching active subscriptions");
     }
   }
@@ -93,6 +101,7 @@ export class SubscriptionService {
         await this.subscriptionRepo.save(expiredSubscriptions);
       }
     } catch (error) {
+      log.error({ err: error, ctx: { service: 'SubscriptionService', op: 'checkExpiredSubscriptions' } }, 'Error checking expired subscriptions');
       throw new Error("Error checking expired subscriptions");
     }
   }
@@ -109,6 +118,7 @@ export class SubscriptionService {
         },
       });
     } catch (error) {
+      log.error({ err: error, ctx: { service: 'SubscriptionService', op: 'getActiveSubscriptions' } }, 'Error fetching active subscriptions');
       throw new Error("Error fetching active subscriptions");
     }
   }

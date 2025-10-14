@@ -7,6 +7,7 @@ import { UserRole } from "../enums/userRoles.enum";
 import { MinimalUserDto } from "../dtos/minimal-user.dto";
 import { AuthMiddleware } from "../utils/auth.middleware";
 import { UserContactInfoDto } from "../dtos/user-contact-info.dto";
+import { getLogger } from "../utils/logger";
 
 export class UserController {
   private userService: UserService;
@@ -35,6 +36,7 @@ export class UserController {
 
       res.status(200).json(userDto);
     } catch (error: any) {
+      (req.log || getLogger()).error({ err: error }, 'Error in user operation');
       if (error.message === "Error fetching user") {
         res.status(404).json({ error: "User not found" });
         return;
@@ -56,6 +58,7 @@ export class UserController {
       await this.userService.updateUser(id, updatedUser);
       res.status(200).json({ message: "User updated successfully" });
     } catch (error: any) {
+      (req.log || getLogger()).error({ err: error }, 'Error in user operation');
       if (error.message === "Error fetching user") {
         res.status(404).json({ error: "User not found" });
         return;
@@ -75,6 +78,7 @@ export class UserController {
       await this.userService.deleteUser(id);
       res.status(204).json({ message: "User deleted successfully" });
     } catch (error: any) {
+      (req.log || getLogger()).error({ err: error }, 'Error in user operation');
       if (error.message === "Error fetching user") {
         res.status(404).json({ error: "User not found" });
         return;
@@ -95,6 +99,7 @@ export class UserController {
       const userPlan = await this.userService.getUserPlan(id);
       res.status(200).json(userPlan?.plan);
     } catch (error: any) {
+      (req.log || getLogger()).error({ err: error }, 'Error in user operation');
       if (error.message === "Error fetching user") {
         res.status(404).json({ error: "User not found" });
         return;
@@ -133,6 +138,7 @@ export class UserController {
       );
       res.status(201).json(paymentMethodDto);
     } catch (error: any) {
+      (req.log || getLogger()).error({ err: error }, 'Error in user operation');
       if (error.message === "Error fetching user") {
         res.status(404).json({ error: "User not found" });
         return;
@@ -165,6 +171,7 @@ export class UserController {
       await this.userService.updatePaymentMethod(paymentMethodBody);
       res.status(200).json({ message: "Payment method updated successfully" });
     } catch (error: any) {
+      (req.log || getLogger()).error({ err: error }, 'Error in user operation');
       if (error.message === "Error fetching user") {
         res.status(404).json({ error: "User not found" });
         return;
@@ -201,6 +208,7 @@ export class UserController {
       );
       res.status(200).json(paymentMethodDtos);
     } catch (error: any) {
+      (req.log || getLogger()).error({ err: error }, 'Error in user operation');
       if (error.message === "Error fetching user") {
         res.status(404).json({ error: "User not found" });
         return;
@@ -229,6 +237,7 @@ export class UserController {
       await this.userService.deletePaymentMethod(paymentMethodId);
       res.status(204).json({ message: "Payment method deleted successfully" });
     } catch (error: any) {
+      (req.log || getLogger()).error({ err: error }, 'Error in user operation');
       if (error.message === "Error fetching user") {
         res.status(404).json({ error: "User not found" });
         return;
@@ -256,6 +265,7 @@ export class UserController {
       });
       res.status(200).json(teacherDtos);
     } catch (error) {
+      (req.log || getLogger()).error({ err: error }, 'Error in user operation');
       res.status(500).json({ error: "Internal Server Error" });
     }
   };
@@ -274,6 +284,7 @@ export class UserController {
       });
       res.status(200).json(studentDtos);
     } catch (error) {
+      (req.log || getLogger()).error({ err: error }, 'Error in user operation');
       res.status(500).json({ error: "Internal Server Error" });
     }
   };
@@ -292,6 +303,7 @@ export class UserController {
       });
       res.status(200).json(academyDtos);
     } catch (error) {
+      (req.log || getLogger()).error({ err: error }, 'Error in user operation');
       res.status(500).json({ error: "Internal Server Error" });
     }
   };
@@ -310,6 +322,7 @@ export class UserController {
       });
       res.status(200).json(adminDtos);
     } catch (error) {
+      (req.log || getLogger()).error({ err: error }, 'Error in user operation');
       res.status(500).json({ error: "Internal Server Error" });
     }
   };
@@ -331,6 +344,7 @@ export class UserController {
       });
       res.status(201).json(userDto);
     } catch (error) {
+      (req.log || getLogger()).error({ err: error }, 'Error in user operation');
       res.status(500).json({ error: "Internal Server Error" });
     }
   };
@@ -351,6 +365,7 @@ export class UserController {
       await this.userService.updateUser(id, user);
       res.status(200).json({ message: "Phone number updated successfully" });
     } catch (error: any) {
+      (req.log || getLogger()).error({ err: error }, 'Error in user operation');
       if (error.message === "Error fetching user") {
         res.status(404).json({ error: "User not found" });
         return;
@@ -390,6 +405,7 @@ export class UserController {
       await this.userService.updateUser(id, user);
       res.status(200).json({ message: "Email updated successfully" });
     } catch (error: any) {
+      (req.log || getLogger()).error({ err: error }, 'Error in user operation');
       if (error.message === "Error fetching user") {
         res.status(404).json({ error: "User not found" });
         return;
@@ -421,6 +437,7 @@ export class UserController {
       await this.userService.updateUser(id, user);
       res.status(200).json({ message: "Password updated successfully" });
     } catch (error: any) {
+      (req.log || getLogger()).error({ err: error }, 'Error in user operation');
       if (error.message === "Error fetching user") {
         res.status(404).json({ error: "User not found" });
         return;
@@ -448,6 +465,7 @@ export class UserController {
         .status(200)
         .json({ message: "Contact information updated successfully" });
     } catch (error: any) {
+      (req.log || getLogger()).error({ err: error }, 'Error in user operation');
       if (error.message === "Error fetching user") {
         res.status(404).json({ error: "User not found" });
         return;
@@ -470,6 +488,7 @@ export class UserController {
       });
       res.status(200).json(userContactInfoDto);
     } catch (error: any) {
+      (req.log || getLogger()).error({ err: error }, 'Error in user operation');
       if (error.message === "Error fetching user") {
         res.status(404).json({ error: "User not found" });
         return;
@@ -491,6 +510,7 @@ export class UserController {
       });
       res.status(200).json(userDto);
     } catch (error: any) {
+      (req.log || getLogger()).error({ err: error }, 'Error in user operation');
       if (error.message === "Error fetching user") {
         res.status(404).json({ error: "User not found" });
         return;
@@ -520,6 +540,7 @@ export class UserController {
         .status(200)
         .json({ message: "Role switched successfully", newToken: token });
     } catch (error: any) {
+      (req.log || getLogger()).error({ err: error }, 'Error in user operation');
       if (error.message === "Error fetching user") {
         res.status(404).json({ error: "User not found" });
         return;

@@ -4,6 +4,9 @@ import { PaymentMethodModel } from "../models/payment-method.model";
 import { UserRole } from "../enums/userRoles.enum";
 import { UserSettingModel } from "../models/user-setting.model";
 import { In } from "typeorm";
+import { getLogger } from "../utils/logger";
+
+const log = getLogger();
 
 export class UserService {
   userRepo: any;
@@ -19,7 +22,7 @@ export class UserService {
     try {
       return await this.userRepo.save(user);
     } catch (error) {
-      console.error(error);
+      log.error({ err: error, ctx: { service: 'UserService', op: 'createUser' } }, 'Error creating user');
       throw new Error("Error creating user");
     }
   }
@@ -30,6 +33,7 @@ export class UserService {
     try {
       return await this.userSettingRepo.save(userSetting);
     } catch (error) {
+      log.error({ err: error, ctx: { service: 'UserService', op: 'createUserSetting' } }, 'Error creating user setting');
       throw new Error("Error creating user setting");
     }
   }
@@ -47,6 +51,7 @@ export class UserService {
         },
       });
     } catch (error) {
+      log.error({ err: error, ctx: { service: 'UserService', op: 'getUserById', userId: id } }, 'Error fetching user');
       throw new Error("Error fetching user");
     }
   }
@@ -61,6 +66,7 @@ export class UserService {
         cache: false,
       });
     } catch (error) {
+      log.error({ err: error, ctx: { service: 'UserService', op: 'getUserByIdNoCache', userId: id } }, 'Error fetching user');
       throw new Error("Error fetching user");
     }
   }
@@ -78,6 +84,7 @@ export class UserService {
         // },
       });
     } catch (error) {
+      log.error({ err: error, ctx: { service: 'UserService', op: 'getUserByEmail', email } }, 'Error fetching user');
       throw new Error("Error fetching user");
     }
   }
@@ -86,6 +93,7 @@ export class UserService {
     try {
       await await this.userRepo.save(user);
     } catch (error) {
+      log.error({ err: error, ctx: { service: 'UserService', op: 'updateUser', userId: id } }, 'Error updating user');
       throw new Error("Error updating user");
     }
   }
@@ -94,6 +102,7 @@ export class UserService {
     try {
       await this.userRepo.softDelete(id);
     } catch (error) {
+      log.error({ err: error, ctx: { service: 'UserService', op: 'deleteUser', userId: id } }, 'Error deleting user');
       throw new Error("Error deleting user");
     }
   }
@@ -111,6 +120,7 @@ export class UserService {
         },
       });
     } catch (error) {
+      log.error({ err: error, ctx: { service: 'UserService', op: 'getPermissions', userId: id } }, 'Error fetching user permissions');
       throw new Error("Error fetching user permissions");
     }
   }
@@ -119,6 +129,7 @@ export class UserService {
     try {
       await AppDataSource.manager.save(user);
     } catch (error) {
+      log.error({ err: error, ctx: { service: 'UserService', op: 'addPermission', userId: user.id } }, 'Error adding permission to user');
       throw new Error("Error adding permission to user");
     }
   }
@@ -137,6 +148,7 @@ export class UserService {
         },
       });
     } catch (error) {
+      log.error({ err: error, ctx: { service: 'UserService', op: 'getUserPlan', userId: id } }, 'Error fetching user plan');
       throw new Error("Error fetching user plan");
     }
   }
@@ -151,6 +163,7 @@ export class UserService {
       );
       return newPaymentMethod;
     } catch (error) {
+      log.error({ err: error, ctx: { service: 'UserService', op: 'addPaymentMethod' } }, 'Error adding payment method to user');
       throw new Error("Error adding payment method to user");
     }
   }
@@ -160,6 +173,7 @@ export class UserService {
     try {
       await this.payementMethodRepo.save(paymentMethod);
     } catch (error) {
+      log.error({ err: error, ctx: { service: 'UserService', op: 'updatePaymentMethod' } }, 'Error updating payment method');
       throw new Error("Error updating payment method");
     }
   }
@@ -181,6 +195,7 @@ export class UserService {
         },
       });
     } catch (error) {
+      log.error({ err: error, ctx: { service: 'UserService', op: 'getPaymentMethodsByUserId', userId } }, 'Error fetching payment methods');
       throw new Error("Error fetching payment methods");
     }
   }
@@ -200,6 +215,7 @@ export class UserService {
         },
       });
     } catch (error) {
+      log.error({ err: error, ctx: { service: 'UserService', op: 'getPaymentMethodById', paymentMethodId: id } }, 'Error fetching payment method');
       throw new Error("Error fetching payment method");
     }
   }
@@ -223,6 +239,7 @@ export class UserService {
         },
       });
     } catch (error) {
+      log.error({ err: error, ctx: { service: 'UserService', op: 'getPaymentMethodByTypeAndUserId', type, userId } }, 'Error fetching payment method by type and user ID');
       throw new Error("Error fetching payment method by type and user ID");
     }
   }
@@ -232,6 +249,7 @@ export class UserService {
     try {
       await this.payementMethodRepo.softDelete(id);
     } catch (error) {
+      log.error({ err: error, ctx: { service: 'UserService', op: 'deletePaymentMethod', paymentMethodId: id } }, 'Error deleting payment method');
       throw new Error("Error deleting payment method");
     }
   }
@@ -249,6 +267,7 @@ export class UserService {
         },
       });
     } catch (error) {
+      log.error({ err: error, ctx: { service: 'UserService', op: 'getUserByGoogleId', googleId } }, 'Error fetching user by Google ID');
       throw new Error("Error fetching user by Google ID");
     }
   }
@@ -271,6 +290,7 @@ export class UserService {
         },
       });
     } catch (error) {
+      log.error({ err: error, ctx: { service: 'UserService', op: 'getAllUsers', role, page, limit } }, 'Error fetching users');
       throw new Error("Error fetching users");
     }
   }
@@ -299,6 +319,7 @@ export class UserService {
         }, // Enable caching for this query
       });
     } catch (error) {
+      log.error({ err: error, ctx: { service: 'UserService', op: 'searchTeachersAndAcademies', page, limit } }, 'Error searching teachers and academies');
       throw new Error("Error searching teachers and academies");
     }
   }

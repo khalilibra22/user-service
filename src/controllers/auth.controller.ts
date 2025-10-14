@@ -5,6 +5,8 @@ import { UserDto } from "../dtos/user.dto";
 import { plainToInstance } from "class-transformer";
 import { UserRole } from "../enums/userRoles.enum";
 import { MinimalUserDto } from "../dtos/minimal-user.dto";
+import { getLogger } from "../utils/logger";
+
 export class AuthController {
   private userService: UserService;
   constructor() {
@@ -53,6 +55,7 @@ export class AuthController {
       }
       res.status(201).json(userDto);
     } catch (error) {
+      (req.log || getLogger()).error({ err: error }, 'Error in register');
       res.status(500).json({ error: "Internal Server Error" });
     }
   };
@@ -76,6 +79,7 @@ export class AuthController {
       const token = await AuthMiddleware.generateToken(user);
       res.status(200).json({ id: user.id, token: token });
     } catch (error) {
+      (req.log || getLogger()).error({ err: error }, 'Error in register');
       res.status(500).json({ error: "Internal Server Error" });
     }
   };
@@ -94,6 +98,7 @@ export class AuthController {
         .status(200)
         .json({ message: "Password reset link sent to email", token: token });
     } catch (error) {
+      (req.log || getLogger()).error({ err: error }, 'Error in register');
       res.status(500).json({ error: "Internal Server Error" });
     }
   };
@@ -105,6 +110,7 @@ export class AuthController {
       try {
         decoded = await AuthMiddleware.decodeToken(token || "");
       } catch (error) {
+        (req.log || getLogger()).error({ err: error }, 'Invalid or expired token');
         res.status(401).json({ message: "Invalid or expired token" });
         return;
       }
@@ -121,6 +127,7 @@ export class AuthController {
       await this.userService.updateUser(id, user);
       res.status(200).json({ message: "Password updated successfully" });
     } catch (error) {
+      (req.log || getLogger()).error({ err: error }, 'Error in register');
       res.status(500).json({ error: "Internal Server Error" });
     }
   };
@@ -133,6 +140,7 @@ export class AuthController {
       try {
         decoded = await AuthMiddleware.decodeToken(token || "");
       } catch (error) {
+        (req.log || getLogger()).error({ err: error }, 'Invalid or expired token');
         res.status(401).json({ message: "Invalid or expired token" });
         return;
       }
@@ -147,6 +155,7 @@ export class AuthController {
       await this.userService.updateUser(id, user);
       res.status(200).json({ message: "Email verified successfully" });
     } catch (error) {
+      (req.log || getLogger()).error({ err: error }, 'Error in register');
       res.status(500).json({ error: "Internal Server Error" });
     }
   };
@@ -157,6 +166,7 @@ export class AuthController {
         res.status(200).json({ message: "Logged out" });
       });
     } catch (error) {
+      (req.log || getLogger()).error({ err: error }, 'Error in register');
       res.status(500).json({ error: "Internal Server Error" });
     }
   };
@@ -182,6 +192,7 @@ export class AuthController {
       const token = await AuthMiddleware.generateToken(user);
       res.status(200).json({ id: user.id, token: token });
     } catch (error) {
+      (req.log || getLogger()).error({ err: error }, 'Error in register');
       res.status(500).json({ error: "Internal Server Error" });
     }
   };

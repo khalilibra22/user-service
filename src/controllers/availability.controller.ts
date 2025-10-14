@@ -5,6 +5,7 @@ import { plainToInstance } from "class-transformer";
 import { UserService } from "../services/user.service";
 import { AvailabilityExceptionDto } from "../dtos/availability-exception.dto";
 import { boolean } from "joi";
+import { getLogger } from "../utils/logger";
 
 export class AvailabilityController {
   private availabilityService: AvailabilityService;
@@ -29,6 +30,7 @@ export class AvailabilityController {
       });
       res.status(200).json(availabilityDtos);
     } catch (error: any) {
+      (req.log || getLogger()).error({ err: error }, 'Error in getAvailability');
       if (error.message === "Error fetching user") {
         res.status(404).json({ error: "User not found" });
         return;
@@ -59,6 +61,7 @@ export class AvailabilityController {
       );
       res.status(201).json(availabilityDto);
     } catch (error: any) {
+      (req.log || getLogger()).error({ err: error }, 'Error creating availability');
       if (error.message === "Error fetching user") {
         res.status(404).json({ error: "User not found" });
         return;
@@ -87,6 +90,7 @@ export class AvailabilityController {
       await this.availabilityService.updateAvailability(updateData);
       res.status(200).json({ message: "Availability updated successfully" });
     } catch (error: any) {
+      (req.log || getLogger()).error({ err: error }, 'Error updating availability');
       if (error.message === "Error fetching user") {
         res.status(404).json({ error: "User not found" });
         return;
@@ -114,6 +118,7 @@ export class AvailabilityController {
       await this.availabilityService.deleteAvailability(availabilityId);
       res.status(204).json({ message: "Availability deleted", id });
     } catch (error: any) {
+      (req.log || getLogger()).error({ err: error }, 'Error deleting availability');
       if (error.message === "Error fetching user") {
         res.status(404).json({ error: "User not found" });
         return;
@@ -148,11 +153,11 @@ export class AvailabilityController {
       );
       res.status(201).json(exeptionDto);
     } catch (error: any) {
+      (req.log || getLogger()).error({ err: error }, 'Error creating availability exception');
       if (error.message === "Error fetching user") {
         res.status(404).json({ error: "User not found" });
         return;
       }
-      console.error(error);
       res
         .status(500)
         .json({ error: "Failed to create availability exception" });
@@ -183,6 +188,7 @@ export class AvailabilityController {
       );
       res.status(200).json(exeptionDtos);
     } catch (error: any) {
+      (req.log || getLogger()).error({ err: error }, 'Error getting availability exceptions');
       if (error.message === "Error fetching user") {
         res.status(404).json({ error: "User not found" });
         return;
@@ -214,6 +220,7 @@ export class AvailabilityController {
       await this.availabilityService.deleteAvailabilityException(exceptionId);
       res.status(204).json({ message: "Availability exception deleted", id });
     } catch (error: any) {
+      (req.log || getLogger()).error({ err: error }, 'Error deleting availability exception');
       if (error.message === "Error fetching user") {
         res.status(404).json({ error: "User not found" });
         return;
@@ -250,6 +257,7 @@ export class AvailabilityController {
         .status(200)
         .json({ message: "Availability exception updated successfully" });
     } catch (error: any) {
+      (req.log || getLogger()).error({ err: error }, 'Error updating availability exception');
       if (error.message === "Error fetching user") {
         res.status(404).json({ error: "User not found" });
         return;
@@ -282,6 +290,7 @@ export class AvailabilityController {
         message: "Availability status toggled successfully",
       });
     } catch (error: any) {
+      (req.log || getLogger()).error({ err: error }, 'Error toggling availability status');
       if (error.message === "Error fetching user") {
         res.status(404).json({ error: "User not found" });
         return;
@@ -308,6 +317,7 @@ export class AvailabilityController {
         message: "All availabilities deactivated successfully",
       });
     } catch (error: any) {
+      (req.log || getLogger()).error({ err: error }, 'Error toggling all availability statuses');
       if (error.message === "Error fetching user") {
         res.status(404).json({ error: "User not found" });
         return;
@@ -333,6 +343,7 @@ export class AvailabilityController {
         message: "All availabilities activated successfully",
       });
     } catch (error: any) {
+      (req.log || getLogger()).error({ err: error }, 'Error activating all availabilities');
       if (error.message === "Error fetching user") {
         res.status(404).json({ error: "User not found" });
         return;
@@ -402,7 +413,7 @@ export class AvailabilityController {
 
       res.status(200).json(availabilityDtos);
     } catch (error: any) {
-      console.error("Error checking availabilities:", error);
+      (req.log || getLogger()).error({ err: error }, 'Error checking availabilities');
       res.status(500).json({ error: "Failed to check availabilities" });
     }
   }
@@ -446,7 +457,7 @@ export class AvailabilityController {
         requestedCount: availabilityIds.length,
       });
     } catch (error: any) {
-      //console.error("Error updating availabilities:", error);
+      (req.log || getLogger()).error({ err: error }, 'Error updating availabilities');
       res.status(500).json({ error: "Failed to update availabilities" });
     }
   }

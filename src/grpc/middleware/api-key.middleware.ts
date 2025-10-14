@@ -1,4 +1,7 @@
 import * as grpc from "@grpc/grpc-js";
+import { getLogger } from "../../utils/logger";
+
+const logger = getLogger();
 
 export class GrpcApiKeyMiddleware {
   private static readonly API_KEYS = new Set([
@@ -18,18 +21,18 @@ export class GrpcApiKeyMiddleware {
       const apiKey = metadata.get("x-api-key")[0] as string;
 
       if (!apiKey) {
-        console.warn("gRPC call without API key from:", call.getPeer());
+        logger.warn("gRPC call without API key from:");
         return false;
       }
 
       const isValid = this.API_KEYS.has(apiKey);
       if (!isValid) {
-        console.warn("gRPC call with invalid API key from:", call.getPeer());
+        logger.warn("gRPC call with invalid API key from:");
       }
 
       return isValid;
-    } catch (error) {
-      console.error("Error validating API key:", error);
+    } catch (error: any) {
+      logger.error("Error validating API key:", error);
       return false;
     }
   }
@@ -51,7 +54,7 @@ export class GrpcApiKeyMiddleware {
       try {
         await handler(call, callback);
       } catch (error: any) {
-        console.error("Error in secured gRPC handler:", error);
+        logger.error("Error in secured gRPC handler:", error);
         callback({
           code: grpc.status.INTERNAL,
           message: error.message || "Internal server error",
@@ -72,7 +75,7 @@ export class GrpcApiKeyMiddleware {
    */
   static addApiKey(key: string): void {
     this.API_KEYS.add(key);
-    console.log("Added new API key for service authentication");
+    logger.info("Added new API key for service authentication");
   }
 
   /**
@@ -81,7 +84,7 @@ export class GrpcApiKeyMiddleware {
   static removeApiKey(key: string): boolean {
     const removed = this.API_KEYS.delete(key);
     if (removed) {
-      console.log("Removed API key from service authentication");
+      logger.info("Removed API key from service authentication");
     }
     return removed;
   }
