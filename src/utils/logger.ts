@@ -4,6 +4,11 @@ const isProd = process.env.NODE_ENV === 'production';
 
 const logger = pino({
   level: process.env.LOG_LEVEL || 'info',
+  base: {
+    service: 'user-service',
+    env: process.env.NODE_ENV || 'development',
+    version: '1.0.0',
+  },
   redact: {
     paths: ['req.headers.authorization', 'password', 'token'],
     remove: true,

@@ -32,6 +32,12 @@ app.get("/", (req: Request, res: Response) => {
 app.use((err: any, req: Request, res: Response, _next: NextFunction): void => {
   const log = req.log || getLogger();
   log.error({ err }, 'Unhandled error');
+  
+  // Ensure X-Request-Id is present in error response
+  if (req.reqId && !res.getHeader('X-Request-Id')) {
+    res.setHeader('X-Request-Id', req.reqId);
+  }
+  
   res.status(err.status || 500).json({ error: err.message || 'Internal Server Error' });
 });
 

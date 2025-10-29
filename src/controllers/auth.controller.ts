@@ -79,7 +79,7 @@ export class AuthController {
       const token = await AuthMiddleware.generateToken(user);
       res.status(200).json({ id: user.id, token: token });
     } catch (error) {
-      (req.log || getLogger()).error({ err: error }, 'Error in register');
+      (req.log || getLogger()).error({ err: error }, 'Error in login');
       res.status(500).json({ error: "Internal Server Error" });
     }
   };
@@ -98,7 +98,7 @@ export class AuthController {
         .status(200)
         .json({ message: "Password reset link sent to email", token: token });
     } catch (error) {
-      (req.log || getLogger()).error({ err: error }, 'Error in register');
+      (req.log || getLogger()).error({ err: error }, 'Error in forgotPassword');
       res.status(500).json({ error: "Internal Server Error" });
     }
   };
@@ -127,7 +127,7 @@ export class AuthController {
       await this.userService.updateUser(id, user);
       res.status(200).json({ message: "Password updated successfully" });
     } catch (error) {
-      (req.log || getLogger()).error({ err: error }, 'Error in register');
+      (req.log || getLogger()).error({ err: error }, 'Error in resetPassword');
       res.status(500).json({ error: "Internal Server Error" });
     }
   };
@@ -155,7 +155,7 @@ export class AuthController {
       await this.userService.updateUser(id, user);
       res.status(200).json({ message: "Email verified successfully" });
     } catch (error) {
-      (req.log || getLogger()).error({ err: error }, 'Error in register');
+      (req.log || getLogger()).error({ err: error }, 'Error in verifyEmail');
       res.status(500).json({ error: "Internal Server Error" });
     }
   };
@@ -166,7 +166,7 @@ export class AuthController {
         res.status(200).json({ message: "Logged out" });
       });
     } catch (error) {
-      (req.log || getLogger()).error({ err: error }, 'Error in register');
+      (req.log || getLogger()).error({ err: error }, 'Error in logout');
       res.status(500).json({ error: "Internal Server Error" });
     }
   };
@@ -192,7 +192,7 @@ export class AuthController {
       const token = await AuthMiddleware.generateToken(user);
       res.status(200).json({ id: user.id, token: token });
     } catch (error) {
-      (req.log || getLogger()).error({ err: error }, 'Error in register');
+      (req.log || getLogger()).error({ err: error }, 'Error in googleLogin');
       res.status(500).json({ error: "Internal Server Error" });
     }
   };
