@@ -62,7 +62,7 @@ export class AuthController {
 
   login = async (req: Request, res: Response): Promise<void> => {
     try {
-      const { email, password } = req.body;
+      const { email, password, fcmToken } = req.body;
       const user = await this.userService.getUserByEmail(email);
       if (!user) {
         res.status(401).json({ error: "Invalid credentials" });
@@ -77,6 +77,10 @@ export class AuthController {
         return;
       }
       const token = await AuthMiddleware.generateToken(user);
+      if(fcmToken){
+        user.fcmToken = fcmToken;
+        await this.userService.updateUser(user.id ?? "", user);
+      }
       res.status(200).json({ id: user.id, token: token });
     } catch (error) {
       (req.log || getLogger()).error({ err: error }, 'Error in login');
