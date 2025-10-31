@@ -40,7 +40,7 @@ export class PaymentMethodModel {
   @Column({ default: true, name: "is_actived" })
   isActived!: boolean;
 
-  @ManyToOne(() => UserModel, (user) => user.academicBackgrounds)
+  @ManyToOne(() => UserModel, (user) => user.paymentMethods)
   user?: UserModel;
 
   @CreateDateColumn({ type: "timestamp" })

@@ -17,8 +17,8 @@ export class SearchController {
     try {
       const { page = 1, limit = 10 } = req.query as any;
       const searchResult = await this.userService.searchTeachersAndAcademies(
-        page,
-        limit
+        Number(page),
+        Number(limit)
       );
       const searchUserDtos = plainToInstance(SearchUserDto, searchResult, {
         excludeExtraneousValues: true,

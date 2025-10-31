@@ -86,7 +86,7 @@ export class CouponService {
     }
   }
 
-  async checkUserCoupon(userId: string, couponCode: number): Promise<boolean> {
+  async checkUserCoupon(userId: string, couponCode: string): Promise<boolean> {
     try {
       const coupon = await this.couponRepo.findOne({
         where: {

@@ -48,7 +48,7 @@ export class CouponModel {
   applicableResource?: "group" | "live" | "prerecorded" | "one-on-one" | "all";
 
   @Column("simple-array", { nullable: true })
-  resourceIds?: number[];
+  resourceIds?: string[];
 
   @Column("decimal", { precision: 10, scale: 2, nullable: true })
   maxDiscountAmount?: number;
