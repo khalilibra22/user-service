@@ -1,5 +1,8 @@
 import { AppDataSource } from "../config/database";
 import { CouponModel } from "../models/coupon.model";
+import { getLogger } from "../utils/logger";
+
+const log = getLogger();
 
 export class CouponService {
   couponRepo: any;
@@ -11,7 +14,7 @@ export class CouponService {
     try {
       return await this.couponRepo.save(coupon);
     } catch (error) {
-      console.error(error);
+      log.error({ err: error, ctx: { service: 'CouponService', op: 'createCoupon' } }, 'Error creating coupon');
       throw new Error("Error creating coupon");
     }
   }
@@ -19,7 +22,7 @@ export class CouponService {
     try {
       return await this.couponRepo.save(coupon);
     } catch (error) {
-      console.error(error);
+      log.error({ err: error, ctx: { service: 'CouponService', op: 'updateCoupon' } }, 'Error updating coupon');
       throw new Error("Error updating coupon");
     }
   }
@@ -36,6 +39,7 @@ export class CouponService {
         },
       });
     } catch (error) {
+      log.error({ err: error, ctx: { service: 'CouponService', op: 'getCouponById', couponId: id } }, 'Error fetching coupon');
       throw new Error("Error fetching coupon");
     }
   }
@@ -49,6 +53,7 @@ export class CouponService {
         },
       });
     } catch (error) {
+      log.error({ err: error, ctx: { service: 'CouponService', op: 'getAllCoupons' } }, 'Error fetching coupons');
       throw new Error("Error fetching coupons");
     }
   }
@@ -57,7 +62,7 @@ export class CouponService {
     try {
       await this.couponRepo.softDelete(id);
     } catch (error) {
-      console.error(error);
+      log.error({ err: error, ctx: { service: 'CouponService', op: 'deleteCoupon', couponId: id } }, 'Error deleting coupon');
       throw new Error("Error deleting coupon");
     }
   }
@@ -76,12 +81,12 @@ export class CouponService {
         },
       });
     } catch (error) {
-      console.error(error);
+      log.error({ err: error, ctx: { service: 'CouponService', op: 'getUserCoupons', userId } }, 'Error fetching user coupons');
       throw new Error("Error fetching user coupons");
     }
   }
 
-  async checkUserCoupon(userId: string, couponCode: number): Promise<boolean> {
+  async checkUserCoupon(userId: string, couponCode: string): Promise<boolean> {
     try {
       const coupon = await this.couponRepo.findOne({
         where: {
@@ -97,7 +102,7 @@ export class CouponService {
       });
       return !!coupon;
     } catch (error) {
-      console.error(error);
+      log.error({ err: error, ctx: { service: 'CouponService', op: 'checkUserCoupon', userId, couponCode } }, 'Error checking user coupon');
       throw new Error("Error checking user coupon");
     }
   }

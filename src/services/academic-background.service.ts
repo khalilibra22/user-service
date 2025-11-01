@@ -4,6 +4,9 @@ import { CategoryModel } from "../models/category.model";
 import { SubjectModel } from "../models/subject.model";
 import { TopicModel } from "../models/topic.model";
 import { UserTopicModel } from "../models/user-topic.model";
+import { getLogger } from "../utils/logger";
+
+const log = getLogger();
 
 export class AcademicBackgroundService {
   academicBackgroundRepo: any;
@@ -28,7 +31,7 @@ export class AcademicBackgroundService {
     try {
       return await this.academicBackgroundRepo.save(academicBackground);
     } catch (error) {
-      console.error(error);
+      log.error({ err: error, ctx: { service: 'AcademicBackgroundService', op: 'createAcademicBackground' } }, 'Error creating academic background');
       throw new Error("Error creating academic background");
     }
   }
@@ -39,7 +42,7 @@ export class AcademicBackgroundService {
     try {
       return await this.academicBackgroundRepo.save(academicBackground);
     } catch (error) {
-      console.error(error);
+      log.error({ err: error, ctx: { service: 'AcademicBackgroundService', op: 'updateAcademicBackground' } }, 'Error updating academic background');
       throw new Error("Error creating academic background");
     }
   }
@@ -54,6 +57,7 @@ export class AcademicBackgroundService {
         },
       });
     } catch (error) {
+      log.error({ err: error, ctx: { service: 'AcademicBackgroundService', op: 'getAcademicBackgroundById', id } }, 'Error fetching academic background');
       throw new Error("Error fetching academic background");
     }
   }
@@ -62,6 +66,7 @@ export class AcademicBackgroundService {
     try {
       return await this.categoryRepo.save(category);
     } catch (error) {
+      log.error({ err: error, ctx: { service: 'AcademicBackgroundService', op: 'createCategory' } }, 'Error creating category');
       throw new Error("Error creating category");
     }
   }
@@ -70,6 +75,7 @@ export class AcademicBackgroundService {
     try {
       return await this.subjectRepo.save(subject);
     } catch (error) {
+      log.error({ err: error, ctx: { service: 'AcademicBackgroundService', op: 'createSubject' } }, 'Error creating subject');
       throw new Error("Error creating subject");
     }
   }
@@ -78,6 +84,7 @@ export class AcademicBackgroundService {
     try {
       return await this.topicRepo.save(topic);
     } catch (error) {
+      log.error({ err: error, ctx: { service: 'AcademicBackgroundService', op: 'createTopic' } }, 'Error creating topic');
       throw new Error("Error creating topic");
     }
   }
@@ -94,6 +101,7 @@ export class AcademicBackgroundService {
         },
       });
     } catch (error) {
+      log.error({ err: error, ctx: { service: 'AcademicBackgroundService', op: 'getCategoryById', categoryId: id } }, 'Error fetching category');
       throw new Error("Error fetching category");
     }
   }
@@ -110,6 +118,7 @@ export class AcademicBackgroundService {
         },
       });
     } catch (error) {
+      log.error({ err: error, ctx: { service: 'AcademicBackgroundService', op: 'getSubjectById', subjectId: id } }, 'Error fetching subject');
       throw new Error("Error fetching subject");
     }
   }
@@ -126,6 +135,7 @@ export class AcademicBackgroundService {
         },
       });
     } catch (error) {
+      log.error({ err: error, ctx: { service: 'AcademicBackgroundService', op: 'getTopicById', topicId: id } }, 'Error fetching topic');
       throw new Error("Error fetching topic");
     }
   }
@@ -136,7 +146,7 @@ export class AcademicBackgroundService {
     try {
       return await this.userTopicRepo.save(userTopic);
     } catch (error) {
-      console.error(error);
+      log.error({ err: error, ctx: { service: 'AcademicBackgroundService', op: 'addTopicToUser' } }, 'Error adding topic to user');
       throw new Error("Error adding topic to user");
     }
   }
@@ -158,6 +168,7 @@ export class AcademicBackgroundService {
         },
       });
     } catch (error) {
+      log.error({ err: error, ctx: { service: 'AcademicBackgroundService', op: 'getTopicsByUserId', userId } }, 'Error fetching topics by user id');
       throw new Error("Error fetching topics by user id");
     }
   }
@@ -173,6 +184,7 @@ export class AcademicBackgroundService {
         },
       });
     } catch (error) {
+      log.error({ err: error, ctx: { service: 'AcademicBackgroundService', op: 'getAllCategories' } }, 'Error fetching categories');
       throw new Error("Error fetching categories");
     }
   }
@@ -194,7 +206,7 @@ export class AcademicBackgroundService {
         },
       });
     } catch (error) {
-      console.error(error);
+      log.error({ err: error, ctx: { service: 'AcademicBackgroundService', op: 'getAcademicBackgroundsByUserId', userId } }, 'Error fetching academic backgrounds by user id');
       throw new Error("Error fetching academic backgrounds by user id");
     }
   }
@@ -202,6 +214,7 @@ export class AcademicBackgroundService {
     try {
       await this.topicRepo.softDelete(id);
     } catch (error) {
+      log.error({ err: error, ctx: { service: 'AcademicBackgroundService', op: 'deleteTopic', topicId: id } }, 'Error deleting topic');
       throw new Error("Error deleting topic");
     }
   }
@@ -210,6 +223,7 @@ export class AcademicBackgroundService {
     try {
       return await this.topicRepo.save(topic);
     } catch (error) {
+      log.error({ err: error, ctx: { service: 'AcademicBackgroundService', op: 'updateTopic' } }, 'Error updating topic');
       throw new Error("Error updating topic");
     }
   }
@@ -218,6 +232,7 @@ export class AcademicBackgroundService {
     try {
       await this.academicBackgroundRepo.softDelete(id);
     } catch (error) {
+      log.error({ err: error, ctx: { service: 'AcademicBackgroundService', op: 'deleteAcademicBackground', academicBackgroundId: id } }, 'Error deleting academic background');
       throw new Error("Error deleting academic background");
     }
   }
@@ -239,6 +254,7 @@ export class AcademicBackgroundService {
         //relations: ["topic", "user"],
       });
     } catch (error) {
+      log.error({ err: error, ctx: { service: 'AcademicBackgroundService', op: 'getUserTopicByUserIdAndTopicId', userId, topicId } }, 'Error fetching user topic by user id and topic id');
       throw new Error("Error fetching user topic by user id and topic id");
     }
   }
@@ -247,6 +263,7 @@ export class AcademicBackgroundService {
     try {
       await this.userTopicRepo.save(userTopic);
     } catch (error) {
+      log.error({ err: error, ctx: { service: 'AcademicBackgroundService', op: 'updateUserTopic' } }, 'Error updating user topic');
       throw new Error("Error updating user topic");
     }
   }
@@ -255,7 +272,7 @@ export class AcademicBackgroundService {
     try {
       await this.userTopicRepo.softDelete(id);
     } catch (error) {
-      console.error(error);
+      log.error({ err: error, ctx: { service: 'AcademicBackgroundService', op: 'deleteUserTopic', userTopicId: id } }, 'Error deleting user topic');
       throw new Error("Error deleting user topic");
     }
   }
@@ -273,6 +290,7 @@ export class AcademicBackgroundService {
         },
       });
     } catch (error) {
+      log.error({ err: error, ctx: { service: 'AcademicBackgroundService', op: 'getUserTopicById', userTopicId: id } }, 'Error fetching user topic by id');
       throw new Error("Error fetching user topic by user id and topic id");
     }
   }

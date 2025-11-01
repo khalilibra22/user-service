@@ -127,6 +127,7 @@ export const updateUserValidationSchema = Joi.object({
 export const loginValidationSchema = Joi.object({
   email: Joi.string().email().required(),
   password: Joi.string().required(),
+  fcmToken: Joi.string().optional(),
 });
 
 export const changeEmailSchema = Joi.object({

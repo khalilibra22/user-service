@@ -1,8 +1,10 @@
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { UserService } from "../services/user.service";
+import { getLogger } from "../utils/logger";
 
 const userService = new UserService();
+const logger = getLogger();
 passport.use(
   new GoogleStrategy(
     {
@@ -27,8 +29,8 @@ passport.use(
         const createdUser = await userService.createUser(userBody);
 
         return done(null, createdUser);
-      } catch (error) {
-        console.error("Error in Google Strategy:", error);
+      } catch (error: any) {
+        logger.error("Error in Google Strategy:", error);
         return done(error, undefined);
       }
     }

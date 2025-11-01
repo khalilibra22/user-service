@@ -19,4 +19,7 @@ export class MinimalUserDto {
 
   @Expose()
   role?: UserRole;
+
+  @Expose()
+  fcmToken?: string;
 }

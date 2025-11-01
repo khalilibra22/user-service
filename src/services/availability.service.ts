@@ -1,6 +1,9 @@
 import { AppDataSource } from "../config/database";
 import { AvailabilityModel } from "../models/availability.model";
 import { AvailabilityExceptionModel } from "../models/availability-exception.model";
+import { getLogger } from "../utils/logger";
+
+const log = getLogger();
 
 export class AvailabilityService {
   aviabilityRepo: any;
@@ -18,7 +21,7 @@ export class AvailabilityService {
     try {
       return await this.aviabilityRepo.save(availability);
     } catch (error) {
-      console.error(error);
+      log.error({ err: error, ctx: { service: 'AvailabilityService', op: 'createAvailability' } }, 'Error creating availability');
       throw new Error("Error creating availability");
     }
   }
@@ -27,7 +30,7 @@ export class AvailabilityService {
     try {
       return await this.aviabilityRepo.save(availability);
     } catch (error) {
-      console.error(error);
+      log.error({ err: error, ctx: { service: 'AvailabilityService', op: 'updateAvailability' } }, 'Error updating availability');
       throw new Error("Error updating availability");
     }
   }
@@ -42,6 +45,7 @@ export class AvailabilityService {
         },
       });
     } catch (error) {
+      log.error({ err: error, ctx: { service: 'AvailabilityService', op: 'getAvailabilityById', availabilityId: id } }, 'Error fetching availability');
       throw new Error("Error fetching availability");
     }
   }
@@ -52,7 +56,7 @@ export class AvailabilityService {
     try {
       return await this.availabilityExceptionRepo.save(availabilityException);
     } catch (error) {
-      console.error(error);
+      log.error({ err: error, ctx: { service: 'AvailabilityService', op: 'createAvailabilityException' } }, 'Error creating availability exception');
       throw new Error("Error creating availability exception");
     }
   }
@@ -63,7 +67,7 @@ export class AvailabilityService {
     try {
       return await this.availabilityExceptionRepo.save(availabilityException);
     } catch (error) {
-      console.error(error);
+      log.error({ err: error, ctx: { service: 'AvailabilityService', op: 'updateAvailabilityException' } }, 'Error updating availability exception');
       throw new Error("Error updating availability exception");
     }
   }
@@ -78,6 +82,7 @@ export class AvailabilityService {
         },
       });
     } catch (error) {
+      log.error({ err: error, ctx: { service: 'AvailabilityService', op: 'getAvailabilityExceptionById', exceptionId: id } }, 'Error fetching availability exception');
       throw new Error("Error fetching availability exception");
     }
   }
@@ -86,7 +91,7 @@ export class AvailabilityService {
     try {
       await this.availabilityExceptionRepo.softDelete(id);
     } catch (error) {
-      console.error(error);
+      log.error({ err: error, ctx: { service: 'AvailabilityService', op: 'deleteAvailabilityException', exceptionId: id } }, 'Error deleting availability exception');
       throw new Error("Error deleting availability exception");
     }
   }
@@ -95,7 +100,7 @@ export class AvailabilityService {
     try {
       await this.aviabilityRepo.softDelete(id);
     } catch (error) {
-      console.error(error);
+      log.error({ err: error, ctx: { service: 'AvailabilityService', op: 'deleteAvailability', availabilityId: id } }, 'Error deleting availability');
       throw new Error("Error deleting availability");
     }
   }
@@ -117,7 +122,7 @@ export class AvailabilityService {
         },
       });
     } catch (error) {
-      console.error(error);
+      log.error({ err: error, ctx: { service: 'AvailabilityService', op: 'getTeacherAvailability', teacherId } }, 'Error fetching teachers availabilities');
       throw new Error("Error fetching teachers availabilities");
     }
   }
@@ -139,7 +144,7 @@ export class AvailabilityService {
         },
       });
     } catch (error) {
-      console.error(error);
+      log.error({ err: error, ctx: { service: 'AvailabilityService', op: 'getTeacherAvailabilityExceptions', teacherId } }, 'Error fetching teachers availability exceptions');
       throw new Error("Error fetching teachers availability exceptions");
     }
   }
@@ -151,7 +156,7 @@ export class AvailabilityService {
         { isActive: false }
       );
     } catch (error) {
-      console.error(error);
+      log.error({ err: error, ctx: { service: 'AvailabilityService', op: 'deactivateAllAvailabilities', teacherId } }, 'Error deactivating all availabilities');
       throw new Error("Error deactivating all availabilities");
     }
   }
@@ -163,7 +168,7 @@ export class AvailabilityService {
         { isActive: true }
       );
     } catch (error) {
-      console.error(error);
+      log.error({ err: error, ctx: { service: 'AvailabilityService', op: 'activateAllAvailabilities', teacherId } }, 'Error activating all availabilities');
       throw new Error("Error activating all availabilities");
     }
   }

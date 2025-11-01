@@ -4,6 +4,9 @@ import { AcademicBackgroundService } from "../services/academic-background.servi
 import { AvailabilityService } from "../services/availability.service";
 import { GrpcApiKeyMiddleware } from "./middleware/api-key.middleware";
 import { userProto, PROTO_PATH } from "./config/setup";
+import { getLogger } from "../utils/logger";
+
+const log = getLogger();
 
 export class GrpcUserService {
   private userService: UserService;
@@ -80,7 +83,7 @@ export class GrpcUserService {
       const response = this.toMinimalUser(user);
       callback(null, response);
     } catch (error: any) {
-      console.error("gRPC GetUser error:", error);
+      log.error("gRPC GetUser error:", error);
       callback({
         code: grpc.status.INTERNAL,
         message: error.message || "Internal server error",
@@ -115,7 +118,7 @@ export class GrpcUserService {
       const response = this.toMinimalUser(user);
       callback(null, response);
     } catch (error: any) {
-      console.error("gRPC GetUserByEmail error:", error);
+      log.error("gRPC GetUserByEmail error:", error);
       callback({
         code: grpc.status.INTERNAL,
         message: error.message || "Internal server error",
@@ -153,7 +156,7 @@ export class GrpcUserService {
       const response = this.toUserTopic(userTopic);
       callback(null, response);
     } catch (error: any) {
-      console.error("gRPC GetUserTopic error:", error);
+      log.error("gRPC GetUserTopic error:", error);
       callback({
         code: grpc.status.INTERNAL,
         message: error.message || "Internal server error",
@@ -225,7 +228,7 @@ export class GrpcUserService {
 
         callback(null, response);
       } catch (error: any) {
-        console.error("gRPC CheckAvailabilities error:", error);
+        log.error("gRPC CheckAvailabilities error:", error);
         callback({
           code: grpc.status.INTERNAL,
           message: error.message || "Internal server error",
@@ -284,7 +287,7 @@ export class GrpcUserService {
 
         callback(null, response);
       } catch (error: any) {
-        console.error("gRPC UpdateAvailabilitiesToUnavailable error:", error);
+        log.error("gRPC UpdateAvailabilitiesToUnavailable error:", error);
         callback({
           code: grpc.status.INTERNAL,
           message: error.message || "Internal server error",

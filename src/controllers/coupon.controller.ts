@@ -3,6 +3,7 @@ import { CouponService } from "../services/coupon.service";
 import { UserService } from "../services/user.service";
 import { CouponDto } from "../dtos/coupon.dto";
 import { plainToInstance } from "class-transformer";
+import { getLogger } from "../utils/logger";
 
 export class CouponController {
   private couponService: CouponService;
@@ -39,6 +40,7 @@ export class CouponController {
       });
       res.status(201).json(couponDto);
     } catch (error: any) {
+      (req.log || getLogger()).error({ err: error }, 'Error creating coupon');
       if (error?.message?.includes("Error creating coupon")) {
         res.status(409).json({ error: "Coupon code already exists" });
         return;
@@ -85,6 +87,7 @@ export class CouponController {
       await this.couponService.updateCoupon(updatedCouponData);
       res.status(200).json({ message: "Coupon updated successfully" });
     } catch (error: any) {
+      (req.log || getLogger()).error({ err: error }, 'Error updating coupon');
       if (error?.message?.includes("Error updating coupon")) {
         res.status(409).json({ error: "Coupon code already exists" });
         return;
@@ -108,6 +111,7 @@ export class CouponController {
       await this.couponService.deleteCoupon(id);
       res.status(204).send();
     } catch (error) {
+      (req.log || getLogger()).error({ err: error }, 'Error in coupon operation');
       res.status(500).json({ error: "Internal Server Error" });
     }
   }
@@ -129,6 +133,7 @@ export class CouponController {
       });
       res.status(200).json(couponDto);
     } catch (error) {
+      (req.log || getLogger()).error({ err: error }, 'Error in coupon operation');
       res.status(500).json({ error: "Internal Server Error" });
     }
   }
@@ -147,6 +152,7 @@ export class CouponController {
       });
       res.status(200).json(couponDtos);
     } catch (error) {
+      (req.log || getLogger()).error({ err: error }, 'Error in coupon operation');
       res.status(500).json({ error: "Internal Server Error" });
     }
   }
@@ -171,6 +177,7 @@ export class CouponController {
         }`,
       });
     } catch (error) {
+      (req.log || getLogger()).error({ err: error }, 'Error in coupon operation');
       res.status(500).json({ error: "Internal Server Error" });
     }
   }

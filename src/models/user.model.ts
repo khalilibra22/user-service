@@ -146,6 +146,9 @@ export class UserModel {
   @Column({ default: false, name: "is_swichable" })
   isSwichable?: boolean;
 
+  @Column({ nullable: true, name: "fcm_token" })
+  fcmToken?: string;
+
   @CreateDateColumn({ type: "timestamp" })
   createdAt?: Date;
 

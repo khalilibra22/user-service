@@ -1,5 +1,8 @@
 import * as grpc from "@grpc/grpc-js";
 import { GrpcUserService } from "./user-service.grpc";
+import { getLogger } from "../utils/logger";
+
+const logger = getLogger();
 
 class GrpcServer {
   private server: grpc.Server;
@@ -44,24 +47,24 @@ class GrpcServer {
       this.server.bindAsync(
         `0.0.0.0:${this.port}`,
         grpc.ServerCredentials.createInsecure(),
-        (error, port) => {
+        (error: any, port: any) => {
           if (error) {
-            console.error("❌ Failed to bind gRPC server:", error);
+            logger.error("❌ Failed to bind gRPC server:", error);
             process.exit(1);
           }
 
-          console.log(`🚀 Secure gRPC Server running on port ${port}`);
-          console.log(`🔐 Security: API Key Authentication`);
-          console.log(`📡 Available services:`);
-          console.log(`   - UserService.GetUser`);
-          console.log(`   - UserService.GetUserByEmail`);
-          console.log(`   - UserService.GetUserTopic`);
-          console.log(`   - UserService.CheckAvailabilities [SECURED]`);
-          console.log(
+          logger.info(`🚀 Secure gRPC Server running on port ${port}`);
+          logger.info(`🔐 Security: API Key Authentication`);
+          logger.info(`📡 Available services:`);
+          logger.info(`   - UserService.GetUser`);
+          logger.info(`   - UserService.GetUserByEmail`);
+          logger.info(`   - UserService.GetUserTopic`);
+          logger.info(`   - UserService.CheckAvailabilities [SECURED]`);
+          logger.info(
             `   - UserService.UpdateAvailabilitiesToUnavailable [SECURED]`
           );
-          console.log(`   - UserService.HealthCheck`);
-          console.log(
+          logger.info(`   - UserService.HealthCheck`);
+          logger.info(
             `\n🔑 API Keys configured: ${
               process.env.USER_SERVICE_API_KEY ? "Yes" : "Using defaults"
             }`
@@ -73,28 +76,28 @@ class GrpcServer {
 
       // Handle graceful shutdown
       process.on("SIGINT", () => {
-        console.log("\n🛑 Received SIGINT, shutting down gracefully...");
+        logger.info("\n🛑 Received SIGINT, shutting down gracefully...");
         this.shutdown();
       });
 
       process.on("SIGTERM", () => {
-        console.log("\n🛑 Received SIGTERM, shutting down gracefully...");
+        logger.info("\n🛑 Received SIGTERM, shutting down gracefully...");
         this.shutdown();
       });
-    } catch (error) {
-      console.error("❌ Failed to start gRPC server:", error);
+    } catch (error: any) {
+      logger.error("❌ Failed to start gRPC server:", error);
       process.exit(1);
     }
   }
 
   private shutdown() {
-    this.server.tryShutdown((error) => {
+    this.server.tryShutdown((error: any) => {
       if (error) {
-        console.error("❌ Error during shutdown:", error);
+        logger.error("❌ Error during shutdown:", error);
         process.exit(1);
       }
 
-      console.log("✅ gRPC server shut down successfully");
+      logger.info("✅ gRPC server shut down successfully");
     });
   }
 }
@@ -103,7 +106,7 @@ class GrpcServer {
 if (require.main === module) {
   const server = new GrpcServer();
   server.start().catch((error) => {
-    console.error("❌ Failed to start server:", error);
+    logger.error("❌ Failed to start server:", error);
     process.exit(1);
   });
 }
