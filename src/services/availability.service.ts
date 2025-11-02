@@ -172,4 +172,27 @@ export class AvailabilityService {
       throw new Error("Error activating all availabilities");
     }
   }
+
+  async findOverlappingAvailability(
+    userId: string,
+    dayOfWeek: string,
+    startTime: string,
+    endTime: string
+  ): Promise<AvailabilityModel | null> {
+    try {
+      const overlapping = await this.aviabilityRepo
+        .createQueryBuilder("availability")
+        .leftJoinAndSelect("availability.user", "user")
+        .where("user.id = :userId", { userId })
+        .andWhere("availability.dayOfWeek = :dayOfWeek", { dayOfWeek })
+        .andWhere("availability.startTime < :endTime", { endTime })
+        .andWhere("availability.endTime > :startTime", { startTime })
+        .getOne();
+
+      return overlapping;
+    } catch (error) {
+      log.error({ err: error, ctx: { service: 'AvailabilityService', op: 'findOverlappingAvailability', userId, dayOfWeek, startTime, endTime } }, 'Error checking for overlapping availability');
+      throw new Error("Error checking for overlapping availability");
+    }
+  }
 }
