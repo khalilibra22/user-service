@@ -43,7 +43,7 @@ export class AcademicBackgroundService {
       return await this.academicBackgroundRepo.save(academicBackground);
     } catch (error) {
       log.error({ err: error, ctx: { service: 'AcademicBackgroundService', op: 'updateAcademicBackground' } }, 'Error updating academic background');
-      throw new Error("Error creating academic background");
+      throw new Error("Error updating academic background");
     }
   }
 
@@ -291,7 +291,7 @@ export class AcademicBackgroundService {
       });
     } catch (error) {
       log.error({ err: error, ctx: { service: 'AcademicBackgroundService', op: 'getUserTopicById', userTopicId: id } }, 'Error fetching user topic by id');
-      throw new Error("Error fetching user topic by user id and topic id");
+      throw new Error("Error fetching user topic by id");
     }
   }
 }
