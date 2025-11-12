@@ -48,6 +48,35 @@ export class AvailabilityController {
         res.status(404).json({ error: "User not found" });
         return;
       }
+
+      // Check for overlapping availability
+      const { dayOfWeek, startTime, endTime } = req.body;
+      if (!dayOfWeek || !startTime || !endTime) {
+        res.status(400).json({ error: "dayOfWeek, startTime, and endTime are required" });
+        return;
+      }
+
+      const overlapping = await this.availabilityService.findOverlappingAvailability(
+        id,
+        dayOfWeek,
+        startTime,
+        endTime
+      );
+
+      if (overlapping) {
+        res.status(409).json({
+          error: "Availability conflict",
+          message: `An availability already exists for ${dayOfWeek} that overlaps with the time range ${startTime} - ${endTime}`,
+          conflictingAvailability: {
+            id: overlapping.id,
+            dayOfWeek: overlapping.dayOfWeek,
+            startTime: overlapping.startTime,
+            endTime: overlapping.endTime,
+          },
+        });
+        return;
+      }
+
       const availabilityData = { ...req.body, user: user };
       const newAvailability = await this.availabilityService.createAvailability(
         availabilityData

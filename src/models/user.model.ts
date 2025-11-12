@@ -149,6 +149,9 @@ export class UserModel {
   @Column({ nullable: true, name: "fcm_token" })
   fcmToken?: string;
 
+  @Column({ type: "tsvector", nullable: true, select: false, name: "search_vector" })
+  searchVector?: any;
+
   @CreateDateColumn({ type: "timestamp" })
   createdAt?: Date;
 
