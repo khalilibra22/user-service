@@ -276,9 +276,9 @@ export class UserService {
     page: number,
     limit: number,
     role: UserRole
-  ): Promise<UserModel[]> {
+  ): Promise<{ data: UserModel[]; total: number }> {
     try {
-      return await this.userRepo.find({
+      const [data, total] = await this.userRepo.findAndCount({
         where: {
           role: role,
         },
@@ -289,6 +289,7 @@ export class UserService {
           milliseconds: 120000, // 2 minutes
         },
       });
+      return { data, total };
     } catch (error) {
       log.error({ err: error, ctx: { service: 'UserService', op: 'getAllUsers', role, page, limit } }, 'Error fetching users');
       throw new Error("Error fetching users");
@@ -298,9 +299,9 @@ export class UserService {
   async searchTeachersAndAcademies(
     page: number,
     limit: number
-  ): Promise<UserModel[]> {
+  ): Promise<{ data: UserModel[]; total: number }> {
     try {
-      return await this.userRepo.find({
+      const [data, total] = await this.userRepo.findAndCount({
         where: {
           role: In([UserRole.TEACHER, UserRole.ACADEMY]),
           topics: {
@@ -318,6 +319,7 @@ export class UserService {
           milliseconds: 120000,
         }, // Enable caching for this query
       });
+      return { data, total };
     } catch (error) {
       log.error({ err: error, ctx: { service: 'UserService', op: 'searchTeachersAndAcademies', page, limit } }, 'Error searching teachers and academies');
       throw new Error("Error searching teachers and academies");
