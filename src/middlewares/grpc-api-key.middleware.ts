@@ -1,5 +1,5 @@
 import * as grpc from "@grpc/grpc-js";
-import { getLogger } from "../../utils/logger";
+import { getLogger } from "../utils/logger";
 
 const logger = getLogger();
 
@@ -89,3 +89,4 @@ export class GrpcApiKeyMiddleware {
     return removed;
   }
 }
+
