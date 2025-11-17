@@ -1,7 +1,8 @@
 import { Expose, Transform } from "class-transformer";
 import { TeachingMode } from "../enums/teaching-modes.enum";
 import { UserRole } from "../enums/userRoles.enum";
-import { getImageUrl } from "../utils";
+import { getS3Url } from "../utils";
+//import { getImageUrl } from "../utils";
 
 export class UserDto {
   @Expose()
@@ -59,11 +60,11 @@ export class UserDto {
   bio?: string;
 
   @Expose()
-  @Transform(({ value }) => (value ? getImageUrl(value) : undefined))
+  @Transform(({ value }) => (value ? getS3Url(value) : undefined))
   profilePicture?: string;
 
   @Expose()
-  @Transform(({ value }) => (value ? getImageUrl(value) : undefined))
+  @Transform(({ value }) => (value ? getS3Url(value) : undefined))
   certificate?: string;
 
   @Expose({ name: "isActive" })
@@ -74,4 +75,10 @@ export class UserDto {
 
   @Expose()
   isSwichable?: boolean;
+
+  @Expose()
+  latitude?: number;
+
+  @Expose()
+  longitude?: number;
 }

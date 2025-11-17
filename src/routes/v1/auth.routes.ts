@@ -7,7 +7,9 @@ import {
   resetPasswordSchema,
   userValidationSchema,
 } from "../../validations/user.validation";
-import { upload } from "../../config/multer";
+import { uploadMemory } from "../../config/multer";
+import { s3UploadMiddleware } from "../../middlewares/s3-upload.middleware";
+import { validateFileUploads } from "../../middlewares/file-validation.middleware";
 import passport from "passport";
 
 const router = express.Router();
@@ -16,11 +18,13 @@ const authController = new AuthController();
 
 router.post(
   "/",
-  upload.fields([
+  uploadMemory.fields([
     { name: "profilePicture", maxCount: 1 },
     { name: "certificate", maxCount: 1 },
   ]),
   ValidationMiddleware.validate(userValidationSchema),
+  validateFileUploads,
+  s3UploadMiddleware,
   authController.register
 );
 router.post(

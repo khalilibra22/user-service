@@ -255,7 +255,7 @@ export class UserController {
     try {
       const page = Number(req.query.page) || 1;
       const limit = Number(req.query.limit) || 10;
-      const teachers = await this.userService.getAllUsers(
+      const { data: teachers, total } = await this.userService.getAllUsers(
         page,
         limit,
         UserRole.TEACHER
@@ -263,6 +263,11 @@ export class UserController {
       const teacherDtos = plainToInstance(UserDto, teachers, {
         excludeExtraneousValues: true,
       });
+      
+      res.setHeader("X-Total-Count", total.toString());
+      res.setHeader("X-Page", page.toString());
+      res.setHeader("X-Limit", limit.toString());
+      
       res.status(200).json(teacherDtos);
     } catch (error) {
       (req.log || getLogger()).error({ err: error }, 'Error in user operation');
@@ -274,7 +279,7 @@ export class UserController {
     try {
       const page = Number(req.query.page) || 1;
       const limit = Number(req.query.limit) || 10;
-      const students = await this.userService.getAllUsers(
+      const { data: students, total } = await this.userService.getAllUsers(
         page,
         limit,
         UserRole.STUDENT
@@ -282,6 +287,11 @@ export class UserController {
       const studentDtos = plainToInstance(MinimalUserDto, students, {
         excludeExtraneousValues: true,
       });
+      
+      res.setHeader("X-Total-Count", total.toString());
+      res.setHeader("X-Page", page.toString());
+      res.setHeader("X-Limit", limit.toString());
+      
       res.status(200).json(studentDtos);
     } catch (error) {
       (req.log || getLogger()).error({ err: error }, 'Error in user operation');
@@ -293,7 +303,7 @@ export class UserController {
     try {
       const page = Number(req.query.page) || 1;
       const limit = Number(req.query.limit) || 10;
-      const academies = await this.userService.getAllUsers(
+      const { data: academies, total } = await this.userService.getAllUsers(
         page,
         limit,
         UserRole.ACADEMY
@@ -301,6 +311,11 @@ export class UserController {
       const academyDtos = plainToInstance(UserDto, academies, {
         excludeExtraneousValues: true,
       });
+      
+      res.setHeader("X-Total-Count", total.toString());
+      res.setHeader("X-Page", page.toString());
+      res.setHeader("X-Limit", limit.toString());
+      
       res.status(200).json(academyDtos);
     } catch (error) {
       (req.log || getLogger()).error({ err: error }, 'Error in user operation');
@@ -312,7 +327,7 @@ export class UserController {
     try {
       const page = Number(req.query.page) || 1;
       const limit = Number(req.query.limit) || 10;
-      const admins = await this.userService.getAllUsers(
+      const { data: admins, total } = await this.userService.getAllUsers(
         page,
         limit,
         UserRole.SUPERVISOR
@@ -320,6 +335,11 @@ export class UserController {
       const adminDtos = plainToInstance(MinimalUserDto, admins, {
         excludeExtraneousValues: true,
       });
+      
+      res.setHeader("X-Total-Count", total.toString());
+      res.setHeader("X-Page", page.toString());
+      res.setHeader("X-Limit", limit.toString());
+      
       res.status(200).json(adminDtos);
     } catch (error) {
       (req.log || getLogger()).error({ err: error }, 'Error in user operation');
@@ -545,6 +565,60 @@ export class UserController {
         res.status(404).json({ error: "User not found" });
         return;
       }
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  };
+
+  // Update user's GPS location
+  updateUserLocation = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const id = req.params.id;
+      const user = await this.userService.getUserById(id);
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      const { latitude, longitude } = req.body;
+      await this.userService.updateUserLocation(id, latitude, longitude);
+      res.status(200).json({ message: "Location updated successfully" });
+    } catch (error: any) {
+      (req.log || getLogger()).error({ err: error }, 'Error in user operation');
+      if (error.message === "Error fetching user") {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  };
+
+  // Get nearby teachers and academies
+  getNearbyTeachers = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const latitude = Number(req.query.latitude);
+      const longitude = Number(req.query.longitude);
+      const radius = Number(req.query.radius) || 10;
+      const limit = Number(req.query.limit) || 20;
+      const page = Number(req.query.page) || 1;
+
+      const { users, total } = await this.userService.findNearbyTeachers({
+        latitude,
+        longitude,
+        radiusKm: radius,
+        limit,
+        page,
+      });
+
+      const userDtos = plainToInstance(UserDto, users, {
+        excludeExtraneousValues: true,
+      });
+
+      res.setHeader("X-Total-Count", total.toString());
+      res.setHeader("X-Page", page.toString());
+      res.setHeader("X-Limit", limit.toString());
+
+      res.status(200).json(userDtos);
+    } catch (error: any) {
+      (req.log || getLogger()).error({ err: error }, 'Error in user operation');
       res.status(500).json({ error: "Internal Server Error" });
     }
   };
