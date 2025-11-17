@@ -231,3 +231,16 @@ export const contactInfoValidationSchema = Joi.object({
   whatsappNumber: phoneNumberValidation,
   website: Joi.string().uri().optional(),
 });
+
+export const updateUserLocationValidationSchema = Joi.object({
+  latitude: Joi.number().min(-90).max(90).required(),
+  longitude: Joi.number().min(-180).max(180).required(),
+});
+
+export const nearbyUsersQueryValidationSchema = Joi.object({
+  latitude: Joi.number().min(-90).max(90).required(),
+  longitude: Joi.number().min(-180).max(180).required(),
+  radius: Joi.number().min(0.1).max(500).default(10),
+  limit: Joi.number().min(1).max(100).default(20),
+  page: Joi.number().min(1).default(1),
+});

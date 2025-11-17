@@ -323,4 +323,82 @@ export class UserService {
       throw new Error("Error searching teachers and academies");
     }
   }
+
+  async updateUserLocation(
+    id: string,
+    latitude: number,
+    longitude: number
+  ): Promise<void> {
+    try {
+      await this.userRepo.update(id, { latitude, longitude });
+    } catch (error) {
+      log.error({ err: error, ctx: { service: 'UserService', op: 'updateUserLocation', userId: id } }, 'Error updating user location');
+      throw new Error("Error updating user location");
+    }
+  }
+
+  async findNearbyTeachers(params: {
+    latitude: number;
+    longitude: number;
+    radiusKm: number;
+    limit: number;
+    page: number;
+  }): Promise<{ users: UserModel[]; total: number }> {
+    try {
+      const { latitude, longitude, radiusKm, limit, page } = params;
+      const skip = (page - 1) * limit;
+
+      // Haversine formula for calculating distance in kilometers
+      // Using GREATEST to avoid acos domain errors (values must be between -1 and 1)
+      const distanceFormula = `(
+        6371 * acos(
+          GREATEST(-1, LEAST(1,
+            cos(radians(${latitude})) * cos(radians("user"."latitude")) * 
+            cos(radians("user"."longitude") - radians(${longitude})) + 
+            sin(radians(${latitude})) * sin(radians("user"."latitude"))
+          ))
+        )
+      )`;
+
+      const query = this.userRepo
+        .createQueryBuilder("user")
+        .select([
+          "user.id",
+          "user.fullname",
+          "user.email",
+          "user.phoneNumber",
+          "user.role",
+          "user.state",
+          "user.district",
+          "user.city",
+          "user.address",
+          "user.bio",
+          "user.profilePicture",
+          "user.latitude",
+          "user.longitude",
+          "user.teachingModes",
+          "user.timeSlot",
+          "user.gender",
+          "user.isActive",
+          "user.isApproved",
+        ])
+        .addSelect(distanceFormula, "distance")
+        .where("user.role IN (:...roles)", { roles: [UserRole.TEACHER, UserRole.ACADEMY] })
+        .andWhere("user.isActive = :isActive", { isActive: false })
+        .andWhere("user.isApproved = :isApproved", { isApproved: false })
+        .andWhere("user.latitude IS NOT NULL")
+        .andWhere("user.longitude IS NOT NULL")
+        .andWhere(`${distanceFormula} <= :radius`, { radius: radiusKm })
+        .orderBy("distance", "ASC")
+        .skip(skip)
+        .take(limit);
+
+      const [users, total] = await query.getManyAndCount();
+      
+      return { users, total };
+    } catch (error) {
+      log.error({ err: error, ctx: { service: 'UserService', op: 'findNearbyTeachers', params } }, 'Error finding nearby teachers');
+      throw new Error("Error finding nearby teachers");
+    }
+  }
 }

@@ -15,6 +15,8 @@ import {
   createUserValidationSchema,
   updateUserPhoneNumberValidationSchema,
   updateUserValidationSchema,
+  updateUserLocationValidationSchema,
+  nearbyUsersQueryValidationSchema,
 } from "../../validations/user.validation";
 
 const userController = new UserController();
@@ -147,6 +149,23 @@ router.get(
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("users", "update"),
   userController.switchUserRole
+);
+
+// Update user's GPS location
+router.patch(
+  "/:id/location",
+  AuthMiddleware.verifyToken,
+  AuthMiddleware.authorize("users", "update"),
+  ValidationMiddleware.validate(updateUserLocationValidationSchema),
+  userController.updateUserLocation
+);
+
+// Get nearby teachers and academies
+router.get(
+  "/nearby",
+  //AuthMiddleware.verifyToken,
+  ValidationMiddleware.validateQuery(nearbyUsersQueryValidationSchema),
+  userController.getNearbyTeachers
 );
 
 export { router as userRouter };

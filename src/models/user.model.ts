@@ -34,6 +34,7 @@ import { CouponModel } from "./coupon.model";
 @Index("IDX_users_role_active", ["role", "isActive"])
 @Index("IDX_users_role_approved", ["role", "isApproved"])
 @Index("IDX_users_location", ["state", "city", "district"])
+@Index("IDX_users_gps_location", ["latitude", "longitude"])
 export class UserModel {
   @PrimaryGeneratedColumn("uuid")
   id?: string;
@@ -148,6 +149,22 @@ export class UserModel {
 
   @Column({ nullable: true, name: "fcm_token" })
   fcmToken?: string;
+
+  @Column({
+    type: "decimal",
+    precision: 10,
+    scale: 8,
+    nullable: true,
+  })
+  latitude?: number;
+
+  @Column({
+    type: "decimal",
+    precision: 11,
+    scale: 8,
+    nullable: true,
+  })
+  longitude?: number;
 
   @Column({ type: "tsvector", nullable: true, select: false, name: "search_vector" })
   searchVector?: any;

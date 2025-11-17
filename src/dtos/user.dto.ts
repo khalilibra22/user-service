@@ -75,4 +75,10 @@ export class UserDto {
 
   @Expose()
   isSwichable?: boolean;
+
+  @Expose()
+  latitude?: number;
+
+  @Expose()
+  longitude?: number;
 }

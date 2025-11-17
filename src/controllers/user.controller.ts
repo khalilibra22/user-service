@@ -548,4 +548,62 @@ export class UserController {
       res.status(500).json({ error: "Internal Server Error" });
     }
   };
+
+  // Update user's GPS location
+  updateUserLocation = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const id = req.params.id;
+      const user = await this.userService.getUserById(id);
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      const { latitude, longitude } = req.body;
+      await this.userService.updateUserLocation(id, latitude, longitude);
+      res.status(200).json({ message: "Location updated successfully" });
+    } catch (error: any) {
+      (req.log || getLogger()).error({ err: error }, 'Error in user operation');
+      if (error.message === "Error fetching user") {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  };
+
+  // Get nearby teachers and academies
+  getNearbyTeachers = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const latitude = Number(req.query.latitude);
+      const longitude = Number(req.query.longitude);
+      const radius = Number(req.query.radius) || 10;
+      const limit = Number(req.query.limit) || 20;
+      const page = Number(req.query.page) || 1;
+
+      const { users, total } = await this.userService.findNearbyTeachers({
+        latitude,
+        longitude,
+        radiusKm: radius,
+        limit,
+        page,
+      });
+
+      const userDtos = plainToInstance(UserDto, users, {
+        excludeExtraneousValues: true,
+      });
+
+      res.status(200).json({
+        data: userDtos,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
+      });
+    } catch (error: any) {
+      (req.log || getLogger()).error({ err: error }, 'Error in user operation');
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  };
 }
