@@ -1,6 +1,6 @@
 import { Exclude, Expose, Transform, Type } from "class-transformer";
-import { getImageUrl } from "../utils"; // assuming you're using this for certificate transformation
-import { UserDto } from "./user.dto"; // optional: include only if needed
+import { UserDto } from "./user.dto";
+import { getS3Url } from "../utils";
 
 export class AcademicBackgroundDto {
   @Expose()
@@ -28,7 +28,7 @@ export class AcademicBackgroundDto {
   location?: string;
 
   @Expose()
-  @Transform(({ value }) => (value ? getImageUrl(value) : undefined))
+  @Transform(({ value }) => (value ? getS3Url(value) : undefined))
   documentUrl?: string;
 
   @Expose()

@@ -1,5 +1,5 @@
-export const getImageUrl = (filename: string): string => {
-  return `${process.env.BASE_URL}/uploads/${filename}`;
+export const getS3Url = (key: string): string => {
+  return `${process.env.S3_READ_URL}/${key}`;
 };
 
 export const getDurationInMonths = (

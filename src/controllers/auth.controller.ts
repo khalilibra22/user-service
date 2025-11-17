@@ -20,17 +20,10 @@ export class AuthController {
         res.status(409).json({ error: "User already exists." });
         return;
       }
-      if (!req.files) {
-        res.status(400).json({ error: "No files uploaded" });
-        return;
-      }
-      const files = req.files as { [fieldname: string]: Express.Multer.File[] };
-      req.body.profilePicture = files.profilePicture
-        ? files.profilePicture[0].filename
-        : null;
-      req.body.certificate = files.certificate
-        ? files.certificate[0].filename
-        : null;
+
+      // Files are already uploaded to S3 by the s3UploadMiddleware
+      // req.body.profilePicture and req.body.certificate now contain S3 URLs
+      // No need to check req.files or process filenames
 
       const hashedPassword = await AuthMiddleware.hashPassword(password);
       req.body.password = hashedPassword;

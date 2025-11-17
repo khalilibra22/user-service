@@ -47,16 +47,8 @@ export const userValidationSchema = Joi.object({
     then: Joi.forbidden(),
     otherwise: Joi.string().required(),
   }),
-  profilePicture: Joi.when("role", {
-    is: Joi.valid(UserRole.STUDENT),
-    then: Joi.forbidden(),
-    otherwise: Joi.object().optional(),
-  }),
-  certificate: Joi.when("role", {
-    is: Joi.valid(UserRole.STUDENT),
-    then: Joi.forbidden(),
-    otherwise: Joi.object().optional(),
-  }),
+  // profilePicture and certificate are handled by multer and S3 middleware
+  // They are not validated here as they come as files, not body fields
 });
 
 export const updateUserValidationSchema = Joi.object({
