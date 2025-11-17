@@ -42,7 +42,7 @@ export const s3UploadMiddleware = async (
         file.originalname,
         file.mimetype
       );
-      req.body.profilePicture = result.url;
+      req.body.profilePicture = result.key;
       logger.info({ url: result.url }, "Profile picture uploaded to S3");
     }
 
@@ -65,8 +65,8 @@ export const s3UploadMiddleware = async (
         file.originalname,
         file.mimetype
       );
-      req.body.certificate = result.url;
-      logger.info({ url: result.url }, "Certificate uploaded to S3");
+      req.body.certificate = result.key;
+      logger.info({ key: result.key }, "Certificate uploaded to S3");
     }
 
     next();
