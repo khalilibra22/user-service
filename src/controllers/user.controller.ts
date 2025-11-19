@@ -8,11 +8,14 @@ import { MinimalUserDto } from "../dtos/minimal-user.dto";
 import { AuthMiddleware } from "../utils/auth.middleware";
 import { UserContactInfoDto } from "../dtos/user-contact-info.dto";
 import { getLogger } from "../utils/logger";
+import { ChatService } from "../services/chat.service";
 
 export class UserController {
   private userService: UserService;
+  private chatService: ChatService;
   constructor() {
     this.userService = new UserService();
+    this.chatService = new ChatService();
   }
 
   getUserById = async (req: Request, res: Response): Promise<void> => {
@@ -56,6 +59,18 @@ export class UserController {
       }
       const updatedUser = { ...user, ...req.body };
       await this.userService.updateUser(id, updatedUser);
+      void this.chatService
+        .updateLightUser(id, {
+          fullname: updatedUser.fullname,
+          email: updatedUser.email,
+          profileImage: updatedUser.profilePicture,
+        })
+        .catch((chatError) => {
+          (req.log || getLogger()).error(
+            { err: chatError },
+            "Failed to update chat service user"
+          );
+        });
       res.status(200).json({ message: "User updated successfully" });
     } catch (error: any) {
       (req.log || getLogger()).error({ err: error }, 'Error in user operation');

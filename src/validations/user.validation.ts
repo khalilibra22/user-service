@@ -114,6 +114,7 @@ export const updateUserValidationSchema = Joi.object({
   }),
   // Teaching Modes Validation
   teachingModes: teachingModesValidation,
+  profilePicture: Joi.string().optional(),
 });
 
 export const loginValidationSchema = Joi.object({
