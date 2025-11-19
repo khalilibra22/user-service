@@ -39,15 +39,16 @@ export const AppDataSource = new DataSource({
   ],
   synchronize: true,
   // Add cache configuration
-  cache: {
-    type: "ioredis",
-    options: {
-      host: "redis-13699.c135.eu-central-1-1.ec2.redns.redis-cloud.com", // Your Redis host
-      port: 13699, // Your Redis port
-      password: "ttpcXXzePDYevUgWEQ7lxgNCrZWb5Oao", // Redis password if any
-    },
-    duration: 60000, // Cache duration in milliseconds (1 minute)
-  },
+  cache: false,
+  // cache: {
+  //   type: "ioredis",
+  //   options: {
+  //     host: "redis-13699.c135.eu-central-1-1.ec2.redns.redis-cloud.com", // Your Redis host
+  //     port: 13699, // Your Redis port
+  //     password: "ttpcXXzePDYevUgWEQ7lxgNCrZWb5Oao", // Redis password if any
+  //   },
+  //   duration: 60000, // Cache duration in milliseconds (1 minute)
+  // },
 });
 
 import { getLogger } from "../utils/logger";
