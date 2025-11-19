@@ -6,11 +6,14 @@ import { plainToInstance } from "class-transformer";
 import { UserRole } from "../enums/userRoles.enum";
 import { MinimalUserDto } from "../dtos/minimal-user.dto";
 import { getLogger } from "../utils/logger";
+import { ChatService } from "../services/chat.service";
 
 export class AuthController {
   private userService: UserService;
+  private chatService: ChatService;
   constructor() {
     this.userService = new UserService();
+    this.chatService = new ChatService();
   }
   register = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -46,6 +49,20 @@ export class AuthController {
           excludeExtraneousValues: true,
         });
       }
+      void this.chatService
+        .createLightUser({
+          userId: createdUser.id ?? "",
+          fullname: createdUser.fullname ?? undefined,
+          email: createdUser.email ?? undefined,
+          profileImage: createdUser.profilePicture ?? undefined,
+        })
+        .catch((chatError) => {
+          (req.log || getLogger()).error(
+            { err: chatError },
+            "Failed to replicate user to chat service"
+          );
+        });
+
       res.status(201).json(userDto);
     } catch (error) {
       (req.log || getLogger()).error({ err: error }, 'Error in register');
