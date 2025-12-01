@@ -21,5 +21,29 @@ export class MinimalUserDto {
   role?: UserRole;
 
   @Expose()
+  state?: string;
+
+  @Expose()
+  district?: string;
+
+  @Expose()
+  city?: string;
+
+  @Expose()
+  zipcode?: string;
+
+  @Expose()
+  address2?: string;
+
+  @Expose()
+  pushNotifications?: boolean;
+
+  @Expose()
+  gender?: string;
+
+  @Expose()
+  language?: string;
+
+  @Expose()
   fcmToken?: string;
 }
