@@ -57,56 +57,20 @@ export const updateUserValidationSchema = Joi.object({
   role: Joi.number()
     .valid(UserRole.TEACHER, UserRole.STUDENT, UserRole.ACADEMY)
     .required(),
-  state: Joi.when("role", {
-    is: Joi.valid(UserRole.STUDENT),
-    then: Joi.forbidden(),
-    otherwise: Joi.string().required(),
-  }),
-  district: Joi.when("role", {
-    is: Joi.valid(UserRole.STUDENT),
-    then: Joi.forbidden(),
-    otherwise: Joi.string().required(),
-  }),
-  city: Joi.when("role", {
-    is: Joi.valid(UserRole.STUDENT),
-    then: Joi.forbidden(),
-    otherwise: Joi.string().required(),
-  }),
-  zipcode: Joi.when("role", {
-    is: Joi.valid(UserRole.STUDENT),
-    then: Joi.forbidden(),
-    otherwise: Joi.string().required(),
-  }),
-  address: Joi.when("role", {
-    is: Joi.valid(UserRole.STUDENT),
-    then: Joi.forbidden(),
-    otherwise: Joi.string().required(),
-  }),
-  address2: Joi.when("role", {
-    is: Joi.valid(UserRole.STUDENT),
-    then: Joi.forbidden(),
-    otherwise: Joi.string().optional(),
-  }),
+  state: Joi.string().required(),
+  district: Joi.string().required(),
+  city: Joi.string().required(),
+  zipcode: Joi.string().required(),
+  address: Joi.string().required(),
+  address2: Joi.string().optional(),
   timeSlot: Joi.when("role", {
     is: Joi.valid(UserRole.STUDENT),
     then: Joi.forbidden(),
     otherwise: Joi.number().required(),
   }),
-  pushNotifications: Joi.when("role", {
-    is: Joi.valid(UserRole.STUDENT),
-    then: Joi.forbidden(),
-    otherwise: Joi.boolean().required(),
-  }),
-  gender: Joi.when("role", {
-    is: Joi.valid(UserRole.STUDENT, UserRole.ACADEMY),
-    then: Joi.forbidden(),
-    otherwise: Joi.string().required(),
-  }),
-  language: Joi.when("role", {
-    is: Joi.valid(UserRole.STUDENT),
-    then: Joi.forbidden(),
-    otherwise: Joi.string().optional(),
-  }),
+  pushNotifications: Joi.boolean().required(),
+  gender: Joi.string().required(),
+  language: Joi.string().optional(),
   bio: Joi.when("role", {
     is: Joi.valid(UserRole.STUDENT),
     then: Joi.forbidden(),
