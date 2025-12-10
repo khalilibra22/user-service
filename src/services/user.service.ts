@@ -3,7 +3,7 @@ import { AppDataSource } from "../config/database";
 import { PaymentMethodModel } from "../models/payment-method.model";
 import { UserRole } from "../enums/userRoles.enum";
 import { UserSettingModel } from "../models/user-setting.model";
-import { In } from "typeorm";
+import { In, Brackets, WhereExpressionBuilder } from "typeorm";
 import { getLogger } from "../utils/logger";
 
 const log = getLogger();
@@ -296,32 +296,81 @@ export class UserService {
     }
   }
 
-  async searchTeachersAndAcademies(
-    page: number,
-    limit: number
-  ): Promise<{ data: UserModel[]; total: number }> {
+  async searchTeachersAndAcademies(params: {
+    page: number;
+    limit: number;
+    q?: string;
+    topic?: string;
+    teachingModes?: string[];
+    minPrice?: number;
+    maxPrice?: number;
+    role?: UserRole;
+  }): Promise<{ data: UserModel[]; total: number }> {
     try {
-      const [data, total] = await this.userRepo.findAndCount({
-        where: {
-          role: In([UserRole.TEACHER, UserRole.ACADEMY]),
-          topics: {
-            isActive: true,
-            topic: {
-              isActive: true,
-            },
-          },
-        },
-        relations: ["topics", "topics.topic", "availabilities"],
-        skip: (page - 1) * limit,
-        take: limit,
-        cache: {
-          id: `search_teachers_academies_page_${page}_limit_${limit}`,
-          milliseconds: 120000,
-        }, // Enable caching for this query
-      });
+      const {
+        page,
+        limit,
+        q,
+        topic,
+        teachingModes,
+        minPrice,
+        maxPrice,
+        role,
+      } = params;
+
+      const query = this.userRepo.createQueryBuilder("user")
+        .leftJoinAndSelect("user.topics", "userTopic", "userTopic.isActive = :isActive", { isActive: true })
+        .leftJoinAndSelect("userTopic.topic", "topic", "topic.isActive = :isActive", { isActive: true })
+        .leftJoinAndSelect("user.availabilities", "availabilities");
+
+      if (role) {
+        query.andWhere("user.role = :role", { role });
+      } else {
+        query.andWhere("user.role IN (:...roles)", { roles: [UserRole.TEACHER, UserRole.ACADEMY] });
+      }
+
+      if (q) {
+        query.andWhere(new Brackets((qb: WhereExpressionBuilder) => {
+          qb.where("user.fullname ILIKE :q", { q: `%${q}%` })
+            .orWhere("user.bio ILIKE :q", { q: `%${q}%` });
+        }));
+      }
+
+      if (topic) {
+        query.andWhere("topic.name ILIKE :topicName", { topicName: `%${topic}%` });
+      }
+
+      if (minPrice !== undefined) {
+        query.andWhere("userTopic.price >= :minPrice", { minPrice });
+      }
+
+      if (maxPrice !== undefined) {
+        query.andWhere("userTopic.price <= :maxPrice", { maxPrice });
+      }
+
+      if (teachingModes && teachingModes.length > 0) {
+        query.andWhere(new Brackets((qb: WhereExpressionBuilder) => {
+          teachingModes.forEach((mode, index) => {
+            const trimmedMode = mode.trim();
+            if (index === 0) {
+              qb.where("user.teachingModes ILIKE :mode" + index, { ["mode" + index]: `%${trimmedMode}%` });
+            } else {
+              qb.orWhere("user.teachingModes ILIKE :mode" + index, { ["mode" + index]: `%${trimmedMode}%` });
+            }
+          });
+        }));
+      }
+
+      query.skip((page - 1) * limit).take(limit);
+
+      // Create a deterministic cache key based on params
+      const cacheKey = `search_teachers_${JSON.stringify(params)}`;
+      query.cache(cacheKey, 120000);
+
+      const [data, total] = await query.getManyAndCount();
       return { data, total };
     } catch (error) {
-      log.error({ err: error, ctx: { service: 'UserService', op: 'searchTeachersAndAcademies', page, limit } }, 'Error searching teachers and academies');
+      log.error({ err: error, ctx: { service: 'UserService', op: 'searchTeachersAndAcademies', params } }, 'Error searching teachers and academies');
       throw new Error("Error searching teachers and academies");
     }
   }
@@ -396,7 +445,7 @@ export class UserService {
         .take(limit);
 
       const [users, total] = await query.getManyAndCount();
-      
+
       return { users, total };
     } catch (error) {
       log.error({ err: error, ctx: { service: 'UserService', op: 'findNearbyTeachers', params } }, 'Error finding nearby teachers');

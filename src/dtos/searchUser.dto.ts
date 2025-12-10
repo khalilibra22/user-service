@@ -1,6 +1,7 @@
 import { Expose, Transform, Type } from "class-transformer";
 import { UserRole } from "../enums/userRoles.enum";
 import { UserTopicDto } from "./user-topic.dto";
+import { getS3Url } from "../utils";
 
 export class SearchUserDto {
   @Expose()
@@ -8,6 +9,10 @@ export class SearchUserDto {
 
   @Expose()
   fullname?: string;
+
+  @Expose()
+  @Transform(({ value }) => (value ? getS3Url(value) : undefined))
+  profilePicture?: string;
 
   @Expose()
   role?: UserRole;
