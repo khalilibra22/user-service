@@ -45,5 +45,8 @@ export class MinimalUserDto {
   language?: string;
 
   @Expose()
+  profilePicture?: string;
+
+  @Expose()
   fcmToken?: string;
 }
