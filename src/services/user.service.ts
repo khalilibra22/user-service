@@ -433,6 +433,9 @@ export class UserService {
           "user.isActive",
           "user.isApproved",
         ])
+        .leftJoinAndSelect("user.topics", "userTopic", "userTopic.isActive = :isActive", { isActive: true })
+        .leftJoinAndSelect("userTopic.topic", "topic", "topic.isActive = :isActive", { isActive: true })
+        .leftJoinAndSelect("user.availabilities", "availabilities")
         .addSelect(distanceFormula, "distance")
         .where("user.role IN (:...roles)", { roles: [UserRole.TEACHER, UserRole.ACADEMY] })
         .andWhere("user.isActive = :isActive", { isActive: false })

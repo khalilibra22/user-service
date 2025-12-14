@@ -160,12 +160,6 @@ router.patch(
   userController.updateUserLocation
 );
 
-// Get nearby teachers and academies
-router.get(
-  "/nearby",
-  //AuthMiddleware.verifyToken,
-  ValidationMiddleware.validateQuery(nearbyUsersQueryValidationSchema),
-  userController.getNearbyTeachers
-);
+
 
 export { router as userRouter };

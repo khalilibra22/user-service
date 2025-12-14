@@ -278,11 +278,11 @@ export class UserController {
       const teacherDtos = plainToInstance(UserDto, teachers, {
         excludeExtraneousValues: true,
       });
-      
+
       res.setHeader("X-Total-Count", total.toString());
       res.setHeader("X-Page", page.toString());
       res.setHeader("X-Limit", limit.toString());
-      
+
       res.status(200).json(teacherDtos);
     } catch (error) {
       (req.log || getLogger()).error({ err: error }, 'Error in user operation');
@@ -302,11 +302,11 @@ export class UserController {
       const studentDtos = plainToInstance(MinimalUserDto, students, {
         excludeExtraneousValues: true,
       });
-      
+
       res.setHeader("X-Total-Count", total.toString());
       res.setHeader("X-Page", page.toString());
       res.setHeader("X-Limit", limit.toString());
-      
+
       res.status(200).json(studentDtos);
     } catch (error) {
       (req.log || getLogger()).error({ err: error }, 'Error in user operation');
@@ -326,11 +326,11 @@ export class UserController {
       const academyDtos = plainToInstance(UserDto, academies, {
         excludeExtraneousValues: true,
       });
-      
+
       res.setHeader("X-Total-Count", total.toString());
       res.setHeader("X-Page", page.toString());
       res.setHeader("X-Limit", limit.toString());
-      
+
       res.status(200).json(academyDtos);
     } catch (error) {
       (req.log || getLogger()).error({ err: error }, 'Error in user operation');
@@ -350,11 +350,11 @@ export class UserController {
       const adminDtos = plainToInstance(MinimalUserDto, admins, {
         excludeExtraneousValues: true,
       });
-      
+
       res.setHeader("X-Total-Count", total.toString());
       res.setHeader("X-Page", page.toString());
       res.setHeader("X-Limit", limit.toString());
-      
+
       res.status(200).json(adminDtos);
     } catch (error) {
       (req.log || getLogger()).error({ err: error }, 'Error in user operation');
@@ -606,35 +606,4 @@ export class UserController {
     }
   };
 
-  // Get nearby teachers and academies
-  getNearbyTeachers = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const latitude = Number(req.query.latitude);
-      const longitude = Number(req.query.longitude);
-      const radius = Number(req.query.radius) || 10;
-      const limit = Number(req.query.limit) || 20;
-      const page = Number(req.query.page) || 1;
-
-      const { users, total } = await this.userService.findNearbyTeachers({
-        latitude,
-        longitude,
-        radiusKm: radius,
-        limit,
-        page,
-      });
-
-      const userDtos = plainToInstance(UserDto, users, {
-        excludeExtraneousValues: true,
-      });
-
-      res.setHeader("X-Total-Count", total.toString());
-      res.setHeader("X-Page", page.toString());
-      res.setHeader("X-Limit", limit.toString());
-
-      res.status(200).json(userDtos);
-    } catch (error: any) {
-      (req.log || getLogger()).error({ err: error }, 'Error in user operation');
-      res.status(500).json({ error: "Internal Server Error" });
-    }
-  };
 }

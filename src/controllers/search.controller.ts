@@ -40,4 +40,35 @@ export class SearchController {
       res.status(500).json({ error: "Internal Server Error" });
     }
   };
+
+  getNearbyTeachers = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const latitude = Number(req.query.latitude);
+      const longitude = Number(req.query.longitude);
+      const radius = Number(req.query.radius) || 10;
+      const limit = Number(req.query.limit) || 20;
+      const page = Number(req.query.page) || 1;
+
+      const { users, total } = await this.userService.findNearbyTeachers({
+        latitude,
+        longitude,
+        radiusKm: radius,
+        limit,
+        page,
+      });
+
+      const searchUserDtos = plainToInstance(SearchUserDto, users, {
+        excludeExtraneousValues: true,
+      });
+
+      res.setHeader("X-Total-Count", total.toString());
+      res.setHeader("X-Page", page.toString());
+      res.setHeader("X-Limit", limit.toString());
+
+      res.status(200).json(searchUserDtos);
+    } catch (error: any) {
+      (req.log || getLogger()).error({ err: error }, 'Error in getNearbyTeachers');
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  };
 }
