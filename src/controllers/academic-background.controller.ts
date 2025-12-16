@@ -6,6 +6,7 @@ import { AcademicBackgroundDto } from "../dtos/academic-background.dto";
 import { CategoryDto } from "../dtos/category.dto";
 import { TopicDto } from "../dtos/topic.dto";
 import { UserTopicDto } from "../dtos/user-topic.dto";
+import { SubjectDto } from "../dtos/subject.dto";
 import { getLogger } from "../utils/logger";
 
 export class AcademicBackgroundController {
@@ -573,6 +574,24 @@ export class AcademicBackgroundController {
       res.status(200).json(userTopicDto);
     } catch (error: any) {
       (req.log || getLogger()).error({ err: error }, 'Error in academic background operation');
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  };
+
+  getSubjectById = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const id = req.params.id;
+      const subject = await this.academicBackgroundService.getSubjectById(id);
+      if (!subject) {
+        res.status(404).json({ error: "Subject not found" });
+        return;
+      }
+      const subjectDto = plainToInstance(SubjectDto, subject, {
+        excludeExtraneousValues: true,
+      });
+      res.status(200).json(subjectDto);
+    } catch (error: any) {
+      (req.log || getLogger()).error({ err: error }, 'Error fetching subject');
       res.status(500).json({ error: "Internal Server Error" });
     }
   };

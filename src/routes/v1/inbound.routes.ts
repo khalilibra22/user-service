@@ -17,6 +17,8 @@ router.get(
 
 router.get("/users/topics/:id", academicBackgroundController.getUserTopicById);
 
+router.get("/subjects/:id", academicBackgroundController.getSubjectById);
+
 router.get("/topics/:id", academicBackgroundController.getTopicById);
 
 router.post(
