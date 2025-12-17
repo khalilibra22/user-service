@@ -305,6 +305,9 @@ export class UserService {
     minPrice?: number;
     maxPrice?: number;
     role?: UserRole;
+    availabilityDay?: string;
+    availabilityTimeStart?: string;
+    availabilityTimeEnd?: string;
   }): Promise<{ data: UserModel[]; total: number }> {
     try {
       const {
@@ -316,6 +319,9 @@ export class UserService {
         minPrice,
         maxPrice,
         role,
+        availabilityDay,
+        availabilityTimeStart,
+        availabilityTimeEnd,
       } = params;
 
       const query = this.userRepo.createQueryBuilder("user")
@@ -359,6 +365,22 @@ export class UserService {
             }
           });
         }));
+      }
+
+      if (availabilityDay) {
+        query.andWhere("availabilities.dayOfWeek = :day", { day: availabilityDay.toLowerCase() });
+      }
+
+      if (availabilityTimeStart && availabilityTimeEnd) {
+        // Find teachers available DURING the time window (overlapping slots)
+        query.andWhere(
+          "availabilities.startTime <= :searchEndTime AND availabilities.endTime >= :searchStartTime AND availabilities.isAvailable = :isAvailable",
+          {
+            searchStartTime: availabilityTimeStart,
+            searchEndTime: availabilityTimeEnd,
+            isAvailable: true
+          }
+        );
       }
 
       query.skip((page - 1) * limit).take(limit);

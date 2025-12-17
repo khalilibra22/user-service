@@ -15,7 +15,20 @@ export class SearchController {
     res: Response
   ): Promise<void> => {
     try {
-      const { page = 1, limit = 10, q, topic, teachingModes, minPrice, maxPrice, role } = req.query as any;
+      const {
+        page = 1,
+        limit = 10,
+        q,
+        topic,
+        teachingModes,
+        minPrice,
+        maxPrice,
+        role,
+        availabilityDay,
+        availabilityTimeStart,
+        availabilityTimeEnd
+      } = req.query as any;
+
       const { data: searchResult, total } = await this.userService.searchTeachersAndAcademies({
         page: Number(page),
         limit: Number(limit),
@@ -24,7 +37,10 @@ export class SearchController {
         teachingModes: teachingModes ? String(teachingModes).split(',') : undefined,
         minPrice: minPrice ? Number(minPrice) : undefined,
         maxPrice: maxPrice ? Number(maxPrice) : undefined,
-        role: role ? Number(role) : undefined
+        role: role ? Number(role) : undefined,
+        availabilityDay: availabilityDay ? String(availabilityDay) : undefined,
+        availabilityTimeStart: availabilityTimeStart ? String(availabilityTimeStart) : undefined,
+        availabilityTimeEnd: availabilityTimeEnd ? String(availabilityTimeEnd) : undefined
       });
       const searchUserDtos = plainToInstance(SearchUserDto, searchResult, {
         excludeExtraneousValues: true,
