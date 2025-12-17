@@ -26,7 +26,8 @@ export class SearchController {
         role,
         availabilityDay,
         availabilityTimeStart,
-        availabilityTimeEnd
+        availabilityTimeEnd,
+        isOnline
       } = req.query as any;
 
       const { data: searchResult, total } = await this.userService.searchTeachersAndAcademies({
@@ -40,7 +41,8 @@ export class SearchController {
         role: role ? Number(role) : undefined,
         availabilityDay: availabilityDay ? String(availabilityDay) : undefined,
         availabilityTimeStart: availabilityTimeStart ? String(availabilityTimeStart) : undefined,
-        availabilityTimeEnd: availabilityTimeEnd ? String(availabilityTimeEnd) : undefined
+        availabilityTimeEnd: availabilityTimeEnd ? String(availabilityTimeEnd) : undefined,
+        isOnline: isOnline === 'true' ? true : undefined
       });
       const searchUserDtos = plainToInstance(SearchUserDto, searchResult, {
         excludeExtraneousValues: true,

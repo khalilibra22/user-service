@@ -5,6 +5,7 @@ import { UserRole } from "../enums/userRoles.enum";
 import { UserSettingModel } from "../models/user-setting.model";
 import { In, Brackets, WhereExpressionBuilder } from "typeorm";
 import { getLogger } from "../utils/logger";
+import { ChatService } from "./chat.service";
 
 const log = getLogger();
 
@@ -12,10 +13,12 @@ export class UserService {
   userRepo: any;
   payementMethodRepo: any;
   userSettingRepo: any;
+  chatService: ChatService;
   constructor() {
     this.userRepo = AppDataSource.getRepository(UserModel);
     this.payementMethodRepo = AppDataSource.getRepository(PaymentMethodModel);
     this.userSettingRepo = AppDataSource.getRepository(UserSettingModel);
+    this.chatService = new ChatService();
   }
 
   async createUser(user: UserModel): Promise<UserModel> {
@@ -308,6 +311,7 @@ export class UserService {
     availabilityDay?: string;
     availabilityTimeStart?: string;
     availabilityTimeEnd?: string;
+    isOnline?: boolean;
   }): Promise<{ data: UserModel[]; total: number }> {
     try {
       const {
@@ -322,6 +326,7 @@ export class UserService {
         availabilityDay,
         availabilityTimeStart,
         availabilityTimeEnd,
+        isOnline
       } = params;
 
       // Use INNER JOIN if availability filters are provided to exclude users without matching slots
@@ -411,6 +416,17 @@ export class UserService {
       query.cache(cacheKey, 120000);
 
       const [data, total] = await query.getManyAndCount();
+
+      if (isOnline) {
+        // Filter out users without IDs (shouldn't happen for persisted users) and force type to string
+        const userIds = data.map((u: UserModel) => u.id).filter((id: string | undefined): id is string => !!id);
+        const onlineUserIds = await this.chatService.getOnlineStatusBulk(userIds);
+        const onlineUserSet = new Set(onlineUserIds);
+        const onlineUsers = data.filter((u: UserModel) => u.id && onlineUserSet.has(u.id));
+        // Note: total is still the DB total, not the filtered total.
+        return { data: onlineUsers, total };
+      }
+
       return { data, total };
     } catch (error) {
       log.error({ err: error, ctx: { service: 'UserService', op: 'searchTeachersAndAcademies', params } }, 'Error searching teachers and academies');

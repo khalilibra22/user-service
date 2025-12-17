@@ -78,5 +78,51 @@ export class ChatService {
       throw error;
     }
   }
+
+  async getOnlineStatusBulk(userIds: string[]): Promise<string[]> {
+    if (!chatHttpClient.defaults.baseURL) {
+      log.warn(
+        {
+          ctx: {
+            service: "ChatService",
+            op: "getOnlineStatusBulk",
+          },
+        },
+        "CHAT_SERVICE_URL is not configured; returning empty list."
+      );
+      return [];
+    }
+
+    try {
+      const response = await chatHttpClient.post<{ userId: string; isOnline: boolean }[]>("/status/bulk", {
+        userIds,
+      });
+      // Filter the response to return only IDs that are online
+      // Assuming the API returns a list of objects like { userId: '...', isOnline: true }
+      // Adjust if the API returns just a list of IDs directly
+      if (Array.isArray(response.data)) {
+        return response.data
+          .filter((status: any) => status.isOnline)
+          .map((status: any) => status.userId);
+      }
+      return [];
+
+    } catch (error) {
+      log.error(
+        {
+          err: error,
+          ctx: {
+            service: "ChatService",
+            op: "getOnlineStatusBulk",
+            userIds,
+          },
+        },
+        "Failed to fetch bulk online status"
+      );
+      // Fail gracefully? Or rethrow? 
+      // For a filter, returning empty list (none online) is safer than crashing the search.
+      return [];
+    }
+  }
 }
 
