@@ -66,4 +66,5 @@ export class SearchUserDto {
     return obj.availabilities?.some((a: any) => a.isAvailable);
   })
   isAvailable?: boolean;
+
 }

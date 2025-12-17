@@ -324,10 +324,21 @@ export class UserService {
         availabilityTimeEnd,
       } = params;
 
+      // Use INNER JOIN if availability filters are provided to exclude users without matching slots
+      // Use LEFT JOIN otherwise to show all users (even without availabilities)
+      const hasAvailabilityFilters = !!(availabilityDay || availabilityTimeStart || availabilityTimeEnd);
+
       const query = this.userRepo.createQueryBuilder("user")
         .leftJoinAndSelect("user.topics", "userTopic", "userTopic.isActive = :isActive", { isActive: true })
-        .leftJoinAndSelect("userTopic.topic", "topic", "topic.isActive = :isActive", { isActive: true })
-        .leftJoinAndSelect("user.availabilities", "availabilities");
+        .leftJoinAndSelect("userTopic.topic", "topic", "topic.isActive = :isActive", { isActive: true });
+
+      if (hasAvailabilityFilters) {
+        // INNER JOIN: only return users with matching available slots
+        query.innerJoinAndSelect("user.availabilities", "availabilities", "availabilities.isAvailable = :availabilityActive", { availabilityActive: true });
+      } else {
+        // LEFT JOIN: return all users, include available slots if they exist
+        query.leftJoinAndSelect("user.availabilities", "availabilities", "availabilities.isAvailable = :availabilityActive", { availabilityActive: true });
+      }
 
       if (role) {
         query.andWhere("user.role = :role", { role });
@@ -371,16 +382,26 @@ export class UserService {
         query.andWhere("availabilities.dayOfWeek = :day", { day: availabilityDay.toLowerCase() });
       }
 
+      // Handle time filters - support partial ranges
       if (availabilityTimeStart && availabilityTimeEnd) {
-        // Find teachers available DURING the time window (overlapping slots)
+        // Both provided: find teachers available DURING the time window (overlapping slots)
         query.andWhere(
-          "availabilities.startTime <= :searchEndTime AND availabilities.endTime >= :searchStartTime AND availabilities.isAvailable = :isAvailable",
+          "availabilities.startTime <= :searchEndTime AND availabilities.endTime >= :searchStartTime",
           {
             searchStartTime: availabilityTimeStart,
-            searchEndTime: availabilityTimeEnd,
-            isAvailable: true
+            searchEndTime: availabilityTimeEnd
           }
         );
+      } else if (availabilityTimeStart) {
+        // Only start time: find teachers whose availability extends to or beyond this time
+        query.andWhere("availabilities.endTime >= :searchStartTime", {
+          searchStartTime: availabilityTimeStart
+        });
+      } else if (availabilityTimeEnd) {
+        // Only end time: find teachers whose availability starts at or before this time
+        query.andWhere("availabilities.startTime <= :searchEndTime", {
+          searchEndTime: availabilityTimeEnd
+        });
       }
 
       query.skip((page - 1) * limit).take(limit);

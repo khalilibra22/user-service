@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { UserService } from "../services/user.service";
 import { plainToInstance } from "class-transformer";
-import { SearchUserDto } from "../dtos/searchUser.dto";
+import { SearchUserDto } from "../dtos/search-user.dto";
 import { getLogger } from "../utils/logger";
 
 export class SearchController {
