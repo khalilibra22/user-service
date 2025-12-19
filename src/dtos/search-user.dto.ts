@@ -67,4 +67,6 @@ export class SearchUserDto {
   })
   isAvailable?: boolean;
 
+  @Expose()
+  isOnline?: boolean;
 }

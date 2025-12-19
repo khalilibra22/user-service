@@ -3,11 +3,15 @@ import { UserService } from "../services/user.service";
 import { plainToInstance } from "class-transformer";
 import { SearchUserDto } from "../dtos/search-user.dto";
 import { getLogger } from "../utils/logger";
+import { ChatService } from "../services/chat.service";
 
 export class SearchController {
   private userService: UserService;
+  private chatService: ChatService;
+
   constructor() {
     this.userService = new UserService();
+    this.chatService = new ChatService();
   }
 
   searchTeachersAndAcademies = async (
@@ -48,6 +52,13 @@ export class SearchController {
         excludeExtraneousValues: true,
       });
 
+      const userIds = searchResult.map((u: any) => u.id);
+      const onlineUserIds = await this.chatService.getOnlineStatusBulk(userIds);
+
+      searchUserDtos.forEach((dto) => {
+        dto.isOnline = onlineUserIds.includes(dto.id!);
+      });
+
       res.setHeader("X-Total-Count", total.toString());
       res.setHeader("X-Page", page.toString());
       res.setHeader("X-Limit", limit.toString());
@@ -77,6 +88,13 @@ export class SearchController {
 
       const searchUserDtos = plainToInstance(SearchUserDto, users, {
         excludeExtraneousValues: true,
+      });
+
+      const userIds = users.map((u: any) => u.id);
+      const onlineUserIds = await this.chatService.getOnlineStatusBulk(userIds);
+
+      searchUserDtos.forEach((dto) => {
+        dto.isOnline = onlineUserIds.includes(dto.id!);
       });
 
       res.setHeader("X-Total-Count", total.toString());

@@ -37,6 +37,9 @@ export class UserController {
         });
       }
 
+      userDto.isOnline = await this.chatService.getOnlineStatus(id);
+
+
       res.status(200).json(userDto);
     } catch (error: any) {
       (req.log || getLogger()).error({ err: error }, 'Error in user operation');

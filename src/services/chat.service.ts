@@ -94,7 +94,7 @@ export class ChatService {
     }
 
     try {
-      const response = await chatHttpClient.post<{ userId: string; isOnline: boolean }[]>("/status/bulk", {
+      const response = await chatHttpClient.post<{ userId: string; isOnline: boolean }[]>("users/status/bulk", {
         userIds,
       });
       // Filter the response to return only IDs that are online
@@ -119,9 +119,42 @@ export class ChatService {
         },
         "Failed to fetch bulk online status"
       );
-      // Fail gracefully? Or rethrow? 
       // For a filter, returning empty list (none online) is safer than crashing the search.
       return [];
+    }
+  }
+
+  async getOnlineStatus(userId: string): Promise<boolean> {
+    if (!chatHttpClient.defaults.baseURL) {
+      log.warn(
+        {
+          ctx: {
+            service: "ChatService",
+            op: "getOnlineStatus",
+            userId,
+          },
+        },
+        "CHAT_SERVICE_URL is not configured; returning offline."
+      );
+      return false;
+    }
+
+    try {
+      const response = await chatHttpClient.get<{ isOnline: boolean }>(`/users/${userId}/status`, { timeout: 1500 });
+      return response.data.isOnline;
+    } catch (error) {
+      log.error(
+        {
+          err: error,
+          ctx: {
+            service: "ChatService",
+            op: "getOnlineStatus",
+            userId,
+          },
+        },
+        "Failed to fetch online status"
+      );
+      return false;
     }
   }
 }

@@ -81,4 +81,7 @@ export class UserDto {
 
   @Expose()
   longitude?: number;
+
+  @Expose()
+  isOnline?: boolean;
 }
