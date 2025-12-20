@@ -352,10 +352,16 @@ export class UserService {
       }
 
       if (q) {
-        query.andWhere(new Brackets((qb: WhereExpressionBuilder) => {
-          qb.where("user.fullname ILIKE :q", { q: `%${q}%` })
-            .orWhere("user.bio ILIKE :q", { q: `%${q}%` });
-        }));
+        const queryTerms = String(q).trim().split(/\s+/).filter((t: string) => t.length > 0);
+        const formattedQuery = queryTerms.map((term: string) => `${term}:*`).join(' & ');
+
+        if (formattedQuery) {
+          query.andWhere(
+            "(to_tsvector('english', COALESCE(user.fullname, '') || ' ' || COALESCE(user.bio, '')) @@ to_tsquery('english', :formattedQuery) OR " +
+            "to_tsvector('arabic', COALESCE(user.fullname, '') || ' ' || COALESCE(user.bio, '')) @@ to_tsquery('arabic', :formattedQuery))",
+            { formattedQuery }
+          );
+        }
       }
 
       if (topic) {
