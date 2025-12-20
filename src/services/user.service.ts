@@ -352,15 +352,32 @@ export class UserService {
       }
 
       if (q) {
-        const queryTerms = String(q).trim().split(/\s+/).filter((t: string) => t.length > 0);
-        const formattedQuery = queryTerms.map((term: string) => `${term}:*`).join(' & ');
+        const cleanQ = String(q).trim();
+        const terms = cleanQ.split(/\s+/).filter((t: string) => t.length > 0);
+
+        // Support both stemming (exact word) and prefix matching (partial word)
+        // for each term: "(word | word:*)"
+        const formattedQuery = terms.map((t: string) => {
+          const escaped = t.replace(/[:&|!()*]/g, '');
+          return escaped ? `(${escaped} | ${escaped}:*)` : '';
+        }).filter(Boolean).join(" | "); // Changed to OR logic for better recall
 
         if (formattedQuery) {
+          const vectorContent = `
+            to_tsvector('arabic', coalesce("user"."fullname", '') || ' ' || coalesce("user"."bio", '')) ||
+            to_tsvector('english', coalesce("user"."fullname", '') || ' ' || coalesce("user"."bio", ''))
+          `;
+
           query.andWhere(
-            "(to_tsvector('english', COALESCE(user.fullname, '') || ' ' || COALESCE(user.bio, '')) @@ to_tsquery('english', :formattedQuery) OR " +
-            "to_tsvector('arabic', COALESCE(user.fullname, '') || ' ' || COALESCE(user.bio, '')) @@ to_tsquery('arabic', :formattedQuery))",
-            { formattedQuery }
+            `(${vectorContent} @@ to_tsquery('arabic', :searchQuery) OR 
+              ${vectorContent} @@ to_tsquery('english', :searchQuery))`,
+            { searchQuery: formattedQuery }
           );
+
+          // Use ts_rank for "sensible" relevance ordering (native to Postgres FTS)
+          query.addSelect(`ts_rank(${vectorContent}, to_tsquery('arabic', :searchQuery)) + 
+                           ts_rank(${vectorContent}, to_tsquery('english', :searchQuery))`, "search_rank");
+          query.addOrderBy("search_rank", "DESC");
         }
       }
 
