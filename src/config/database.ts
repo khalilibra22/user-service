@@ -20,7 +20,7 @@ export const AppDataSource = new DataSource({
   port: 12183,
   username: "avnadmin",
   password: "AVNS_0vhpVNq82FydIBgv2ow",
-  database: "defaultdb",
+  database: "user-service-db",
   ssl: { rejectUnauthorized: false },
   entities: [
     UserModel,
