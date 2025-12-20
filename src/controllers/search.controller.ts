@@ -1,13 +1,17 @@
 import { Request, Response } from "express";
 import { UserService } from "../services/user.service";
 import { plainToInstance } from "class-transformer";
-import { SearchUserDto } from "../dtos/searchUser.dto";
+import { SearchUserDto } from "../dtos/search-user.dto";
 import { getLogger } from "../utils/logger";
+import { ChatService } from "../services/chat.service";
 
 export class SearchController {
   private userService: UserService;
+  private chatService: ChatService;
+
   constructor() {
     this.userService = new UserService();
+    this.chatService = new ChatService();
   }
 
   searchTeachersAndAcademies = async (
@@ -15,7 +19,21 @@ export class SearchController {
     res: Response
   ): Promise<void> => {
     try {
-      const { page = 1, limit = 10, q, topic, teachingModes, minPrice, maxPrice, role } = req.query as any;
+      const {
+        page = 1,
+        limit = 10,
+        q,
+        topic,
+        teachingModes,
+        minPrice,
+        maxPrice,
+        role,
+        availabilityDay,
+        availabilityTimeStart,
+        availabilityTimeEnd,
+        isOnline
+      } = req.query as any;
+
       const { data: searchResult, total } = await this.userService.searchTeachersAndAcademies({
         page: Number(page),
         limit: Number(limit),
@@ -24,10 +42,21 @@ export class SearchController {
         teachingModes: teachingModes ? String(teachingModes).split(',') : undefined,
         minPrice: minPrice ? Number(minPrice) : undefined,
         maxPrice: maxPrice ? Number(maxPrice) : undefined,
-        role: role ? Number(role) : undefined
+        role: role ? Number(role) : undefined,
+        availabilityDay: availabilityDay ? String(availabilityDay) : undefined,
+        availabilityTimeStart: availabilityTimeStart ? String(availabilityTimeStart) : undefined,
+        availabilityTimeEnd: availabilityTimeEnd ? String(availabilityTimeEnd) : undefined,
+        isOnline: isOnline === 'true' ? true : undefined
       });
       const searchUserDtos = plainToInstance(SearchUserDto, searchResult, {
         excludeExtraneousValues: true,
+      });
+
+      const userIds = searchResult.map((u: any) => u.id);
+      const onlineUserIds = await this.chatService.getOnlineStatusBulk(userIds);
+
+      searchUserDtos.forEach((dto) => {
+        dto.isOnline = onlineUserIds.includes(dto.id!);
       });
 
       res.setHeader("X-Total-Count", total.toString());
@@ -59,6 +88,13 @@ export class SearchController {
 
       const searchUserDtos = plainToInstance(SearchUserDto, users, {
         excludeExtraneousValues: true,
+      });
+
+      const userIds = users.map((u: any) => u.id);
+      const onlineUserIds = await this.chatService.getOnlineStatusBulk(userIds);
+
+      searchUserDtos.forEach((dto) => {
+        dto.isOnline = onlineUserIds.includes(dto.id!);
       });
 
       res.setHeader("X-Total-Count", total.toString());

@@ -49,4 +49,7 @@ export class MinimalUserDto {
 
   @Expose()
   fcmToken?: string;
+
+  @Expose()
+  isOnline?: boolean;
 }

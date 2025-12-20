@@ -18,6 +18,7 @@ export class SearchUserDto {
   role?: UserRole;
 
   @Expose()
+  @Transform(() => Math.floor(Math.random() * 5) + 1)
   rating?: number;
 
   @Expose()
@@ -65,4 +66,7 @@ export class SearchUserDto {
     return obj.availabilities?.some((a: any) => a.isAvailable);
   })
   isAvailable?: boolean;
+
+  @Expose()
+  isOnline?: boolean;
 }
