@@ -308,9 +308,9 @@ export class UserService {
     minPrice?: number;
     maxPrice?: number;
     role?: UserRole;
-    availabilityDay?: string;
-    availabilityTimeStart?: string;
-    availabilityTimeEnd?: string;
+    availabilityDay?: string[];
+    availabilityTimeStart?: string[];
+    availabilityTimeEnd?: string[];
     isOnline?: boolean;
   }): Promise<{ data: UserModel[]; total: number }> {
     try {
@@ -406,30 +406,44 @@ export class UserService {
         }));
       }
 
-      if (availabilityDay) {
-        query.andWhere("availabilities.dayOfWeek = :day", { day: availabilityDay.toLowerCase() });
+      if (availabilityDay && availabilityDay.length > 0) {
+        query.andWhere("availabilities.dayOfWeek IN (:...days)", { days: availabilityDay.map(d => d.toLowerCase()) });
       }
 
-      // Handle time filters - support partial ranges
-      if (availabilityTimeStart && availabilityTimeEnd) {
-        // Both provided: find teachers available DURING the time window (overlapping slots)
-        query.andWhere(
-          "availabilities.startTime <= :searchEndTime AND availabilities.endTime >= :searchStartTime",
-          {
-            searchStartTime: availabilityTimeStart,
-            searchEndTime: availabilityTimeEnd
+      // Handle multiple time filters - support partial ranges and pairings
+      if (availabilityTimeStart || availabilityTimeEnd) {
+        query.andWhere(new Brackets((qb: WhereExpressionBuilder) => {
+          const starts = availabilityTimeStart || [];
+          const ends = availabilityTimeEnd || [];
+          const maxIdx = Math.max(starts.length, ends.length);
+
+          for (let i = 0; i < maxIdx; i++) {
+            const start = starts[i];
+            const end = ends[i];
+            const condition = [];
+            const params: any = {};
+
+            if (start && end) {
+              condition.push("availabilities.startTime <= :endTime" + i + " AND availabilities.endTime >= :startTime" + i);
+              params["startTime" + i] = start;
+              params["endTime" + i] = end;
+            } else if (start) {
+              condition.push("availabilities.endTime >= :startTime" + i);
+              params["startTime" + i] = start;
+            } else if (end) {
+              condition.push("availabilities.startTime <= :endTime" + i);
+              params["endTime" + i] = end;
+            }
+
+            if (condition.length > 0) {
+              if (i === 0) {
+                qb.where(condition[0], params);
+              } else {
+                qb.orWhere(condition[0], params);
+              }
+            }
           }
-        );
-      } else if (availabilityTimeStart) {
-        // Only start time: find teachers whose availability extends to or beyond this time
-        query.andWhere("availabilities.endTime >= :searchStartTime", {
-          searchStartTime: availabilityTimeStart
-        });
-      } else if (availabilityTimeEnd) {
-        // Only end time: find teachers whose availability starts at or before this time
-        query.andWhere("availabilities.startTime <= :searchEndTime", {
-          searchEndTime: availabilityTimeEnd
-        });
+        }));
       }
 
       query.skip((page - 1) * limit).take(limit);

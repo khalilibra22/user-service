@@ -43,9 +43,9 @@ export class SearchController {
         minPrice: minPrice ? Number(minPrice) : undefined,
         maxPrice: maxPrice ? Number(maxPrice) : undefined,
         role: role ? Number(role) : undefined,
-        availabilityDay: availabilityDay ? String(availabilityDay) : undefined,
-        availabilityTimeStart: availabilityTimeStart ? String(availabilityTimeStart) : undefined,
-        availabilityTimeEnd: availabilityTimeEnd ? String(availabilityTimeEnd) : undefined,
+        availabilityDay: availabilityDay ? String(availabilityDay).split(',') : undefined,
+        availabilityTimeStart: availabilityTimeStart ? String(availabilityTimeStart).split(',') : undefined,
+        availabilityTimeEnd: availabilityTimeEnd ? String(availabilityTimeEnd).split(',') : undefined,
         isOnline: isOnline === 'true' ? true : undefined
       });
       const searchUserDtos = plainToInstance(SearchUserDto, searchResult, {
