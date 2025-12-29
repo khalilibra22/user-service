@@ -1,23 +1,37 @@
-# Use lightweight Node.js Alpine image for production
-FROM node:22.14.0-alpine
+# Stage 1: Build Stage
+FROM node:22.14.0-alpine AS builder
 
-# Set working directory in the container
+# Set working directory
 WORKDIR /user-service
 
-# Copy package.json and package-lock.json for dependency installation
+# Copy package files for dependency installation
+COPY package*.json ./
+
+# Install all dependencies including devDependencies for build
+RUN npm ci
+
+# Copy source code and tsconfig
+COPY . .
+
+# Build the application (generates dist directory)
+RUN npm run build
+
+# Stage 2: Production Stage
+FROM node:22.14.0-alpine
+
+# Set working directory
+WORKDIR /user-service
+
+# Copy package files
 COPY package*.json ./
 
 # Install only production dependencies
 RUN npm ci --only=production && npm cache clean --force
 
-# Copy the compiled JavaScript files from dist directory
-COPY dist/ ./dist/
-
-# Copy proto files for gRPC services
-COPY proto/ ./proto/
-
-# Copy .env file if it exists (optional, for environment variables)
-COPY .env* ./
+# Copy only the necessary files from the builder stage
+COPY --from=builder /user-service/dist ./dist
+COPY --from=builder /user-service/proto ./proto
+COPY --from=builder /user-service/.env* ./
 
 # Create non-root user for security
 RUN addgroup -g 1001 -S nodejs && \
