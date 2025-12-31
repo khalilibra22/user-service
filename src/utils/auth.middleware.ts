@@ -1,5 +1,6 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import config from "../config";
 import { Request, Response, NextFunction } from "express";
 import { UserModel } from "../models/user.model";
 import { UserRole } from "../enums/userRoles.enum";
@@ -38,7 +39,7 @@ class AuthMiddleware {
             phoneNumber: user.phoneNumber,
             roles: user.role,
           },
-          process.env.JWT_SECRET!
+          config.jwt.secret
           //{ expiresIn: "1h" }
         );
         resolve(token);
@@ -50,7 +51,7 @@ class AuthMiddleware {
   static async decodeToken(token: string): Promise<any> {
     return new Promise((resolve, reject) => {
       try {
-        const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
+        const decoded: any = jwt.verify(token, config.jwt.secret);
         resolve(decoded);
       } catch (error) {
         reject(error);
@@ -82,7 +83,7 @@ class AuthMiddleware {
   static async getTokenDecode(token: string): Promise<UserDto> {
     return new Promise((resolve, reject) => {
       try {
-        const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
+        const decoded: any = jwt.verify(token, config.jwt.secret);
         const userDto: UserDto = {
           id: decoded.id,
           email: decoded.email,
