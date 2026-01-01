@@ -1,5 +1,6 @@
 import axios, { AxiosInstance } from "axios";
 import { getLogger } from "../utils/logger";
+import config from ".";
 
 const logger = getLogger();
 
@@ -45,7 +46,7 @@ export const createHttpClient = ({
   return instance;
 };
 
-const chatServiceBaseUrl = process.env.CHAT_SERVICE_URL;
+const chatServiceBaseUrl = config.chatServiceUrl;
 
 if (!chatServiceBaseUrl) {
   logger.warn(

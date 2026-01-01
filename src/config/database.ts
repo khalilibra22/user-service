@@ -14,14 +14,16 @@ import { AvailabilityModel } from "../models/availability.model";
 import { AvailabilityExceptionModel } from "../models/availability-exception.model";
 import { CouponModel } from "../models/coupon.model";
 
+import config from ".";
+
 export const AppDataSource = new DataSource({
-  type: "postgres",
-  host: "pg-2a2ac9b9-ibrakhalilo22-4c7b.f.aivencloud.com",
-  port: 12183,
-  username: "avnadmin",
-  password: "AVNS_0vhpVNq82FydIBgv2ow",
-  database: "user-service-db",
-  ssl: { rejectUnauthorized: false },
+  type: config.db.type,
+  host: config.db.host,
+  port: config.db.port,
+  username: config.db.username,
+  password: config.db.password,
+  database: config.db.database,
+  ssl: config.db.ssl ? { rejectUnauthorized: false } : false,
   entities: [
     UserModel,
     UserSettingModel,
@@ -37,18 +39,19 @@ export const AppDataSource = new DataSource({
     AvailabilityExceptionModel,
     CouponModel,
   ],
-  synchronize: true,
+  synchronize: config.env === "development",
   // Add cache configuration
-  cache: false,
-  // cache: {
-  //   type: "ioredis",
-  //   options: {
-  //     host: "redis-13699.c135.eu-central-1-1.ec2.redns.redis-cloud.com", // Your Redis host
-  //     port: 13699, // Your Redis port
-  //     password: "ttpcXXzePDYevUgWEQ7lxgNCrZWb5Oao", // Redis password if any
-  //   },
-  //   duration: 60000, // Cache duration in milliseconds (1 minute)
-  // },
+  cache: config.redis.enabled
+    ? {
+      type: "ioredis",
+      options: {
+        host: config.redis.host,
+        port: config.redis.port,
+        password: config.redis.password,
+      },
+      duration: config.redis.cacheDuration,
+    }
+    : false,
 });
 
 import { getLogger } from "../utils/logger";
