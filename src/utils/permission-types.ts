@@ -32,7 +32,8 @@ export type Action =
   | "adjust"
   | "drop"
   | "view"
-  | "overview";
+  | "overview"
+  | "validate"; // validation of payments
 
 export type Resource =
   | "availabilities"
@@ -41,4 +42,5 @@ export type Resource =
   | "academic_backgrounds"
   | "payment_methods"
   | "subscriptions"
-  | "catalogs";
+  | "catalogs"
+  | "payments";

@@ -23,6 +23,7 @@ import { SubscriptionModel } from "./subscription.model";
 import { AvailabilityModel } from "./availability.model";
 import { AvailabilityExceptionModel } from "./availability-exception.model";
 import { CouponModel } from "./coupon.model";
+import { TransactionModel } from "./transaction.model";
 
 @Entity("users")
 @Index("IDX_users_role", ["role"])
@@ -212,4 +213,7 @@ export class UserModel {
 
   @OneToMany(() => SubscriptionModel, (subscription) => subscription.user)
   subscriptions?: SubscriptionModel[];
+
+  @OneToMany(() => TransactionModel, (transaction) => transaction.user)
+  transactions?: TransactionModel[];
 }

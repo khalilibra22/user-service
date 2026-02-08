@@ -13,6 +13,7 @@ import { SubscriptionModel } from "../models/subscription.model";
 import { AvailabilityModel } from "../models/availability.model";
 import { AvailabilityExceptionModel } from "../models/availability-exception.model";
 import { CouponModel } from "../models/coupon.model";
+import { TransactionModel } from "../models/transaction.model";
 
 import config from ".";
 
@@ -38,6 +39,7 @@ export const AppDataSource = new DataSource({
     AvailabilityModel,
     AvailabilityExceptionModel,
     CouponModel,
+    TransactionModel
   ],
   synchronize: config.env === "development",
   // Add cache configuration

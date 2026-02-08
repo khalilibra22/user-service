@@ -6,6 +6,8 @@ import { plainToInstance } from "class-transformer";
 import { PlanDto } from "../dtos/plan.dto";
 import { SubscriptionDto } from "../dtos/subscription.dto";
 import { getLogger } from "../utils/logger";
+import { PaymentService } from "../services/payment.service";
+import { PaymentMethod } from "../enums/payment-method.enum";
 
 export class SubscriptionController {
   private subscriptionService: SubscriptionService;
@@ -42,10 +44,13 @@ export class SubscriptionController {
         res.status(404).json({ error: "Plan not found" });
         return;
       }
+
+      const isFree = !plan.price || plan.price === 0;
       const durationInMonths = getDurationInMonths(
         plan.duration,
         plan.durationUnit
       );
+
       const subscriptionBody = {
         startDate: new Date(),
         endDate: new Date(
@@ -55,16 +60,46 @@ export class SubscriptionController {
         ),
         plan: plan,
         user: user,
+        status: isFree ? "active" : "pending_payment"
       };
+
       const subscription = await this.subscriptionService.createSubscription(
         subscriptionBody
       );
+
       const subscriptionDto = plainToInstance(SubscriptionDto, subscription, {
         excludeExtraneousValues: true,
       });
-      user.plan = plan;
-      await this.userService.updateUser(userId, user);
-      res.status(201).json(subscriptionDto);
+
+      // If free, return subscription as before
+      if (isFree) {
+        user.plan = plan;
+        await this.userService.updateUser(userId, user);
+        res.status(201).json(subscriptionDto);
+        return;
+      }
+
+      // If paid, initiate payment
+      const paymentService = new PaymentService(); // Instantiate here since we didn't inject it globally yet in this file
+
+      const { paymentUrl, transactionId, message } = await paymentService.initiateTransaction({
+        userId: userId,
+        amount: plan.price!,
+        currency: "DZD",
+        method: req.body.paymentMethod || PaymentMethod.SATIM,
+        referenceType: "SUBSCRIPTION",
+        referenceId: subscription.id!.toString(),
+        returnUrl: req.body.returnUrl || `http://localhost:3000/payment/success?type=subscription`, // Default or from body
+        failUrl: req.body.failUrl || `http://localhost:3000/payment/fail`,
+      });
+
+      res.status(201).json({
+        subscription: subscriptionDto,
+        paymentUrl,
+        transactionId,
+        message
+      });
+
     } catch (error) {
       (req.log || getLogger()).error({ err: error }, 'Error in subscription operation');
       res.status(500).json({ error: "Internal Server Error" });

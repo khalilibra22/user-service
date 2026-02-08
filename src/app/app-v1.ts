@@ -10,6 +10,8 @@ import path from "path";
 import passport from "passport";
 import session from "express-session";
 import { inboundRouter } from "../routes/v1/inbound.routes";
+import { paymentRouter } from "../routes/v1/payment.routes";
+import { adminPaymentRouter } from "../routes/v1/admin-payment.routes";
 
 const app = express.Router();
 
@@ -32,5 +34,7 @@ app.use("/subscriptions", subscriptionRouter); // Assuming you have a route for 
 app.use("/coupons", couponManagementRouter); // Assuming you have a route for coupons
 app.use("/search", searchRouter);
 app.use("/inbounds", inboundRouter);
+app.use("/payments", paymentRouter);
+app.use("/admin/payments", adminPaymentRouter);
 
 export { app as appV1 };
