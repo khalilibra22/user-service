@@ -22,4 +22,7 @@ export class AvailabilityDto {
   @Expose()
   @Transform(({ value }) => (value ? value : undefined))
   isFree?: boolean;
+
+  @Expose()
+  reservedUntil?: Date;
 }

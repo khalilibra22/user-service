@@ -49,10 +49,18 @@ export class AvailabilityController {
         return;
       }
 
-      // Check for overlapping availability
       const { dayOfWeek, startTime, endTime } = req.body;
       if (!dayOfWeek || !startTime || !endTime) {
         res.status(400).json({ error: "dayOfWeek, startTime, and endTime are required" });
+        return;
+      }
+
+      // Validate time slot
+      if (startTime >= endTime) {
+        res.status(400).json({
+          error: "Invalid time slot",
+          message: `Start time (${startTime}) must be before end time (${endTime})`,
+        });
         return;
       }
 
@@ -452,7 +460,7 @@ export class AvailabilityController {
     res: Response
   ): Promise<void> => {
     try {
-      const { availabilityIds } = req.body;
+      const { availabilityIds, reservedUntil } = req.body;
 
       if (!availabilityIds || !Array.isArray(availabilityIds)) {
         res.status(400).json({ error: "Availability IDs array is required" });
@@ -471,7 +479,10 @@ export class AvailabilityController {
           availabilityId
         );
         if (availability) {
-          const updateData = { ...availability, isAvailable: false };
+          const updateData: any = { ...availability, isAvailable: false };
+          if (reservedUntil) {
+            updateData.reservedUntil = new Date(reservedUntil);
+          }
           return await this.availabilityService.updateAvailability(updateData);
         }
         return null;

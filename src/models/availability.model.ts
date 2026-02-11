@@ -48,6 +48,9 @@ export class AvailabilityModel {
   //@JoinColumn({ name: "teacherId" })
   user?: UserModel;
 
+  @Column({ name: "reserved_until", type: "timestamp", nullable: true })
+  reservedUntil?: Date;
+
   @CreateDateColumn()
   createdAt?: Date;
 
