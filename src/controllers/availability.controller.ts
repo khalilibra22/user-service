@@ -392,7 +392,7 @@ export class AvailabilityController {
   // Check availabilities by IDs
   checkAvailabilitiesByIds = async (req: Request, res: Response): Promise<void> => {
     try {
-      const { availabilityIds } = req.body;
+      const { availabilityIds, allowUnavailable } = req.body;
 
       if (!availabilityIds || !Array.isArray(availabilityIds)) {
         res.status(400).json({ error: "Availability IDs array is required" });
@@ -429,15 +429,17 @@ export class AvailabilityController {
       }
 
       // Check if all availabilities are active
-      const inactiveAvailabilities = validAvailabilities.filter(
-        (availability) => !availability.isAvailable
-      );
-      if (inactiveAvailabilities.length > 0) {
-        res.status(400).json({
-          message: "Some availabilities are not available",
-          inactiveCount: inactiveAvailabilities.length,
-        });
-        return;
+      if (!allowUnavailable) {
+        const inactiveAvailabilities = validAvailabilities.filter(
+          (availability) => !availability.isAvailable
+        );
+        if (inactiveAvailabilities.length > 0) {
+          res.status(400).json({
+            message: "Some availabilities are not available",
+            inactiveCount: inactiveAvailabilities.length,
+          });
+          return;
+        }
       }
 
       const availabilityDtos = plainToInstance(
@@ -474,14 +476,18 @@ export class AvailabilityController {
         return;
       }
 
-      const updatePromises = availabilityIds.map(async (availabilityId) => {
+      const updatePromises = availabilityIds.map(async (idOrObj) => {
+        const availabilityId = typeof idOrObj === "string" ? idOrObj : idOrObj.id;
         const availability = await this.availabilityService.getAvailabilityById(
           availabilityId
         );
         if (availability) {
           const updateData: any = { ...availability, isAvailable: false };
-          if (reservedUntil) {
-            updateData.reservedUntil = new Date(reservedUntil);
+          const individualReservedUntil = typeof idOrObj === "object" ? idOrObj.reservedUntil : undefined;
+          const finalReservedUntil = individualReservedUntil || reservedUntil;
+
+          if (finalReservedUntil) {
+            updateData.reservedUntil = new Date(finalReservedUntil);
           }
           return await this.availabilityService.updateAvailability(updateData);
         }
