@@ -212,10 +212,12 @@ export class AvailabilityService {
       availability.reservedUntil &&
       new Date(availability.reservedUntil) < new Date()
     ) {
+      log.info({ availabilityId: availability.id }, 'Reservation expired. Resetting availability to available.');
       availability.isAvailable = true;
-      availability.reservedUntil = undefined;
+      availability.reservedUntil = null;
       await this.aviabilityRepo.save(availability);
     }
+
     return availability;
   }
 }

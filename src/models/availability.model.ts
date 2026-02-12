@@ -49,7 +49,8 @@ export class AvailabilityModel {
   user?: UserModel;
 
   @Column({ name: "reserved_until", type: "timestamp", nullable: true })
-  reservedUntil?: Date;
+  reservedUntil?: Date | null;
+
 
   @CreateDateColumn()
   createdAt?: Date;
