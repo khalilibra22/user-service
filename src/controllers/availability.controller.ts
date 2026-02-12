@@ -49,10 +49,18 @@ export class AvailabilityController {
         return;
       }
 
-      // Check for overlapping availability
       const { dayOfWeek, startTime, endTime } = req.body;
       if (!dayOfWeek || !startTime || !endTime) {
         res.status(400).json({ error: "dayOfWeek, startTime, and endTime are required" });
+        return;
+      }
+
+      // Validate time slot
+      if (startTime >= endTime) {
+        res.status(400).json({
+          error: "Invalid time slot",
+          message: `Start time (${startTime}) must be before end time (${endTime})`,
+        });
         return;
       }
 
@@ -384,7 +392,7 @@ export class AvailabilityController {
   // Check availabilities by IDs
   checkAvailabilitiesByIds = async (req: Request, res: Response): Promise<void> => {
     try {
-      const { availabilityIds } = req.body;
+      const { availabilityIds, allowUnavailable } = req.body;
 
       if (!availabilityIds || !Array.isArray(availabilityIds)) {
         res.status(400).json({ error: "Availability IDs array is required" });
@@ -421,15 +429,17 @@ export class AvailabilityController {
       }
 
       // Check if all availabilities are active
-      const inactiveAvailabilities = validAvailabilities.filter(
-        (availability) => !availability.isAvailable
-      );
-      if (inactiveAvailabilities.length > 0) {
-        res.status(400).json({
-          message: "Some availabilities are not available",
-          inactiveCount: inactiveAvailabilities.length,
-        });
-        return;
+      if (!allowUnavailable) {
+        const inactiveAvailabilities = validAvailabilities.filter(
+          (availability) => !availability.isAvailable
+        );
+        if (inactiveAvailabilities.length > 0) {
+          res.status(400).json({
+            message: "Some availabilities are not available",
+            inactiveCount: inactiveAvailabilities.length,
+          });
+          return;
+        }
       }
 
       const availabilityDtos = plainToInstance(
@@ -452,7 +462,7 @@ export class AvailabilityController {
     res: Response
   ): Promise<void> => {
     try {
-      const { availabilityIds } = req.body;
+      const { availabilityIds, reservedUntil } = req.body;
 
       if (!availabilityIds || !Array.isArray(availabilityIds)) {
         res.status(400).json({ error: "Availability IDs array is required" });
@@ -466,12 +476,19 @@ export class AvailabilityController {
         return;
       }
 
-      const updatePromises = availabilityIds.map(async (availabilityId) => {
+      const updatePromises = availabilityIds.map(async (idOrObj) => {
+        const availabilityId = typeof idOrObj === "string" ? idOrObj : idOrObj.id;
         const availability = await this.availabilityService.getAvailabilityById(
           availabilityId
         );
         if (availability) {
-          const updateData = { ...availability, isAvailable: false };
+          const updateData: any = { ...availability, isAvailable: false };
+          const individualReservedUntil = typeof idOrObj === "object" ? idOrObj.reservedUntil : undefined;
+          const finalReservedUntil = individualReservedUntil || reservedUntil;
+
+          if (finalReservedUntil) {
+            updateData.reservedUntil = new Date(finalReservedUntil);
+          }
           return await this.availabilityService.updateAvailability(updateData);
         }
         return null;

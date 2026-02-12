@@ -39,11 +39,15 @@ export class AvailabilityService {
     id: string
   ): Promise<AvailabilityModel | undefined> {
     try {
-      return await this.aviabilityRepo.findOne({
+      const availability = await this.aviabilityRepo.findOne({
         where: {
           id: id,
         },
       });
+      if (availability) {
+        return await this.checkAndResetAvailability(availability);
+      }
+      return undefined;
     } catch (error) {
       log.error({ err: error, ctx: { service: 'AvailabilityService', op: 'getAvailabilityById', availabilityId: id } }, 'Error fetching availability');
       throw new Error("Error fetching availability");
@@ -110,7 +114,7 @@ export class AvailabilityService {
     teacherId: string
   ): Promise<AvailabilityModel[]> {
     try {
-      return await this.aviabilityRepo.find({
+      const availabilities = await this.aviabilityRepo.find({
         where: {
           user: {
             id: teacherId,
@@ -121,6 +125,10 @@ export class AvailabilityService {
           milliseconds: 120000, // 2 minutes
         },
       });
+
+      return await Promise.all(
+        availabilities.map((a: AvailabilityModel) => this.checkAndResetAvailability(a))
+      );
     } catch (error) {
       log.error({ err: error, ctx: { service: 'AvailabilityService', op: 'getTeacherAvailability', teacherId } }, 'Error fetching teachers availabilities');
       throw new Error("Error fetching teachers availabilities");
@@ -194,5 +202,22 @@ export class AvailabilityService {
       log.error({ err: error, ctx: { service: 'AvailabilityService', op: 'findOverlappingAvailability', userId, dayOfWeek, startTime, endTime } }, 'Error checking for overlapping availability');
       throw new Error("Error checking for overlapping availability");
     }
+  }
+
+  private async checkAndResetAvailability(
+    availability: AvailabilityModel
+  ): Promise<AvailabilityModel> {
+    if (
+      !availability.isAvailable &&
+      availability.reservedUntil &&
+      new Date(availability.reservedUntil) < new Date()
+    ) {
+      log.info({ availabilityId: availability.id }, 'Reservation expired. Resetting availability to available.');
+      availability.isAvailable = true;
+      availability.reservedUntil = null;
+      await this.aviabilityRepo.save(availability);
+    }
+
+    return availability;
   }
 }
