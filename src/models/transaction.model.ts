@@ -64,6 +64,9 @@ export class TransactionModel {
     @Column({ nullable: true })
     description?: string;
 
+    @Column({ type: "json", nullable: true })
+    metadata?: any;
+
     @ManyToOne(() => UserModel, (user) => user.transactions)
     user!: UserModel;
 

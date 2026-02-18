@@ -12,6 +12,7 @@ import session from "express-session";
 import { inboundRouter } from "../routes/v1/inbound.routes";
 import { paymentRouter } from "../routes/v1/payment.routes";
 import { adminPaymentRouter } from "../routes/v1/admin-payment.routes";
+import withdrawalRouter from "../routes/v1/withdrawal.routes";
 
 const app = express.Router();
 
@@ -36,5 +37,6 @@ app.use("/search", searchRouter);
 app.use("/inbounds", inboundRouter);
 app.use("/payments", paymentRouter);
 app.use("/admin/payments", adminPaymentRouter);
+app.use("/withdrawals", withdrawalRouter);
 
 export { app as appV1 };

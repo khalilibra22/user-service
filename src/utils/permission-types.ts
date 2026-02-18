@@ -43,4 +43,5 @@ export type Resource =
   | "payment_methods"
   | "subscriptions"
   | "catalogs"
-  | "payments";
+  | "payments"
+  | "withdrawals";

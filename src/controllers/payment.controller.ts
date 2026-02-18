@@ -17,7 +17,7 @@ export class PaymentController {
 
     initiatePayment = async (req: Request, res: Response): Promise<void> => {
         try {
-            const { userId, amount, currency, method, referenceType, referenceId, description, returnUrl, failUrl } = req.body;
+            const { userId, amount, currency, method, referenceType, referenceId, description, returnUrl, failUrl, metadata } = req.body;
 
             const result = await this.paymentService.initiateTransaction({
                 userId,
@@ -28,7 +28,8 @@ export class PaymentController {
                 referenceId,
                 description,
                 returnUrl,
-                failUrl
+                failUrl,
+                metadata
             });
 
             res.status(201).json(result);
@@ -77,6 +78,28 @@ export class PaymentController {
             res.status(200).json(transaction);
         } catch (error: any) {
             log.error({ err: error }, "Error getting transaction by reference");
+            res.status(500).json({ error: error.message });
+        }
+    }
+
+    refundToWallet = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const { userId, amount, referenceType, referenceId } = req.body;
+            await this.paymentService.refundToWallet(userId, amount, referenceType, referenceId);
+            res.status(200).json({ message: "Refund processed successfully to student wallet." });
+        } catch (error: any) {
+            log.error({ err: error }, "Error processing refund to wallet");
+            res.status(500).json({ error: error.message });
+        }
+    }
+
+    getWalletBalance = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const { userId } = req.params;
+            const balance = await this.paymentService.getWalletBalance(userId);
+            res.status(200).json(balance || { userId, currentBalance: 0, frozenBalance: 0, totalEarned: 0 });
+        } catch (error: any) {
+            log.error({ err: error }, "Error getting wallet balance");
             res.status(500).json({ error: error.message });
         }
     }

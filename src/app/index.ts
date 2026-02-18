@@ -1,5 +1,6 @@
 import "../utils/subscription-checker";
 import { startSubscriptionCleanupCron } from "../background/subscription-cleanup.cron";
+import { releaseFrozenEarningsTask } from "../background/earning-cleanup.cron";
 import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import { appV1 } from "./app-v1";
@@ -47,6 +48,7 @@ app.listen(port, () => {
   const logger = getLogger();
   logger.info(`Server running on http://localhost:${port}`);
   startSubscriptionCleanupCron();
+  releaseFrozenEarningsTask.start();
   //new GrpcServer().start();
 });
 

@@ -29,4 +29,24 @@ router.get(
     paymentController.getTransactionByReference
 );
 
+// Wallet & Refund routes
+router.get(
+    "/wallet/balance/:userId",
+    AuthMiddleware.verifyToken,
+    paymentController.getWalletBalance
+);
+
+router.post(
+    "/refund/wallet",
+    AuthMiddleware.verifyToken,
+    // Add specific authorization if needed, e.g. Admin or Internal Service
+    paymentController.refundToWallet
+);
+
+router.get(
+    "/:transactionId/verify",
+    AuthMiddleware.verifyToken,
+    paymentController.verifyPayment
+);
+
 export { router as paymentRouter };
