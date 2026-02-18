@@ -89,6 +89,7 @@ export class SubscriptionController {
         method: req.body.paymentMethod || PaymentMethod.SATIM,
         referenceType: "SUBSCRIPTION",
         referenceId: subscription.id!.toString(),
+        description: `Subscription to ${plan.name} Plan for User ${user.fullname || user.id}`,
         returnUrl: req.body.returnUrl || `http://localhost:3000/payment/success?type=subscription`, // Default or from body
         failUrl: req.body.failUrl || `http://localhost:3000/payment/fail`,
       });

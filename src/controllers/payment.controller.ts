@@ -17,7 +17,7 @@ export class PaymentController {
 
     initiatePayment = async (req: Request, res: Response): Promise<void> => {
         try {
-            const { userId, amount, currency, method, referenceType, referenceId, returnUrl, failUrl } = req.body;
+            const { userId, amount, currency, method, referenceType, referenceId, description, returnUrl, failUrl } = req.body;
 
             const result = await this.paymentService.initiateTransaction({
                 userId,
@@ -26,6 +26,7 @@ export class PaymentController {
                 method,
                 referenceType,
                 referenceId,
+                description,
                 returnUrl,
                 failUrl
             });

@@ -29,10 +29,11 @@ export class PaymentService {
         method: PaymentMethod;
         referenceType: "SUBSCRIPTION" | "COURSE_ENROLLMENT" | "ONE_ON_ONE_ENROLLMENT";
         referenceId: string;
+        description: string;
         returnUrl: string;
         failUrl: string;
     }): Promise<{ transactionId: string; paymentUrl?: string; message?: string }> {
-        const { userId, amount, currency, method, referenceType, referenceId, returnUrl, failUrl } = payload;
+        const { userId, amount, currency, method, referenceType, referenceId, description, returnUrl, failUrl } = payload;
 
         const user = await this.userRepo.findOne({ where: { id: userId } });
         if (!user) throw new Error("User not found");
@@ -43,6 +44,7 @@ export class PaymentService {
         transaction.method = method;
         transaction.referenceType = referenceType;
         transaction.referenceId = referenceId;
+        transaction.description = description;
         transaction.user = user;
         transaction.status = TransactionStatus.PENDING;
 

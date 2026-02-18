@@ -9,6 +9,7 @@ export const initiatePaymentSchema = Joi.object({
     method: Joi.string().valid(...Object.values(PaymentMethod)).required(),
     referenceType: Joi.string().valid("SUBSCRIPTION", "COURSE_ENROLLMENT", "ONE_ON_ONE_ENROLLMENT").required(),
     referenceId: Joi.string().required(),
+    description: Joi.string().required(),
     returnUrl: Joi.string().uri().required(),
     failUrl: Joi.string().uri().required(),
 });
