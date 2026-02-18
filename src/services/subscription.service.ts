@@ -26,7 +26,7 @@ export class SubscriptionService {
 
   async getPlanById(planId: string): Promise<PlanModel | null> {
     try {
-      return await this.planRepo.findOne({ 
+      return await this.planRepo.findOne({
         where: { id: planId },
         cache: {
           id: `plan_${planId}`,
@@ -57,11 +57,43 @@ export class SubscriptionService {
     subscription: SubscriptionModel
   ): Promise<SubscriptionModel> {
     try {
+      // Default to pending_payment if not specified
+      if (!subscription.status) {
+        subscription.status = "pending_payment";
+      }
       return await this.subscriptionRepo.save(subscription);
     } catch (error) {
       log.error({ err: error, ctx: { service: 'SubscriptionService', op: 'createSubscription' } }, 'Error creating subscription');
       throw new Error("Error creating subscription");
     }
+  }
+
+  async activateSubscription(subscriptionId: string | number): Promise<SubscriptionModel> {
+    try {
+      const subscription = await this.subscriptionRepo.findOne({ where: { id: subscriptionId }, relations: ["user", "plan"] });
+      if (!subscription) throw new Error("Subscription not found");
+
+      subscription.status = "active";
+      // We might want to update startDate/endDate here if they should start from payment date
+      // For now, let's assume they were set correctly or we just update them.
+      const now = new Date();
+      subscription.startDate = now;
+
+      if (subscription.plan) {
+        const durationInMonths = this.getDurationInMonths(subscription.plan.duration, subscription.plan.durationUnit);
+        subscription.endDate = new Date(now);
+        subscription.endDate.setMonth(now.getMonth() + durationInMonths);
+      }
+
+      return await this.subscriptionRepo.save(subscription);
+    } catch (error) {
+      log.error({ err: error, ctx: { service: 'SubscriptionService', op: 'activateSubscription', subscriptionId } }, 'Error activating subscription');
+      throw new Error("Error activating subscription");
+    }
+  }
+
+  private getDurationInMonths(duration: number = 1, unit: string = 'months'): number {
+    return unit === 'years' ? duration * 12 : duration;
   }
 
   async getActiveSubscriptionsByUserId(
