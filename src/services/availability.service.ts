@@ -1,3 +1,4 @@
+import { In } from "typeorm";
 import { AppDataSource } from "../config/database";
 import { AvailabilityModel } from "../models/availability.model";
 import { AvailabilityExceptionModel } from "../models/availability-exception.model";
@@ -219,5 +220,17 @@ export class AvailabilityService {
     }
 
     return availability;
+  }
+
+  async releaseAvailabilities(availabilityIds: string[]): Promise<void> {
+    try {
+      await this.aviabilityRepo.update(
+        { id: In(availabilityIds) },
+        { isAvailable: true, reservedUntil: null }
+      );
+    } catch (error) {
+      log.error({ err: error, availabilityIds }, 'Error releasing availabilities');
+      throw new Error("Error releasing availabilities");
+    }
   }
 }

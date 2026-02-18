@@ -507,4 +507,19 @@ export class AvailabilityController {
       res.status(500).json({ error: "Failed to update availabilities" });
     }
   }
+
+  releaseAvailabilities = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { availabilityIds } = req.body;
+      if (!availabilityIds || !Array.isArray(availabilityIds)) {
+        res.status(400).json({ error: "Availability IDs array is required" });
+        return;
+      }
+      await this.availabilityService.releaseAvailabilities(availabilityIds);
+      res.status(200).json({ message: "Availabilities released successfully" });
+    } catch (error: any) {
+      (req.log || getLogger()).error({ err: error }, 'Error releasing availabilities');
+      res.status(500).json({ error: "Failed to release availabilities" });
+    }
+  }
 }

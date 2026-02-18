@@ -31,4 +31,9 @@ router.put(
   availabilityController.updateAvailabilitiesToUnavailable
 );
 
+router.put(
+  "/availabilities/release",
+  availabilityController.releaseAvailabilities
+);
+
 export { router as inboundRouter };

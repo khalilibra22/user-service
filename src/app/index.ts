@@ -1,4 +1,5 @@
 import "../utils/subscription-checker";
+import { startSubscriptionCleanupCron } from "../background/subscription-cleanup.cron";
 import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import { appV1 } from "./app-v1";
@@ -45,6 +46,7 @@ app.use((err: any, req: Request, res: Response, _next: NextFunction): void => {
 app.listen(port, () => {
   const logger = getLogger();
   logger.info(`Server running on http://localhost:${port}`);
+  startSubscriptionCleanupCron();
   //new GrpcServer().start();
 });
 

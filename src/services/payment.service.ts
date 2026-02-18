@@ -106,55 +106,48 @@ export class PaymentService {
 
         const updatedTransaction = await this.transactionRepo.save(transaction);
 
-        if (status === TransactionStatus.SUCCESS) {
-            await this.handlePostPayment(updatedTransaction);
-        }
+        await this.handlePostPayment(updatedTransaction); // handlePostPayment should now handle both success and failure
 
         return updatedTransaction;
     }
 
     // Handle Post-Payment Logic (Callbacks)
     private async handlePostPayment(transaction: TransactionModel) {
-        log.info({ transactionId: transaction.id, type: transaction.referenceType }, "Handling post-payment logic");
+        log.info({ transactionId: transaction.id, type: transaction.referenceType, status: transaction.status }, "Handling post-payment logic");
+
+        const isSuccess = transaction.status === TransactionStatus.SUCCESS;
 
         if (transaction.referenceType === "SUBSCRIPTION") {
-            // Call internal SubscriptionService? 
-            // Circular dependency risk if SubscriptionService uses PaymentService.
-            // Better to have SubscriptionService listen to an event or have a separate orchestrator.
-            // For simplicity: We will rely on the Controller or a separate "CallbackService".
-            // BUT, since we are inside PaymentService, let's keep it simple: 
-            // We can dynamically import SubscriptionService to avoid circular dependency at module level?
-            // Or just emit an event.
-
-            // Actually, SubscriptionService can expose a public method `activateSubscription(transactionId)` 
-            // But SubscriptionService calls PaymentService to INITIATE. 
-            // So PaymentService calling SubscriptionService to FINALIZE is circular.
-
-            // Solution: Use `PaymentCallbackService` or just handle it here if possible.
-            // Or strict separation: PaymentService returns success, and the CALLER (AdminController) handles the next step.
-            // BUT SATIM webhook needs to trigger it too.
-
             const { SubscriptionService } = await import("./subscription.service");
             const subscriptionService = new SubscriptionService();
-            await subscriptionService.activateSubscription(transaction.referenceId);
+            if (isSuccess) {
+                await subscriptionService.activateSubscription(transaction.referenceId);
+            } else {
+                await subscriptionService.deactivateSubscription(transaction.referenceId);
+            }
 
         } else if (transaction.referenceType === "COURSE_ENROLLMENT" || transaction.referenceType === "ONE_ON_ONE_ENROLLMENT") {
-            // Call Internal Course Service via HTTP or internal logic?
-            // Since CourseService is a separate project/service (even if monorepo-ish), we should use HTTP.
             try {
-                // We need to know where CourseService is.
-                // Env variable or config.
-                const courseServiceUrl = process.env.COURSE_SERVICE_URL || "http://localhost:3002"; // Default assumption
-                await axios.post(`${courseServiceUrl}/api/webhooks/payment`, {
+                const courseServiceUrl = process.env.COURSE_SERVICE_URL || "http://localhost:3002";
+                await axios.post(`${courseServiceUrl}/v1/payments/webhook`, {
                     transactionId: transaction.id,
                     referenceId: transaction.referenceId,
                     referenceType: transaction.referenceType,
-                    status: "success"
+                    status: isSuccess ? "success" : "failed"
                 });
             } catch (error) {
                 log.error({ err: error }, "Failed to notify Course Service");
-                // TODO: Retry mechanism
             }
         }
+    }
+
+    async getTransactionByReference(type: string, id: string): Promise<TransactionModel | null> {
+        return await this.transactionRepo.findOne({
+            where: {
+                referenceType: type as any,
+                referenceId: id
+            },
+            order: { createdAt: "DESC" }
+        });
     }
 }

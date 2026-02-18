@@ -74,8 +74,6 @@ export class SubscriptionService {
       if (!subscription) throw new Error("Subscription not found");
 
       subscription.status = "active";
-      // We might want to update startDate/endDate here if they should start from payment date
-      // For now, let's assume they were set correctly or we just update them.
       const now = new Date();
       subscription.startDate = now;
 
@@ -85,10 +83,33 @@ export class SubscriptionService {
         subscription.endDate.setMonth(now.getMonth() + durationInMonths);
       }
 
-      return await this.subscriptionRepo.save(subscription);
+      const updatedSubscription = await this.subscriptionRepo.save(subscription);
+
+      // Update user plan
+      if (subscription.user && subscription.plan) {
+        const { UserService } = await import("./user.service");
+        const userService = new UserService();
+        subscription.user.plan = subscription.plan;
+        await userService.updateUser(subscription.user.id, subscription.user);
+      }
+
+      return updatedSubscription;
     } catch (error) {
       log.error({ err: error, ctx: { service: 'SubscriptionService', op: 'activateSubscription', subscriptionId } }, 'Error activating subscription');
       throw new Error("Error activating subscription");
+    }
+  }
+
+  async deactivateSubscription(subscriptionId: string | number): Promise<SubscriptionModel> {
+    try {
+      const subscription = await this.subscriptionRepo.findOne({ where: { id: subscriptionId } });
+      if (!subscription) throw new Error("Subscription not found");
+
+      subscription.status = "inactive";
+      return await this.subscriptionRepo.save(subscription);
+    } catch (error) {
+      log.error({ err: error, ctx: { service: 'SubscriptionService', op: 'deactivateSubscription', subscriptionId } }, 'Error deactivating subscription');
+      throw new Error("Error deactivating subscription");
     }
   }
 

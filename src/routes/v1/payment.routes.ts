@@ -24,9 +24,9 @@ router.post(
 );
 
 router.get(
-    "/:transactionId/verify",
+    "/reference/:type/:id",
     AuthMiddleware.verifyToken,
-    paymentController.verifyPayment
+    paymentController.getTransactionByReference
 );
 
 export { router as paymentRouter };

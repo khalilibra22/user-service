@@ -76,4 +76,19 @@ export class PaymentController {
             res.status(500).json({ error: error.message });
         }
     }
+
+    getTransactionByReference = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const { type, id } = req.params;
+            const transaction = await this.paymentService.getTransactionByReference(type, id);
+            if (!transaction) {
+                res.status(404).json({ error: "Transaction not found" });
+                return;
+            }
+            res.status(200).json(transaction);
+        } catch (error: any) {
+            log.error({ err: error }, "Error getting transaction by reference");
+            res.status(500).json({ error: error.message });
+        }
+    }
 }
