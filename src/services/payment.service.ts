@@ -150,4 +150,32 @@ export class PaymentService {
             order: { createdAt: "DESC" }
         });
     }
+
+    async verifySatimTransaction(transactionId: string): Promise<TransactionStatus> {
+        const transaction = await this.transactionRepo.findOne({ where: { id: transactionId } });
+        if (!transaction) throw new Error("Transaction not found");
+
+        // If already final, just return status
+        if (transaction.status === TransactionStatus.SUCCESS || transaction.status === TransactionStatus.FAILED) {
+            return transaction.status;
+        }
+
+        if (!transaction.externalId) {
+            throw new Error("Cannot verify SATIM transaction: External ID missing");
+        }
+
+        const result = await this.satimProvider.verifyPayment(transaction.externalId);
+
+        if (result.status === "success") {
+            transaction.status = TransactionStatus.SUCCESS;
+            const updated = await this.transactionRepo.save(transaction);
+            await this.handlePostPayment(updated);
+        } else if (result.status === "failed") {
+            transaction.status = TransactionStatus.FAILED;
+            const updated = await this.transactionRepo.save(transaction);
+            await this.handlePostPayment(updated);
+        }
+
+        return transaction.status;
+    }
 }

@@ -55,22 +55,11 @@ export class PaymentController {
     verifyPayment = async (req: Request, res: Response): Promise<void> => {
         try {
             const { transactionId } = req.params;
-            // In a real Satim implementation, we would call paymentService.verify(transactionId) which calls SatimProvider.
-            // For now, SatimProvider mock returns success.
 
-            // Let's assume we have a verify method in PaymentService that checks Status.
-            // Since we didn't implement 'verify' in PaymentService yet effectively (it was just validateManual), 
-            // we should add it. usage: await this.paymentService.verifySatimTransaction(transactionId);
+            // Call PaymentService to verify transaction with SATIM provider
+            const status = await this.paymentService.verifySatimTransaction(transactionId);
 
-            // MOCK Logic for now:
-            // Check transaction status. If pending, call provider.verify.
-            // If success, trigger handlePaymentSuccess.
-
-            // Ideally:
-            // const status = await this.paymentService.verifyRemoteTransaction(transactionId);
-            // if (status === TransactionStatus.SUCCESS) { await this.handlePaymentSuccess(transactionId); }
-
-            res.status(200).json({ status: "success", message: "Payment verified" });
+            res.status(200).json({ status, message: `Payment status: ${status}` });
         } catch (error: any) {
             log.error({ err: error }, "Error verifying payment");
             res.status(500).json({ error: error.message });
