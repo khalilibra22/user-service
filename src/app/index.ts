@@ -10,8 +10,27 @@ import config from "../config";
 
 const app = express();
 const port = config.port;
+const isProduction = config.env === "production";
 
-app.use(cors());
+// ── CORS — restrict to configured origins ────────────────────────────────
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(",").map((o) => o.trim())
+  : [];
+
+app.use(
+  cors({
+    origin: isProduction
+      ? (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error("Not allowed by CORS"));
+        }
+      }
+      : true, // permissive in development
+    credentials: true,
+  })
+);
 
 app.use(express.json());
 
@@ -19,10 +38,9 @@ app.use(requestLogger);
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction): void => {
   if (err instanceof SyntaxError && err.name === "SyntaxError") {
-    // JSON parsing error
     res.status(400).json({ error: "Invalid JSON" });
   }
-  next(err); // Forward the error if it's not a JSON parsing error
+  next(err);
 });
 
 app.use("/v1", appV1);
@@ -31,17 +49,21 @@ app.get("/", (req: Request, res: Response) => {
   res.send("Running...");
 });
 
-// Global error handler
+// ── Global error handler — sanitize messages in production ───────────────
 app.use((err: any, req: Request, res: Response, _next: NextFunction): void => {
   const log = req.log || getLogger();
-  log.error({ err }, 'Unhandled error');
+  log.error({ err }, "Unhandled error");
 
-  // Ensure X-Request-Id is present in error response
-  if (req.reqId && !res.getHeader('X-Request-Id')) {
-    res.setHeader('X-Request-Id', req.reqId);
+  if (req.reqId && !res.getHeader("X-Request-Id")) {
+    res.setHeader("X-Request-Id", req.reqId);
   }
 
-  res.status(err.status || 500).json({ error: err.message || 'Internal Server Error' });
+  const status = err.status || 500;
+  // Never leak internal error details to clients in production
+  const message =
+    isProduction && status === 500 ? "Internal Server Error" : err.message || "Internal Server Error";
+
+  res.status(status).json({ error: message });
 });
 
 app.listen(port, () => {
@@ -49,7 +71,7 @@ app.listen(port, () => {
   logger.info(`Server running on http://localhost:${port}`);
   startSubscriptionCleanupCron();
   releaseFrozenEarningsTask.start();
-  //new GrpcServer().start();
 });
 
 export default app;
+

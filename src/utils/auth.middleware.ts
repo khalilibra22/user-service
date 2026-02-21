@@ -39,8 +39,8 @@ class AuthMiddleware {
             phoneNumber: user.phoneNumber,
             roles: user.role,
           },
-          config.jwt.secret
-          //{ expiresIn: "1h" }
+          config.jwt.secret,
+          { expiresIn: config.jwt.expiresIn as any }
         );
         resolve(token);
       } catch {
@@ -72,7 +72,7 @@ class AuthMiddleware {
       }
 
       const decoded = await AuthMiddleware.decodeToken(token);
-      req.body.user = decoded;
+      res.locals.user = decoded;
       next();
     } catch (error) {
       res.status(401).json({ message: "Invalid or expired token" });
@@ -100,22 +100,9 @@ class AuthMiddleware {
   static authorize(resource: Resource, action: Action) {
     return (req: Request, res: Response, next: NextFunction): void => {
       try {
-        const user = req.body.user;
-        delete req.body.user;
-        const hasAccess = AuthMiddleware.checkMethodPrivileges(
-          req.method,
-          resource,
-          action
-        );
-        if (hasAccess) {
-          next();
-          return;
-        }
-        if (req.params.id && req.params.id !== user.id) {
-          res.status(403).json({ message: "Forbidden" });
-          return;
-        }
-        // set by your token middleware
+        const user = res.locals.user;
+
+        // Guard: user must exist (verifyToken must run first)
         if (!user) {
           res.status(403).json({ message: "Forbidden" });
           return;

@@ -8,10 +8,9 @@ const logger = getLogger();
 passport.use(
   new GoogleStrategy(
     {
-      clientID:
-        "1087619747666-8udka2t24crenrlbd9ri8lci9hdkcgqj.apps.googleusercontent.com",
-      clientSecret: "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",
-      callbackURL: "/auth/google/callback",
+      clientID: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      callbackURL: process.env.GOOGLE_CALLBACK_URL || "/auth/google/callback",
     },
     async (accessToken, refreshToken, profile, done) => {
       try {

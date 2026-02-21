@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Request, Response, NextFunction } from "express";
 import { authRouter } from "../routes/v1/auth.routes";
 import { categoriesRouter } from "../routes/v1/category.routes";
 import { couponRouter } from "../routes/v1/coupon.routes";
@@ -16,27 +16,55 @@ import withdrawalRouter from "../routes/v1/withdrawal.routes";
 
 const app = express.Router();
 
+// ── Session secret must come from env ────────────────────────────────────
+if (!process.env.SESSION_SECRET) {
+  throw new Error("[CONFIG] SESSION_SECRET environment variable is not set.");
+}
+
 app.use(
   session({
-    secret: "secret",
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    },
   })
 );
 
 app.use(passport.initialize());
 app.use(passport.session());
 
+// ── Internal API-key guard for inbound (service-to-service) routes ────────
+const INBOUND_API_KEY = process.env.INBOUND_API_KEY;
+const requireInboundKey = (req: Request, res: Response, next: NextFunction): void => {
+  if (!INBOUND_API_KEY) {
+    // Key not configured → block all requests (fail secure)
+    res.status(503).json({ message: "Inbound endpoint not configured" });
+    return;
+  }
+  const provided = req.headers["x-internal-api-key"];
+  if (provided !== INBOUND_API_KEY) {
+    res.status(401).json({ message: "Unauthorized" });
+    return;
+  }
+  next();
+};
+
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 app.use("/auth", authRouter);
 app.use("/users", userRouter);
-app.use("/categories", categoriesRouter); // Assuming you have a route for academic background
-app.use("/subscriptions", subscriptionRouter); // Assuming you have a route for subscriptions
-app.use("/coupons", couponManagementRouter); // Assuming you have a route for coupons
+app.use("/categories", categoriesRouter);
+app.use("/subscriptions", subscriptionRouter);
+app.use("/coupons", couponManagementRouter);
 app.use("/search", searchRouter);
-app.use("/inbounds", inboundRouter);
+app.use("/inbounds", requireInboundKey, inboundRouter);  // 🔒 protected
 app.use("/payments", paymentRouter);
 app.use("/admin/payments", adminPaymentRouter);
 app.use("/withdrawals", withdrawalRouter);
 
 export { app as appV1 };
+
+

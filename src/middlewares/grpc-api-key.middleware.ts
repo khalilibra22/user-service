@@ -3,14 +3,23 @@ import { getLogger } from "../utils/logger";
 
 const logger = getLogger();
 
+// ── Startup check: warn if any API keys are missing ──────────────────────
+const API_KEY_ENV_VARS = [
+  "USER_SERVICE_API_KEY",
+  "BOOKING_SERVICE_API_KEY",
+  "PAYMENT_SERVICE_API_KEY",
+  "NOTIFICATION_SERVICE_API_KEY",
+];
+for (const key of API_KEY_ENV_VARS) {
+  if (!process.env[key]) {
+    logger.warn(`[GrpcApiKeyMiddleware] Environment variable "${key}" is not set — that service cannot authenticate.`);
+  }
+}
+
 export class GrpcApiKeyMiddleware {
-  private static readonly API_KEYS = new Set([
-    process.env.USER_SERVICE_API_KEY || "user-service-key-123",
-    process.env.BOOKING_SERVICE_API_KEY || "booking-service-key-456",
-    process.env.PAYMENT_SERVICE_API_KEY || "payment-service-key-789",
-    process.env.NOTIFICATION_SERVICE_API_KEY || "notification-service-key-101",
-    // Add more service keys as needed
-  ]);
+  private static readonly API_KEYS = new Set<string>(
+    API_KEY_ENV_VARS.map((k) => process.env[k]).filter(Boolean) as string[]
+  );
 
   /**
    * Validate API key from gRPC metadata
@@ -64,24 +73,24 @@ export class GrpcApiKeyMiddleware {
   }
 
   /**
-   * Get list of configured API keys (for debugging - don't expose in production)
+   * Get count of configured API keys (safe for diagnostics)
    */
   static getConfiguredKeysCount(): number {
     return this.API_KEYS.size;
   }
 
   /**
-   * Add a new API key at runtime (useful for dynamic service registration)
+   * Add a new API key at runtime (private — only for internal use)
    */
-  static addApiKey(key: string): void {
+  private static addApiKey(key: string): void {
     this.API_KEYS.add(key);
     logger.info("Added new API key for service authentication");
   }
 
   /**
-   * Remove an API key (useful for key rotation)
+   * Remove an API key (private — only for internal use)
    */
-  static removeApiKey(key: string): boolean {
+  private static removeApiKey(key: string): boolean {
     const removed = this.API_KEYS.delete(key);
     if (removed) {
       logger.info("Removed API key from service authentication");
