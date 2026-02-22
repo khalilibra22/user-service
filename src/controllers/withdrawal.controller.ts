@@ -14,7 +14,7 @@ export class WithdrawalController {
 
     getTeacherBalance = async (req: Request, res: Response): Promise<void> => {
         try {
-            const { userId } = req.params;
+            const userId = res.locals.user.id;
             const balance = await this.withdrawalService.getTeacherBalance(userId);
             res.status(200).json(balance || { totalEarned: 0, currentBalance: 0, frozenBalance: 0 });
         } catch (error: any) {
@@ -25,7 +25,7 @@ export class WithdrawalController {
 
     requestWithdrawal = async (req: Request, res: Response): Promise<void> => {
         try {
-            const { userId } = req.params;
+            const userId = res.locals.user.id;
             const { amount } = req.body;
 
             const withdrawal = await this.withdrawalService.requestWithdrawal(userId, amount);
@@ -38,7 +38,7 @@ export class WithdrawalController {
 
     getTeacherWithdrawals = async (req: Request, res: Response): Promise<void> => {
         try {
-            const { userId } = req.params;
+            const userId = res.locals.user.id;
             const withdrawals = await this.withdrawalService.getTeacherWithdrawals(userId);
             res.status(200).json(withdrawals);
         } catch (error: any) {

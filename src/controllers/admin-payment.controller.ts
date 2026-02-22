@@ -4,6 +4,8 @@ import { SubscriptionService } from "../services/subscription.service";
 import { getLogger } from "../utils/logger";
 import { TransactionStatus } from "../enums/transaction-status.enum";
 import axios from "axios";
+import * as fs from "fs";
+import * as path from "path";
 
 const log = getLogger();
 
@@ -20,6 +22,9 @@ export class AdminPaymentController {
         try {
             const { transactionId } = req.params;
             const { status, adminNote } = req.body; // status: 'success' | 'failed'
+
+            const debugPath = path.join(process.cwd(), "admin-debug.log");
+            fs.appendFileSync(debugPath, `[${new Date().toISOString()}] Admin validate: ${transactionId} status: ${status}\n`);
 
             if (status !== TransactionStatus.SUCCESS && status !== TransactionStatus.FAILED) {
                 res.status(400).json({ error: "Invalid status" });
@@ -54,16 +59,7 @@ export class AdminPaymentController {
             // We need SubscriptionService to have `updateStatus(id, status)`
             await this.subscriptionService.activateSubscription(transaction.referenceId);
 
-        } else if (transaction.referenceType === "COURSE_ENROLLMENT" || transaction.referenceType === "ONE_ON_ONE_ENROLLMENT") {
-            // Notify Course Service
-            const courseServiceUrl = process.env.COURSE_SERVICE_URL || "http://localhost:3002";
-            await axios.post(`${courseServiceUrl}/api/webhooks/payment`, {
-                transactionId: transaction.id,
-                referenceId: transaction.referenceId,
-                referenceType: transaction.referenceType,
-                status: "success",
-                method: transaction.method
-            });
+            // Handled by PaymentService.handlePostPayment via validateManualTransaction
         }
     }
 }

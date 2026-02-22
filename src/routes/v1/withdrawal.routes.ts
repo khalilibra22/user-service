@@ -13,7 +13,7 @@ const withdrawalController = new WithdrawalController();
 
 // Get balance
 router.get(
-    "/balance/:userId",
+    "/balance",
     AuthMiddleware.verifyToken,
     AuthMiddleware.authorize("withdrawals", "read"),
     withdrawalController.getTeacherBalance
@@ -21,7 +21,7 @@ router.get(
 
 // Request withdrawal
 router.post(
-    "/request/:userId",
+    "/request",
     AuthMiddleware.verifyToken,
     AuthMiddleware.authorize("withdrawals", "create"),
     ValidationMiddleware.validate(withdrawalRequestSchema),
@@ -30,7 +30,7 @@ router.post(
 
 // Get withdrawal history
 router.get(
-    "/history/:userId",
+    "/history",
     AuthMiddleware.verifyToken,
     AuthMiddleware.authorize("withdrawals", "read"),
     withdrawalController.getTeacherWithdrawals

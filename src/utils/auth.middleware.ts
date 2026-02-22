@@ -67,14 +67,17 @@ class AuthMiddleware {
     try {
       const token = req.headers.authorization?.split(" ")[1];
       if (!token) {
+        console.warn(`[AUTH] No token provided for ${req.method} ${req.url}`);
         res.status(401).json({ message: "Invalid or expired token" });
         return;
       }
 
       const decoded = await AuthMiddleware.decodeToken(token);
+      console.log(`[AUTH] Token verified for user: ${decoded.id}`);
       res.locals.user = decoded;
       next();
-    } catch (error) {
+    } catch (error: any) {
+      console.error(`[AUTH] Token verification failed: ${error.message}`);
       res.status(401).json({ message: "Invalid or expired token" });
       return;
     }
@@ -115,6 +118,7 @@ class AuthMiddleware {
           next();
           return;
         }
+        console.warn(`[AUTH] Authorization failed for user ${user.id} (${roleId}). Resource: ${resource}, Action: ${action}`);
         res.status(403).json({ message: "Forbidden" });
       } catch (error) {
         res.status(500).json({ message: "Server error" });

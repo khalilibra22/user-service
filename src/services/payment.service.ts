@@ -8,6 +8,8 @@ import { SatimProvider } from "./payment-providers/satim.provider";
 import { getLogger } from "../utils/logger";
 import { Repository } from "typeorm";
 import axios from "axios";
+import * as fs from "fs";
+import * as path from "path";
 import { UserWalletModel } from "../models/user-wallet.model";
 import { EarningModel } from "../models/earning.model";
 import { EarningStatus } from "../enums/earning-status.enum";
@@ -162,6 +164,7 @@ export class PaymentService {
 
     // Handle Post-Payment Logic (Callbacks)
     private async handlePostPayment(transaction: TransactionModel) {
+        log.info({ transactionId: transaction.id, referenceType: transaction.referenceType, status: transaction.status }, "Executing handlePostPayment entry");
         log.info({ transactionId: transaction.id, type: transaction.referenceType, status: transaction.status }, "Handling post-payment logic");
 
         const isSuccess = transaction.status === TransactionStatus.SUCCESS;
@@ -182,15 +185,37 @@ export class PaymentService {
             }
 
             try {
-                const courseServiceUrl = process.env.COURSE_SERVICE_URL || "http://localhost:3002";
-                await axios.post(`${courseServiceUrl}/v1/payments/webhook`, {
+                const courseServiceUrl = process.env.COURSE_SERVICE_URL || "http://localhost:5001";
+                const debugPath = path.join(process.cwd(), "user-webhook-debug.log");
+                const payload = {
                     transactionId: transaction.id,
+                    externalId: transaction.externalId,
                     referenceId: transaction.referenceId,
                     referenceType: transaction.referenceType,
-                    status: isSuccess ? "success" : "failed"
+                    status: isSuccess ? "success" : "failed",
+                    provider: transaction.provider,
+                    method: transaction.method
+                };
+
+                fs.appendFileSync(debugPath, `[${new Date().toISOString()}] Attempting webhook: ${courseServiceUrl} payload: ${JSON.stringify(payload)}\n`);
+                log.info({ courseServiceUrl, transactionId: transaction.id }, "Notifying Course Service via webhook");
+
+                const response = await axios.post(`${courseServiceUrl}/v1/payments/webhook`, payload, {
+                    headers: {
+                        "x-internal-api-key": process.env.INBOUND_API_KEY || "12345"
+                    }
                 });
-            } catch (error) {
-                log.error({ err: error }, "Failed to notify Course Service");
+
+                fs.appendFileSync(debugPath, `[${new Date().toISOString()}] Response: ${response.status} ${JSON.stringify(response.data)}\n`);
+                log.info({ status: response.status, data: response.data }, "Course Service notified successfully");
+            } catch (error: any) {
+                const debugPath = path.join(process.cwd(), "user-webhook-debug.log");
+                fs.appendFileSync(debugPath, `[${new Date().toISOString()}] ERROR: ${error.message} RESP: ${JSON.stringify(error.response?.data)}\n`);
+                log.error({
+                    err: error.message,
+                    response: error.response?.data,
+                    status: error.response?.status
+                }, "Failed to notify Course Service");
             }
         }
     }

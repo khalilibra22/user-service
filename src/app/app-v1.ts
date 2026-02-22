@@ -38,15 +38,21 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // ── Internal API-key guard for inbound (service-to-service) routes ────────
-const INBOUND_API_KEY = process.env.INBOUND_API_KEY;
 const requireInboundKey = (req: Request, res: Response, next: NextFunction): void => {
+  const INBOUND_API_KEY = process.env.INBOUND_API_KEY;
+  console.log(`[AUTH] user-service requireInboundKey check. Key in env: ${INBOUND_API_KEY}`);
+
   if (!INBOUND_API_KEY) {
     // Key not configured → block all requests (fail secure)
+    console.error("[AUTH] Inbound API key not configured in .env");
     res.status(503).json({ message: "Inbound endpoint not configured" });
     return;
   }
   const provided = req.headers["x-internal-api-key"];
+  console.log(`[AUTH] Provided key: ${provided}`);
+
   if (provided !== INBOUND_API_KEY) {
+    console.warn(`[AUTH] Unauthorized inbound request. Provided: ${provided}, Expected: ${INBOUND_API_KEY}`);
     res.status(401).json({ message: "Unauthorized" });
     return;
   }

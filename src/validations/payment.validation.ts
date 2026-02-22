@@ -3,7 +3,7 @@ import { PaymentMethod } from "../enums/payment-method.enum";
 import { TransactionStatus } from "../enums/transaction-status.enum";
 
 export const initiatePaymentSchema = Joi.object({
-    userId: Joi.string().uuid().required(),
+    userId: Joi.string().uuid().optional(),
     amount: Joi.number().positive().precision(2).required(),
     currency: Joi.string().length(3).uppercase().required(),
     method: Joi.string().valid(...Object.values(PaymentMethod)).required(),

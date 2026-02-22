@@ -17,7 +17,23 @@ export class PaymentController {
 
     initiatePayment = async (req: Request, res: Response): Promise<void> => {
         try {
-            const { userId, amount, currency, method, referenceType, referenceId, description, returnUrl, failUrl, metadata } = req.body;
+            const INBOUND_API_KEY = process.env.INBOUND_API_KEY;
+            const providedKey = req.headers["x-internal-api-key"];
+            const isInternal = INBOUND_API_KEY && providedKey === INBOUND_API_KEY;
+
+            let userId;
+            if (isInternal && req.body.userId) {
+                userId = req.body.userId;
+            } else {
+                userId = res.locals.user?.id;
+            }
+
+            if (!userId) {
+                res.status(401).json({ error: "Unauthorized: UserId required" });
+                return;
+            }
+
+            const { amount, currency, method, referenceType, referenceId, description, returnUrl, failUrl, metadata } = req.body;
 
             const result = await this.paymentService.initiateTransaction({
                 userId,
@@ -84,7 +100,26 @@ export class PaymentController {
 
     refundToWallet = async (req: Request, res: Response): Promise<void> => {
         try {
-            const { userId, amount, referenceType, referenceId } = req.body;
+            // Check if it's an internal service call via API Key
+            const INBOUND_API_KEY = process.env.INBOUND_API_KEY;
+            const providedKey = req.headers["x-internal-api-key"];
+            const isInternal = INBOUND_API_KEY && providedKey === INBOUND_API_KEY;
+
+            let userId;
+            if (isInternal) {
+                // If internal, trust the userId in body
+                userId = req.body.userId;
+            } else {
+                // If not internal, it must be the user themselves (or we should block this entirely for public)
+                userId = res.locals.user?.id;
+            }
+
+            if (!userId) {
+                res.status(401).json({ error: "Unauthorized: UserId required" });
+                return;
+            }
+
+            const { amount, referenceType, referenceId } = req.body;
             await this.paymentService.refundToWallet(userId, amount, referenceType, referenceId);
             res.status(200).json({ message: "Refund processed successfully to student wallet." });
         } catch (error: any) {
@@ -95,7 +130,7 @@ export class PaymentController {
 
     getWalletBalance = async (req: Request, res: Response): Promise<void> => {
         try {
-            const { userId } = req.params;
+            const userId = res.locals.user.id;
             const balance = await this.paymentService.getWalletBalance(userId);
             res.status(200).json(balance || { userId, currentBalance: 0, frozenBalance: 0, totalEarned: 0 });
         } catch (error: any) {
