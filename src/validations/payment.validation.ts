@@ -12,6 +12,7 @@ export const initiatePaymentSchema = Joi.object({
     description: Joi.string().required(),
     returnUrl: Joi.string().uri().required(),
     failUrl: Joi.string().uri().required(),
+    metadata: Joi.any().optional(),
 });
 
 export const submitReceiptSchema = Joi.object({

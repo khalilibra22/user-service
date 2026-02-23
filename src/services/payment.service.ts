@@ -119,6 +119,7 @@ export class PaymentService {
                 await transactionalEntityManager.save(TransactionModel, savedTransaction);
             });
 
+            log.info({ transactionId: savedTransaction.id, metadata: savedTransaction.metadata }, "Wallet payment successful, calling handlePostPayment");
             await this.handlePostPayment(savedTransaction);
 
             return {
@@ -164,10 +165,9 @@ export class PaymentService {
 
     // Handle Post-Payment Logic (Callbacks)
     private async handlePostPayment(transaction: TransactionModel) {
-        log.info({ transactionId: transaction.id, referenceType: transaction.referenceType, status: transaction.status }, "Executing handlePostPayment entry");
-        log.info({ transactionId: transaction.id, type: transaction.referenceType, status: transaction.status }, "Handling post-payment logic");
-
         const isSuccess = transaction.status === TransactionStatus.SUCCESS;
+        const teacherId = transaction.metadata?.teacherId;
+        log.info({ transactionId: transaction.id, isSuccess, teacherId }, "Handling post-payment logic");
 
         if (transaction.referenceType === "SUBSCRIPTION") {
             const { SubscriptionService } = await import("./subscription.service");
@@ -197,7 +197,7 @@ export class PaymentService {
                     method: transaction.method
                 };
 
-                fs.appendFileSync(debugPath, `[${new Date().toISOString()}] Attempting webhook: ${courseServiceUrl} payload: ${JSON.stringify(payload)}\n`);
+                fs.appendFileSync(debugPath, `[${new Date().toISOString()}] Attempting webhook: ${courseServiceUrl} payload: ${JSON.stringify(payload)} metadata: ${JSON.stringify(transaction.metadata)}\n`);
                 log.info({ courseServiceUrl, transactionId: transaction.id }, "Notifying Course Service via webhook");
 
                 const response = await axios.post(`${courseServiceUrl}/v1/payments/webhook`, payload, {
@@ -278,7 +278,7 @@ export class PaymentService {
         balance.totalEarned = Number(balance.totalEarned) + netAmount;
         await this.walletRepo.save(balance);
 
-        log.info({ teacherId, netAmount, feeAmount, releaseDate }, "Earning record created and frozen balance updated");
+        log.info({ teacherId, netAmount, feeAmount, releaseDate, transactionId: transaction.id }, "Earning record created and frozen balance updated");
     }
 
     async getTransactionByReference(type: string, id: string): Promise<TransactionModel | null> {
