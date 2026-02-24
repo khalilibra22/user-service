@@ -5,9 +5,10 @@ import axios from "axios";
 const log = getLogger();
 
 export class SatimProvider implements PaymentProviderInterface {
-    private readonly gatewayUrl = "https://test.satim.dz/payment/rest"; // Example URL
+    private readonly gatewayUrl = "https://test2.satim.dz/payment/rest"; // Updated for Satim Test Env
     private readonly userName = process.env.SATIM_USERNAME || "satim_user";
     private readonly password = process.env.SATIM_PASSWORD || "satim_pass";
+    private readonly terminalId = process.env.SATIM_TERMINAL_ID || "0000000000"; // Identifiant terminal
 
     async initiatePayment(
         amount: number,
@@ -26,19 +27,19 @@ export class SatimProvider implements PaymentProviderInterface {
             const params = new URLSearchParams();
             params.append("userName", this.userName);
             params.append("password", this.password);
-            params.append("orderNumber", orderId);
+            params.append("orderNumber", "11");
             params.append("amount", (amount * 100).toString()); // Amount in cents
-            params.append("currency", "604"); // DZD
+            params.append("currency", "012"); // 012 is the test currency code required by Satim test environment
             params.append("returnUrl", returnUrl);
+            params.append("description", "Payment for order " + orderId);
             params.append("failUrl", failUrl);
-            params.append("language", language);
-            params.append("pageView", "DESKTOP");
+            params.append("language", "FR");
+            // Add the Terminal ID (Identifiant terminal) as required by SATIM
+            params.append("jsonParams", JSON.stringify({ force_terminal_id: this.terminalId, udf1: 123 }));
 
-            const response = await axios.post(`${this.gatewayUrl}/register.do`, params, {
-                headers: { "Content-Type": "application/x-www-form-urlencoded" }
-            });
+            const response = await axios.get(`${this.gatewayUrl}/register.do`, { params });
 
-            if (response.data.errorCode && response.data.errorCode !== "0") {
+            if (response.data && response.data.errorCode && response.data.errorCode !== 0 && response.data.errorCode !== "0") {
                 log.error({ data: response.data }, "SATIM register.do failed");
                 throw new Error(response.data.errorMessage || "SATIM payment initiation failed");
             }
@@ -64,9 +65,7 @@ export class SatimProvider implements PaymentProviderInterface {
             params.append("password", this.password);
             params.append("orderId", externalId);
 
-            const response = await axios.post(`${this.gatewayUrl}/getOrderStatusExtended.do`, params, {
-                headers: { "Content-Type": "application/x-www-form-urlencoded" }
-            });
+            const response = await axios.get(`${this.gatewayUrl}/getOrderStatusExtended.do`, { params });
 
             // Transaction status:
             // 0: Initialized
@@ -80,14 +79,14 @@ export class SatimProvider implements PaymentProviderInterface {
             const errorCode = response.data.errorCode;
             const transactionStatus = response.data.transactionStatus;
 
-            if (errorCode && errorCode !== "0" && errorCode !== "2") {
+            if (errorCode && errorCode !== 0 && errorCode !== "0" && errorCode !== 2 && errorCode !== "2") {
                 // errorCode 2 means "Order not found" usually if we check too early or with wrong ID
                 log.warn({ data: response.data, externalId }, "SATIM verify status warning");
             }
 
-            if (transactionStatus === 2) {
+            if (transactionStatus === 2 || transactionStatus === "2") {
                 return { status: "success", externalId };
-            } else if ([3, 4, 5].includes(transactionStatus)) {
+            } else if ([3, 4, 5, "3", "4", "5"].includes(transactionStatus)) {
                 return { status: "failed", externalId };
             } else {
                 return { status: "pending", externalId };
