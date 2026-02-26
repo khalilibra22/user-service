@@ -96,6 +96,10 @@ export const resetPasswordSchema = Joi.object({
   password: passwordValidation,
 });
 
+export const forgotPasswordSchema = Joi.object({
+  email: Joi.string().email().required(),
+});
+
 export const changePasswordSchema = Joi.object({
   currentPassword: Joi.string().required(),
   newPassword: passwordValidation,

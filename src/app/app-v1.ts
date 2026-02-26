@@ -13,6 +13,8 @@ import { inboundRouter } from "../routes/v1/inbound.routes";
 import { paymentRouter } from "../routes/v1/payment.routes";
 import { adminPaymentRouter } from "../routes/v1/admin-payment.routes";
 import withdrawalRouter from "../routes/v1/withdrawal.routes";
+import notificationRouter from "../routes/v1/notification.routes";
+
 
 const app = express.Router();
 
@@ -70,6 +72,8 @@ app.use("/inbounds", requireInboundKey, inboundRouter);  // 🔒 protected
 app.use("/payments", paymentRouter);
 app.use("/admin/payments", adminPaymentRouter);
 app.use("/withdrawals", withdrawalRouter);
+app.use("/notifications", notificationRouter);
+
 
 export { app as appV1 };
 

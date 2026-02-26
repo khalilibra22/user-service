@@ -43,6 +43,13 @@ const config = {
         port: parseInt(process.env.GRPC_PORT || "50051", 10),
     },
     chatServiceUrl: process.env.CHAT_SERVICE_URL,
+    smtp: {
+        host: process.env.SMTP_HOST || "smtp.gmail.com",
+        port: parseInt(process.env.SMTP_PORT || "587", 10),
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+        from: process.env.SMTP_FROM || '"E-Learning Platform" <noreply@elearning.com>',
+    },
     apiKeys: {
         userService: process.env.USER_SERVICE_API_KEY,
         bookingService: process.env.BOOKING_SERVICE_API_KEY,

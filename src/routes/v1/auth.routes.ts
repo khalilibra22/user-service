@@ -3,6 +3,7 @@ import { AuthController } from "../../controllers/auth.controller";
 import { ValidationMiddleware } from "../../utils/validation.middleware";
 import {
   changeEmailSchema,
+  forgotPasswordSchema,
   loginValidationSchema,
   resetPasswordSchema,
   userValidationSchema,
@@ -39,7 +40,7 @@ router.post(
 router.post(
   "/forgot-password",
   forgotPasswordLimiter,
-  ValidationMiddleware.validate(changeEmailSchema),
+  ValidationMiddleware.validate(forgotPasswordSchema),
   authController.forgotPassword
 );
 

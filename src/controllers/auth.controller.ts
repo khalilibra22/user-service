@@ -7,13 +7,17 @@ import { UserRole } from "../enums/userRoles.enum";
 import { MinimalUserDto } from "../dtos/minimal-user.dto";
 import { getLogger } from "../utils/logger";
 import { ChatService } from "../services/chat.service";
+import { NotificationService } from "../services/notification.service";
+
 
 export class AuthController {
   private userService: UserService;
   private chatService: ChatService;
+  private notificationService: NotificationService;
   constructor() {
     this.userService = new UserService();
     this.chatService = new ChatService();
+    this.notificationService = new NotificationService();
   }
   register = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -35,7 +39,10 @@ export class AuthController {
       }
       const createdUser = await this.userService.createUser(req.body);
       const token = await AuthMiddleware.generateToken(createdUser);
-      //const verificationLink = `http://localhost:5000/auth/verify-email?token=${token}`;
+
+      const verificationUrl = `${process.env.BASE_URL || 'http://localhost:5000'}/auth/verify-email?token=${token}`;
+      void this.notificationService.sendEmailVerification(createdUser.email ?? email, createdUser.fullname ?? 'Utilisateur', verificationUrl);
+
       let userDto;
       if (
         createdUser.role === UserRole.STUDENT ||
@@ -87,7 +94,7 @@ export class AuthController {
         return;
       }
       const token = await AuthMiddleware.generateToken(user);
-      if(fcmToken){
+      if (fcmToken) {
         user.fcmToken = fcmToken;
         await this.userService.updateUser(user.id ?? "", user);
       }
@@ -107,10 +114,13 @@ export class AuthController {
         return;
       }
       const token = await AuthMiddleware.generateToken(user);
-      //TODO: Send email with password reset link
+
+      const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${token}`;
+      await this.notificationService.sendPasswordReset(user.email ?? email, user.fullname ?? 'Utilisateur', resetUrl);
+
       res
         .status(200)
-        .json({ message: "Password reset link sent to email", token: token });
+        .json({ message: "Password reset link sent to email" });
     } catch (error) {
       (req.log || getLogger()).error({ err: error }, 'Error in forgotPassword');
       res.status(500).json({ error: "Internal Server Error" });
@@ -147,6 +157,7 @@ export class AuthController {
   };
 
   verifyEmail = async (req: Request, res: Response): Promise<void> => {
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5000';
     try {
       //read token from query params
       const token = req.query.token as string;
@@ -155,22 +166,36 @@ export class AuthController {
         decoded = await AuthMiddleware.decodeToken(token || "");
       } catch (error) {
         (req.log || getLogger()).error({ err: error }, 'Invalid or expired token');
-        res.status(401).json({ message: "Invalid or expired token" });
+        const html = this.notificationService.renderTemplate('verification-error', {
+          message: "Votre lien de vérification est invalide ou a expiré.",
+          frontendUrl
+        });
+        res.status(401).send(html || "Invalid or expired token");
         return;
       }
       const id = decoded.id;
       const user = await this.userService.getUserById(id);
 
       if (!user) {
-        res.status(404).json({ error: "User not found" });
+        const html = this.notificationService.renderTemplate('verification-error', {
+          message: "Utilisateur non trouvé.",
+          frontendUrl
+        });
+        res.status(404).send(html || "User not found");
         return;
       }
       user.isActive = true;
       await this.userService.updateUser(id, user);
-      res.status(200).json({ message: "Email verified successfully" });
+
+      const html = this.notificationService.renderTemplate('verification-success', { frontendUrl });
+      res.status(200).send(html || "Email verified successfully");
     } catch (error) {
       (req.log || getLogger()).error({ err: error }, 'Error in verifyEmail');
-      res.status(500).json({ error: "Internal Server Error" });
+      const html = this.notificationService.renderTemplate('verification-error', {
+        message: "Une erreur interne est survenue lors de la vérification.",
+        frontendUrl
+      });
+      res.status(500).send(html || "Internal Server Error");
     }
   };
 
