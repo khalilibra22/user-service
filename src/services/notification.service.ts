@@ -41,6 +41,7 @@ export class NotificationService {
             currency,
             itemName,
             transactionId,
+            frontendUrl: process.env.FRONTEND_URL || "http://localhost:3000",
         });
     }
 

@@ -18,8 +18,9 @@ export class SatimProvider implements PaymentProviderInterface {
         failUrl: string,
         language: string = "fr"
     ): Promise<{ paymentUrl: string; externalId?: string }> {
+        const orderNumber = `${Date.now()}${Math.floor(1000 + Math.random() * 9000)}`;
         log.info(
-            { amount, currency, orderId },
+            { amount, currency, orderNumber },
             "Initiating SATIM payment via register.do"
         );
 
@@ -27,15 +28,15 @@ export class SatimProvider implements PaymentProviderInterface {
             const params = new URLSearchParams();
             params.append("userName", this.userName);
             params.append("password", this.password);
-            params.append("orderNumber", "11");
+            params.append("orderNumber", orderNumber);
             params.append("amount", (amount * 100).toString()); // Amount in cents
             params.append("currency", "012"); // 012 is the test currency code required by Satim test environment
             params.append("returnUrl", returnUrl);
-            params.append("description", "Payment for order " + orderId);
+            params.append("description", "Payment for order " + orderNumber);
             params.append("failUrl", failUrl);
             params.append("language", "FR");
             // Add the Terminal ID (Identifiant terminal) as required by SATIM
-            params.append("jsonParams", JSON.stringify({ force_terminal_id: this.terminalId, udf1: 123 }));
+            params.append("jsonParams", JSON.stringify({ force_terminal_id: this.terminalId, udf1: orderNumber }));
 
             const response = await axios.get(`${this.gatewayUrl}/register.do`, { params });
 
@@ -63,11 +64,14 @@ export class SatimProvider implements PaymentProviderInterface {
             const params = new URLSearchParams();
             params.append("userName", this.userName);
             params.append("password", this.password);
-            params.append("orderId", externalId);
+            params.append("mdOrder", externalId);
+            params.append("language", "FR");
 
-            const response = await axios.get(`${this.gatewayUrl}/getOrderStatusExtended.do`, { params });
 
-            // Transaction status:
+
+            const response = await axios.get(`${this.gatewayUrl}/public/acknowledgeTransaction.do`, { params });
+
+            // Order status:
             // 0: Initialized
             // 1: Wait for 3D Secure
             // 2: Success
@@ -76,17 +80,17 @@ export class SatimProvider implements PaymentProviderInterface {
             // 5: Timeout
             // 6: Refunded
 
-            const errorCode = response.data.errorCode;
-            const transactionStatus = response.data.transactionStatus;
+            const errorCode = response.data.ErrorCode ?? response.data.errorCode;
+            const OrderStatus = response.data.OrderStatus;
 
-            if (errorCode && errorCode !== 0 && errorCode !== "0" && errorCode !== 2 && errorCode !== "2") {
-                // errorCode 2 means "Order not found" usually if we check too early or with wrong ID
-                log.warn({ data: response.data, externalId }, "SATIM verify status warning");
+            // Log any SATIM error
+            if (errorCode && errorCode !== 0 && errorCode !== "0") {
+                log.warn({ data: response.data, externalId }, "SATIM verify returned non-zero ErrorCode");
             }
 
-            if (transactionStatus === 2 || transactionStatus === "2") {
+            if (OrderStatus === 2 || OrderStatus === "2") {
                 return { status: "success", externalId };
-            } else if ([3, 4, 5, "3", "4", "5"].includes(transactionStatus)) {
+            } else if ([3, 4, 5, "3", "4", "5"].includes(OrderStatus)) {
                 return { status: "failed", externalId };
             } else {
                 return { status: "pending", externalId };

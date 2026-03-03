@@ -10,9 +10,7 @@ const paymentController = new PaymentController();
 // Middlewares
 const flexibleAuth = (req: any, res: any, next: any) => {
     const INBOUND_API_KEY = process.env.INBOUND_API_KEY;
-    console.log(`[AUTH] payment.routes flexibleAuth check. Key in env: ${INBOUND_API_KEY}`);
     const providedKey = req.headers["x-internal-api-key"];
-    console.log(`[AUTH] Provided key: ${providedKey}`);
 
     if (INBOUND_API_KEY && providedKey === INBOUND_API_KEY) {
         return next();
@@ -20,8 +18,6 @@ const flexibleAuth = (req: any, res: any, next: any) => {
     return AuthMiddleware.verifyToken(req, res, next);
 };
 
-// Public route? Or protected? Often payment initiation is protected.
-// Assuming protected for now as we need userId.
 router.post(
     "/initiate",
     flexibleAuth,
@@ -52,14 +48,25 @@ router.get(
 router.post(
     "/refund/wallet",
     flexibleAuth,
-    // Add specific authorization if needed, e.g. Admin or Internal Service
     paymentController.refundToWallet
 );
 
+// Manual verify (kept for admin/debug use)
 router.get(
     "/:transactionId/verify",
     AuthMiddleware.verifyToken,
     paymentController.verifyPayment
+);
+
+/**
+ * PUBLIC — SATIM browser redirect callback.
+ * SATIM redirects the user's browser here after payment (success or fail).
+ * No JWT required — this is a browser redirect, not an API call.
+ * Query params: transactionId (our internal ID)
+ */
+router.get(
+    "/satim/callback",
+    paymentController.satimCallback
 );
 
 export { router as paymentRouter };

@@ -5,6 +5,7 @@ import { TransactionStatus } from "../enums/transaction-status.enum";
 import { PaymentMethod } from "../enums/payment-method.enum";
 import { PaymentProvider } from "../enums/payment-provider.enum";
 import { SatimProvider } from "./payment-providers/satim.provider";
+import { NotificationService } from "./notification.service";
 import { getLogger } from "../utils/logger";
 import { Repository } from "typeorm";
 import axios from "axios";
@@ -26,6 +27,7 @@ export class PaymentService {
     private walletTxRepo: Repository<WalletTransactionModel>;
     private subscriptionRepo: Repository<SubscriptionModel>;
     private satimProvider: SatimProvider;
+    private notificationService: NotificationService;
 
     constructor() {
         this.userRepo = AppDataSource.getRepository(UserModel);
@@ -35,6 +37,7 @@ export class PaymentService {
         this.walletTxRepo = AppDataSource.getRepository(WalletTransactionModel);
         this.subscriptionRepo = AppDataSource.getRepository(SubscriptionModel);
         this.satimProvider = new SatimProvider();
+        this.notificationService = new NotificationService();
     }
 
     async initiateTransaction(payload: {
@@ -77,13 +80,18 @@ export class PaymentService {
         const savedTransaction = await this.transactionRepo.save(transaction);
 
         if (method === PaymentMethod.SATIM) {
-            // Initiate via Provider
+            // Build backend callback URLs so SATIM redirects here for auto-verification.
+            // SERVICE_BASE_URL must be the publicly reachable URL of this service.
+            const baseUrl = (process.env.SERVICE_BASE_URL || `http://localhost:${process.env.PORT || 5000}`).replace(/\/$/, "");
+            const backendReturnUrl = `${baseUrl}/v1/payments/satim/callback?transactionId=${savedTransaction.id}`;
+            const backendFailUrl = `${baseUrl}/v1/payments/satim/callback?transactionId=${savedTransaction.id}`;
+
             const response = await this.satimProvider.initiatePayment(
                 amount,
                 currency,
                 savedTransaction.id, // Use transaction ID as order ID
-                returnUrl,
-                failUrl
+                backendReturnUrl,
+                backendFailUrl
             );
 
             savedTransaction.externalId = response.externalId;
@@ -169,6 +177,12 @@ export class PaymentService {
         const teacherId = transaction.metadata?.teacherId;
         log.info({ transactionId: transaction.id, isSuccess, teacherId }, "Handling post-payment logic");
 
+        // ── Send payment confirmation email (fire-and-forget) ────────────────
+        if (isSuccess) {
+            void this.sendPaymentConfirmationEmail(transaction);
+        }
+        // ─────────────────────────────────────────────────────────────────────
+
         if (transaction.referenceType === "SUBSCRIPTION") {
             const { SubscriptionService } = await import("./subscription.service");
             const subscriptionService = new SubscriptionService();
@@ -217,6 +231,37 @@ export class PaymentService {
                     status: error.response?.status
                 }, "Failed to notify Course Service");
             }
+        }
+    }
+
+    private async sendPaymentConfirmationEmail(transaction: TransactionModel): Promise<void> {
+        try {
+            // Load user if not already in the relation
+            const user = transaction.user ?? await this.userRepo.findOne({ where: { id: (transaction as any).userId } });
+            if (!user?.email) {
+                log.warn({ transactionId: transaction.id }, "Cannot send payment email — user or email missing");
+                return;
+            }
+
+            const referenceLabels: Record<string, string> = {
+                COURSE_ENROLLMENT: "Inscription au cours",
+                ONE_ON_ONE_ENROLLMENT: "Session individuelle",
+                SUBSCRIPTION: "Abonnement",
+            };
+            const itemName = transaction.description || referenceLabels[transaction.referenceType] || transaction.referenceType;
+
+            await this.notificationService.sendPaymentSuccess(
+                user.email,
+                user.fullname || "Utilisateur",
+                Number(transaction.amount).toFixed(2) as any,
+                transaction.currency || "DZD",
+                itemName,
+                transaction.id
+            );
+            log.info({ transactionId: transaction.id, email: user.email }, "Payment confirmation email sent");
+        } catch (err) {
+            // Never fail the payment flow because of email
+            log.error({ err, transactionId: transaction.id }, "Failed to send payment confirmation email");
         }
     }
 
@@ -295,32 +340,47 @@ export class PaymentService {
         return await this.walletRepo.findOne({ where: { userId } });
     }
 
-    async verifySatimTransaction(transactionId: string): Promise<TransactionStatus> {
-        const transaction = await this.transactionRepo.findOne({ where: { id: transactionId } });
+    async verifySatimTransaction(transactionId: string, externalIdOverride?: string): Promise<{ status: TransactionStatus; transaction: TransactionModel }> {
+        const transaction = await this.transactionRepo.findOne({ where: { id: transactionId }, relations: ["user"] });
         if (!transaction) throw new Error("Transaction not found");
 
-        // If already final, just return status
+        // If already final, just return status + transaction
         if (transaction.status === TransactionStatus.SUCCESS || transaction.status === TransactionStatus.FAILED) {
-            return transaction.status;
+            return { status: transaction.status, transaction };
         }
 
-        if (!transaction.externalId) {
+        // Use the orderId from SATIM's redirect if provided (most reliable),
+        // otherwise fall back to the stored externalId from register.do
+        const externalIdToUse = externalIdOverride || transaction.externalId;
+
+        if (!externalIdToUse) {
             throw new Error("Cannot verify SATIM transaction: External ID missing");
         }
 
-        const result = await this.satimProvider.verifyPayment(transaction.externalId);
+        // If SATIM sent a different orderId than what we stored, update the record
+        if (externalIdOverride && transaction.externalId !== externalIdOverride) {
+            log.info({ transactionId, stored: transaction.externalId, fromRedirect: externalIdOverride }, "Updating externalId from SATIM redirect");
+            transaction.externalId = externalIdOverride;
+            await this.transactionRepo.save(transaction);
+        }
+
+        const result = await this.satimProvider.verifyPayment(externalIdToUse);
+        log.info({ transactionId, externalIdToUse, result }, "SATIM verify result");
 
         if (result.status === "success") {
             transaction.status = TransactionStatus.SUCCESS;
             const updated = await this.transactionRepo.save(transaction);
             await this.handlePostPayment(updated);
+            return { status: TransactionStatus.SUCCESS, transaction: updated };
         } else if (result.status === "failed") {
             transaction.status = TransactionStatus.FAILED;
             const updated = await this.transactionRepo.save(transaction);
             await this.handlePostPayment(updated);
+            return { status: TransactionStatus.FAILED, transaction: updated };
         }
 
-        return transaction.status;
+        return { status: transaction.status, transaction };
+
     }
 
     async refundToWallet(userId: string, amount: number, referenceType: string, referenceId: string): Promise<void> {

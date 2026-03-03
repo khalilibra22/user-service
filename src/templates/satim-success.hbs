@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paiement Réussi - E-Learning Platform</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --success: #22c55e;
+            --success-light: rgba(34, 197, 94, 0.1);
+            --success-border: rgba(34, 197, 94, 0.2);
+            --primary: #4A90E2;
+            --bg: #f0fdf4;
+            --card-bg: #ffffff;
+            --text: #1a2e1a;
+            --muted: #6b7280;
+            --border: #e5e7eb;
+            --divider: #f3f4f6;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(160deg, #f0fdf4 0%, #dcfce7 50%, #d1fae5 100%);
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 24px 16px;
+        }
+
+        .wrapper {
+            width: 100%;
+            max-width: 480px;
+            animation: slideUp 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(32px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ── Header card ── */
+        .header-card {
+            background: white;
+            border-radius: 20px 20px 0 0;
+            padding: 36px 32px 28px;
+            text-align: center;
+            border: 1px solid var(--border);
+            border-bottom: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(160deg, rgba(34, 197, 94, 0.04) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .icon-ring {
+            width: 80px;
+            height: 80px;
+            background: var(--success-light);
+            border: 2px solid var(--success-border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            animation: popIn 0.5s 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
+        @keyframes popIn {
+            from {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .icon-ring svg {
+            width: 38px;
+            height: 38px;
+            stroke: var(--success);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: var(--success-light);
+            color: #16a34a;
+            border: 1px solid var(--success-border);
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 10px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: var(--success);
+            border-radius: 50%;
+        }
+
+        h1 {
+            font-size: 26px;
+            font-weight: 700;
+            color: #14532d;
+            margin-bottom: 6px;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: var(--muted);
+            font-weight: 300;
+            line-height: 1.6;
+        }
+
+        /* ── Amount highlight ── */
+        .amount-block {
+            margin-top: 22px;
+            padding: 16px 20px;
+            background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
+            border-radius: 12px;
+            color: white;
+        }
+
+        .amount-label {
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            opacity: 0.8;
+            margin-bottom: 4px;
+        }
+
+        .amount-value {
+            font-size: 34px;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .amount-currency {
+            font-size: 16px;
+            font-weight: 400;
+            opacity: 0.85;
+            margin-left: 4px;
+        }
+
+        /* ── Receipt body card ── */
+        .receipt-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-top: none;
+            padding: 0 32px 28px;
+            position: relative;
+        }
+
+        /* Dashed tear line */
+        .tear-line {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 0 20px;
+        }
+
+        .tear-line::before,
+        .tear-line::after {
+            content: '';
+            flex: 1;
+            border-top: 2px dashed var(--border);
+        }
+
+        .tear-circle {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        /* Notch cutouts on sides */
+        .receipt-card::before,
+        .receipt-card::after {
+            content: '';
+            position: absolute;
+            top: -1px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(160deg, #f0fdf4 0%, #dcfce7 100%);
+            border: 1px solid var(--border);
+        }
+
+        .receipt-card::before {
+            left: -10px;
+        }
+
+        .receipt-card::after {
+            right: -10px;
+        }
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--divider);
+            font-size: 14px;
+        }
+
+        .row:last-of-type {
+            border-bottom: none;
+        }
+
+        .row-label {
+            color: var(--muted);
+            font-weight: 400;
+            flex-shrink: 0;
+        }
+
+        .row-value {
+            color: var(--text);
+            font-weight: 500;
+            text-align: right;
+            word-break: break-all;
+            font-size: 13px;
+        }
+
+        .row-value.mono {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #374151;
+        }
+
+        /* ── Footer card ── */
+        .footer-card {
+            background: white;
+            border-radius: 0 0 20px 20px;
+            padding: 24px 32px 32px;
+            border: 1px solid var(--border);
+            border-top: none;
+            text-align: center;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
+            color: white;
+            padding: 14px 36px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 15px;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 16px rgba(34, 197, 94, 0.35);
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(34, 197, 94, 0.42);
+        }
+
+        .btn svg {
+            width: 18px;
+            height: 18px;
+            stroke: white;
+        }
+
+        .hint {
+            margin-top: 14px;
+            font-size: 12px;
+            color: var(--muted);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrapper">
+
+        <!-- Header -->
+        <div class="header-card">
+            <div class="icon-ring">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+            </div>
+            <div class="badge">Paiement confirmé</div>
+            <h1>Merci pour votre paiement !</h1>
+            <p class="subtitle">Votre transaction a été traitée avec succès.</p>
+
+            {{#if amount}}
+            <div class="amount-block">
+                <div class="amount-label">Montant payé</div>
+                <div class="amount-value">{{amount}}<span class="amount-currency">{{currency}}</span></div>
+            </div>
+            {{/if}}
+        </div>
+
+        <!-- Receipt rows -->
+        <div class="receipt-card">
+            <div class="tear-line">
+                <div class="tear-circle"></div>
+                <div class="tear-circle"></div>
+                <div class="tear-circle"></div>
+            </div>
+
+            {{#if description}}
+            <div class="row">
+                <span class="row-label">Description</span>
+                <span class="row-value">{{description}}</span>
+            </div>
+            {{/if}}
+
+            {{#if referenceType}}
+            <div class="row">
+                <span class="row-label">Type</span>
+                <span class="row-value">{{referenceType}}</span>
+            </div>
+            {{/if}}
+
+            {{#if paidAt}}
+            <div class="row">
+                <span class="row-label">Date</span>
+                <span class="row-value">{{paidAt}}</span>
+            </div>
+            {{/if}}
+
+            <div class="row">
+                <span class="row-label">Référence</span>
+                <span class="row-value mono">{{transactionId}}</span>
+            </div>
+
+            {{#if externalId}}
+            <div class="row">
+                <span class="row-label">N° SATIM</span>
+                <span class="row-value mono">{{externalId}}</span>
+            </div>
+            {{/if}}
+
+            <div class="row">
+                <span class="row-label">Méthode</span>
+                <span class="row-value">Carte bancaire (SATIM)</span>
+            </div>
+
+            <div class="row">
+                <span class="row-label">Statut</span>
+                <span class="row-value" style="color:#16a34a; font-weight:600;">✓ Approuvé</span>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer-card">
+            <a href="{{frontendUrl}}" class="btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+                Retour à l'accueil
+            </a>
+            <p class="hint">Conservez votre numéro de référence pour tout renseignement.</p>
+        </div>
+
+    </div>
+</body>
+
+</html>
