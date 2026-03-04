@@ -1,4 +1,3 @@
-import "../utils/subscription-checker";
 import { startSubscriptionCleanupCron } from "../background/subscription-cleanup.cron";
 import { releaseFrozenEarningsTask } from "../background/earning-cleanup.cron";
 import express, { Request, Response, NextFunction } from "express";

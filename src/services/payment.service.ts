@@ -233,7 +233,15 @@ export class PaymentService {
             const { SubscriptionService } = await import("./subscription.service");
             const subscriptionService = new SubscriptionService();
             if (isSuccess) {
-                await subscriptionService.activateSubscription(transaction.referenceId);
+                const isRenewal = transaction.metadata?.isRenewal === true;
+                if (isRenewal && transaction.metadata?.renewsFrom) {
+                    // Renewal: activate from stored renewsFrom date so billing period is continuous
+                    const renewsFrom = new Date(transaction.metadata.renewsFrom);
+                    await subscriptionService.activateRenewalSubscription(transaction.referenceId, renewsFrom);
+                } else {
+                    // Normal purchase or upgrade
+                    await subscriptionService.activateSubscription(transaction.referenceId);
+                }
             } else {
                 await subscriptionService.deactivateSubscription(transaction.referenceId);
             }

@@ -28,8 +28,22 @@ export class SubscriptionModel {
   @Column({ name: "end_date", type: "timestamp" })
   endDate?: Date;
 
-  @Column({ default: "active" })
-  status?: string; // 'active' | 'inactive' | 'cancelled'
+  @Column({ default: "pending_payment" })
+  status?: string; // 'pending_payment' | 'active' | 'inactive' | 'cancelled'
+
+  /**
+   * If set, the subscription will switch to this plan at endDate.
+   * Used for downgrades (take effect at end of billing period).
+   */
+  @Column({ name: "scheduled_plan_id", nullable: true, type: "int" })
+  scheduledPlanId?: number | null;
+
+  /**
+   * Tracks the reason for the next renewal cycle:
+   * 'renew' | 'upgrade' | 'downgrade' | null
+   */
+  @Column({ name: "renewal_status", nullable: true, type: "varchar" })
+  renewalStatus?: string | null;
 
   @ManyToOne(() => PlanModel, (plan) => plan.subscriptions)
   plan?: PlanModel;
