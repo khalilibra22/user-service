@@ -120,13 +120,10 @@ export class SubscriptionController {
       const { paymentUrl, transactionId, message, discount } = await paymentService.initiateTransaction({
         userId: userId,
         amount: plan.price!,
-        currency: "DZD",
         method: req.body.paymentMethod || PaymentMethod.SATIM,
         referenceType: "SUBSCRIPTION",
         referenceId: subscription.id!.toString(),
         description: `Subscription to ${plan.name} Plan for User ${user.fullname || user.id}`,
-        returnUrl: req.body.returnUrl || `http://localhost:3000/payment/success?type=subscription`,
-        failUrl: req.body.failUrl || `http://localhost:3000/payment/fail`,
         couponCode: req.body.couponCode,
       });
 
@@ -198,13 +195,10 @@ export class SubscriptionController {
       const { paymentUrl, transactionId, message, discount } = await paymentService.initiateTransaction({
         userId,
         amount: plan.price!,
-        currency: "DZD",
         method: req.body.paymentMethod || PaymentMethod.SATIM,
         referenceType: "SUBSCRIPTION",
         referenceId: newSubscription.id!.toString(),
         description: `Renewal of ${plan.name} Plan`,
-        returnUrl: req.body.returnUrl || `http://localhost:3000/payment/success?type=subscription`,
-        failUrl: req.body.failUrl || `http://localhost:3000/payment/fail`,
         couponCode: req.body.couponCode,
         // Store renewsFrom so post-payment handler can use it
         metadata: { renewsFrom: renewsFrom.toISOString(), isRenewal: true },
@@ -244,13 +238,10 @@ export class SubscriptionController {
       const { paymentUrl, transactionId, message, discount } = await paymentService.initiateTransaction({
         userId,
         amount: plan.price!,
-        currency: "DZD",
         method: req.body.paymentMethod || PaymentMethod.SATIM,
         referenceType: "SUBSCRIPTION",
         referenceId: newSubscription.id!.toString(),
         description: `Upgrade to ${plan.name} Plan`,
-        returnUrl: req.body.returnUrl || `http://localhost:3000/payment/success?type=subscription`,
-        failUrl: req.body.failUrl || `http://localhost:3000/payment/fail`,
         couponCode: req.body.couponCode,
       });
 

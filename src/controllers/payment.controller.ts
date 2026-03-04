@@ -36,18 +36,15 @@ export class PaymentController {
                 return;
             }
 
-            const { amount, currency, method, referenceType, referenceId, description, returnUrl, failUrl, metadata, couponCode } = req.body;
+            const { amount, method, referenceType, referenceId, description, metadata, couponCode } = req.body;
 
             const result = await this.paymentService.initiateTransaction({
                 userId,
                 amount,
-                currency,
                 method,
                 referenceType,
                 referenceId,
                 description,
-                returnUrl,
-                failUrl,
                 metadata,
                 couponCode,
             });

@@ -46,17 +46,15 @@ export class PaymentService {
     async initiateTransaction(payload: {
         userId: string;
         amount: number;
-        currency: string;
         method: PaymentMethod;
         referenceType: "SUBSCRIPTION" | "COURSE_ENROLLMENT" | "ONE_ON_ONE_ENROLLMENT";
         referenceId: string;
         description: string;
-        returnUrl: string;
-        failUrl: string;
         metadata?: any;
         couponCode?: string;
-    }): Promise<{ transactionId: string; paymentUrl?: string; message?: string; discount?: { couponCode: string; originalAmount: number; discountAmount: number; finalAmount: number } }> {
-        const { userId, amount, currency, method, referenceType, referenceId, description, returnUrl, failUrl, metadata, couponCode } = payload;
+    }): Promise<{ transactionId: string; paymentUrl?: string; message?: string; currency?: string; discount?: { couponCode: string; originalAmount: number; discountAmount: number; finalAmount: number } }> {
+        const { userId, amount, method, referenceType, referenceId, description, metadata, couponCode } = payload;
+        const currency = process.env.PAYMENT_CURRENCY || "DZD";
 
         const user = await this.userRepo.findOne({ where: { id: userId } });
         if (!user) throw new Error("User not found");
