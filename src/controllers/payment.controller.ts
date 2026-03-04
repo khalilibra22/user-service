@@ -36,7 +36,7 @@ export class PaymentController {
                 return;
             }
 
-            const { amount, currency, method, referenceType, referenceId, description, returnUrl, failUrl, metadata } = req.body;
+            const { amount, currency, method, referenceType, referenceId, description, returnUrl, failUrl, metadata, couponCode } = req.body;
 
             const result = await this.paymentService.initiateTransaction({
                 userId,
@@ -48,7 +48,8 @@ export class PaymentController {
                 description,
                 returnUrl,
                 failUrl,
-                metadata
+                metadata,
+                couponCode,
             });
 
             res.status(201).json(result);

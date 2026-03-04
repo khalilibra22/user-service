@@ -13,6 +13,7 @@ export const initiatePaymentSchema = Joi.object({
     returnUrl: Joi.string().uri().required(),
     failUrl: Joi.string().uri().required(),
     metadata: Joi.any().optional(),
+    couponCode: Joi.string().optional().allow(null, ""),
 });
 
 export const submitReceiptSchema = Joi.object({

@@ -6,6 +6,7 @@ import { PaymentMethod } from "../enums/payment-method.enum";
 import { PaymentProvider } from "../enums/payment-provider.enum";
 import { SatimProvider } from "./payment-providers/satim.provider";
 import { NotificationService } from "./notification.service";
+import { CouponService } from "./coupon.service";
 import { getLogger } from "../utils/logger";
 import { Repository } from "typeorm";
 import axios from "axios";
@@ -28,6 +29,7 @@ export class PaymentService {
     private subscriptionRepo: Repository<SubscriptionModel>;
     private satimProvider: SatimProvider;
     private notificationService: NotificationService;
+    private couponService: CouponService;
 
     constructor() {
         this.userRepo = AppDataSource.getRepository(UserModel);
@@ -38,6 +40,7 @@ export class PaymentService {
         this.subscriptionRepo = AppDataSource.getRepository(SubscriptionModel);
         this.satimProvider = new SatimProvider();
         this.notificationService = new NotificationService();
+        this.couponService = new CouponService();
     }
 
     async initiateTransaction(payload: {
@@ -51,14 +54,39 @@ export class PaymentService {
         returnUrl: string;
         failUrl: string;
         metadata?: any;
-    }): Promise<{ transactionId: string; paymentUrl?: string; message?: string }> {
-        const { userId, amount, currency, method, referenceType, referenceId, description, returnUrl, failUrl, metadata } = payload;
+        couponCode?: string;
+    }): Promise<{ transactionId: string; paymentUrl?: string; message?: string; discount?: { couponCode: string; originalAmount: number; discountAmount: number; finalAmount: number } }> {
+        const { userId, amount, currency, method, referenceType, referenceId, description, returnUrl, failUrl, metadata, couponCode } = payload;
 
         const user = await this.userRepo.findOne({ where: { id: userId } });
         if (!user) throw new Error("User not found");
 
+        // ── Coupon validation (before touching the DB transaction) ────────────
+        let effectiveAmount = amount;
+        let couponMeta: { couponCode: string; originalAmount: number; discountAmount: number; finalAmount: number } | undefined;
+
+        if (couponCode && couponCode.trim()) {
+            const resourceType = metadata?.courseType ?? undefined;
+            const resourceId = referenceId ?? undefined;
+            const couponResult = await this.couponService.validateAndComputeDiscount(
+                couponCode.trim(),
+                amount,
+                resourceType,
+                resourceId
+            );
+            effectiveAmount = couponResult.finalAmount;
+            couponMeta = {
+                couponCode: couponCode.trim(),
+                originalAmount: couponResult.originalAmount,
+                discountAmount: couponResult.discountAmount,
+                finalAmount: couponResult.finalAmount,
+            };
+            log.info({ couponCode, originalAmount: amount, finalAmount: effectiveAmount, discountAmount: couponResult.discountAmount }, "Coupon applied to transaction");
+        }
+        // ─────────────────────────────────────────────────────────────────────
+
         const transaction = new TransactionModel();
-        transaction.amount = amount;
+        transaction.amount = effectiveAmount;
         transaction.currency = currency;
         transaction.method = method;
         transaction.referenceType = referenceType;
@@ -66,7 +94,10 @@ export class PaymentService {
         transaction.description = description;
         transaction.user = user;
         transaction.status = TransactionStatus.PENDING;
-        transaction.metadata = metadata;
+        // Merge coupon metadata with any caller-provided metadata
+        transaction.metadata = couponMeta
+            ? { ...metadata, coupon: couponMeta }
+            : metadata;
 
         // Determine Provider based on Method
         if (method === PaymentMethod.SATIM) {
@@ -100,6 +131,7 @@ export class PaymentService {
             return {
                 transactionId: savedTransaction.id,
                 paymentUrl: response.paymentUrl,
+                ...(couponMeta && { discount: couponMeta }),
             };
         } else if (method === PaymentMethod.WALLET) {
             // Internal Wallet Payment
@@ -133,12 +165,14 @@ export class PaymentService {
             return {
                 transactionId: savedTransaction.id,
                 message: "Payment completed successfully using your wallet balance.",
+                ...(couponMeta && { discount: couponMeta }),
             };
         } else {
             // Manual Method (Baridimob or Transfer)
             return {
                 transactionId: savedTransaction.id,
                 message: "Please upload your payment receipt.",
+                ...(couponMeta && { discount: couponMeta }),
             };
         }
     }
@@ -176,6 +210,18 @@ export class PaymentService {
         const isSuccess = transaction.status === TransactionStatus.SUCCESS;
         const teacherId = transaction.metadata?.teacherId;
         log.info({ transactionId: transaction.id, isSuccess, teacherId }, "Handling post-payment logic");
+
+        // ── Coupon usage tracking ─────────────────────────────────────────────
+        const couponCode: string | undefined = transaction.metadata?.coupon?.couponCode;
+        if (couponCode) {
+            if (isSuccess) {
+                await this.couponService.applyCouponUsage(couponCode);
+            } else {
+                // FAILED or CANCELED — roll back any in-flight reservation
+                await this.couponService.rollbackCouponUsage(couponCode);
+            }
+        }
+        // ─────────────────────────────────────────────────────────────────────
 
         // ── Send payment confirmation email (fire-and-forget) ────────────────
         if (isSuccess) {

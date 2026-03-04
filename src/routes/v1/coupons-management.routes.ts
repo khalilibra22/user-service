@@ -10,7 +10,7 @@ router.get(
   "/:couponId",
   AuthMiddleware.verifyToken,
   AuthMiddleware.authorize("coupons", "read"),
-  couponController.getCouponById
+  couponController.getCouponByIdAdmin
 );
 
 router.patch(
