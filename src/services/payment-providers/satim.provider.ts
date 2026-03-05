@@ -5,7 +5,7 @@ import axios from "axios";
 const log = getLogger();
 
 export class SatimProvider implements PaymentProviderInterface {
-    private readonly gatewayUrl = "https://test2.satim.dz/payment/rest"; // Updated for Satim Test Env
+    private readonly gatewayUrl = process.env.SATIM_GATEWAY_URL || "https://test2.satim.dz/payment/rest";
     private readonly userName = process.env.SATIM_USERNAME || "satim_user";
     private readonly password = process.env.SATIM_PASSWORD || "satim_pass";
     private readonly terminalId = process.env.SATIM_TERMINAL_ID || "0000000000"; // Identifiant terminal

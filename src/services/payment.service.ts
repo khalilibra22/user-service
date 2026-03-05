@@ -116,7 +116,7 @@ export class PaymentService {
             const backendFailUrl = `${baseUrl}/v1/payments/satim/callback?transactionId=${savedTransaction.id}`;
 
             const response = await this.satimProvider.initiatePayment(
-                amount,
+                effectiveAmount,
                 currency,
                 savedTransaction.id, // Use transaction ID as order ID
                 backendReturnUrl,
