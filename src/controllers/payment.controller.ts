@@ -171,26 +171,15 @@ export class PaymentController {
 
     refundToWallet = async (req: Request, res: Response): Promise<void> => {
         try {
-            // Check if it's an internal service call via API Key
-            const INBOUND_API_KEY = process.env.INBOUND_API_KEY;
-            const providedKey = req.headers["x-internal-api-key"];
-            const isInternal = INBOUND_API_KEY && providedKey === INBOUND_API_KEY;
-
-            let userId;
-            if (isInternal) {
-                // If internal, trust the userId in body
-                userId = req.body.userId;
-            } else {
-                // If not internal, it must be the user themselves (or we should block this entirely for public)
-                userId = res.locals.user?.id;
-            }
+            // This endpoint is internal-only (guarded by requireInternalApiKey middleware).
+            // The userId is always sourced from the request body sent by the trusted caller (course-service).
+            const { userId, amount, referenceType, referenceId } = req.body;
 
             if (!userId) {
-                res.status(401).json({ error: "Unauthorized: UserId required" });
+                res.status(400).json({ error: "Bad Request: userId is required" });
                 return;
             }
 
-            const { amount, referenceType, referenceId } = req.body;
             await this.paymentService.refundToWallet(userId, amount, referenceType, referenceId);
             res.status(200).json({ message: "Refund processed successfully to student wallet." });
         } catch (error: any) {

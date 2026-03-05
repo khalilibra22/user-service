@@ -18,6 +18,17 @@ const flexibleAuth = (req: any, res: any, next: any) => {
     return AuthMiddleware.verifyToken(req, res, next);
 };
 
+/** Strictly internal — rejects anything without the correct service-to-service API key. */
+const requireInternalApiKey = (req: any, res: any, next: any) => {
+    const INBOUND_API_KEY = process.env.INBOUND_API_KEY;
+    const providedKey = req.headers["x-internal-api-key"];
+
+    if (!INBOUND_API_KEY || providedKey !== INBOUND_API_KEY) {
+        return res.status(403).json({ error: "Forbidden: internal service access only" });
+    }
+    return next();
+};
+
 router.post(
     "/initiate",
     flexibleAuth,
@@ -34,7 +45,7 @@ router.post(
 
 router.get(
     "/reference/:type/:id",
-    flexibleAuth,
+    requireInternalApiKey,
     paymentController.getTransactionByReference
 );
 
@@ -47,7 +58,7 @@ router.get(
 
 router.post(
     "/refund/wallet",
-    flexibleAuth,
+    requireInternalApiKey,
     paymentController.refundToWallet
 );
 
