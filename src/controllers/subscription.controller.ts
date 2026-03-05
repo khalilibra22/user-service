@@ -62,7 +62,11 @@ export class SubscriptionController {
 
   createSubscription = async (req: Request, res: Response): Promise<void> => {
     try {
-      const userId = req.body.userId;
+      const userId = res.locals.user?.id;
+      if (!userId) {
+        res.status(400).json({ error: "User not authenticated" });
+        return;
+      }
       const user = await this.userService.getUserById(userId);
       if (!user) {
         res.status(404).json({ error: "User not found" });
@@ -144,10 +148,10 @@ export class SubscriptionController {
   cancelSubscription = async (req: Request, res: Response): Promise<void> => {
     try {
       const subscriptionId = req.params.subscriptionId;
-      const userId = (req as any).user?.id || req.body.userId;
+      const userId = res.locals.user?.id;
 
       if (!userId) {
-        res.status(400).json({ error: "User ID is required" });
+        res.status(400).json({ error: "User not authenticated" });
         return;
       }
 
@@ -174,9 +178,9 @@ export class SubscriptionController {
 
   renewSubscription = async (req: Request, res: Response): Promise<void> => {
     try {
-      const userId = (req as any).user?.id || req.body.userId;
+      const userId = res.locals.user?.id;
       if (!userId) {
-        res.status(400).json({ error: "User ID is required" });
+        res.status(400).json({ error: "User not authenticated" });
         return;
       }
 
@@ -224,11 +228,11 @@ export class SubscriptionController {
 
   upgradeSubscription = async (req: Request, res: Response): Promise<void> => {
     try {
-      const userId = (req as any).user?.id || req.body.userId;
+      const userId = res.locals.user?.id;
       const newPlanId = req.params.planId;
 
       if (!userId) {
-        res.status(400).json({ error: "User ID is required" });
+        res.status(400).json({ error: "User not authenticated" });
         return;
       }
 
@@ -268,11 +272,11 @@ export class SubscriptionController {
 
   downgradeSubscription = async (req: Request, res: Response): Promise<void> => {
     try {
-      const userId = (req as any).user?.id || req.body.userId;
+      const userId = res.locals.user?.id;
       const newPlanId = req.params.planId;
 
       if (!userId) {
-        res.status(400).json({ error: "User ID is required" });
+        res.status(400).json({ error: "User not authenticated" });
         return;
       }
 
