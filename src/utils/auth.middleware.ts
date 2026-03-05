@@ -126,6 +126,35 @@ class AuthMiddleware {
     };
   }
 
+  /**
+   * Ensures the authenticated user is the resource owner.
+   * Use for sensitive writes (password, email, payment methods, etc.).
+   */
+  static requireSelf(req: Request, res: Response, next: NextFunction): void {
+    const callerId: string = res.locals.user?.id;
+    const resourceId: string = req.params.id;
+    if (!callerId || callerId !== resourceId) {
+      res.status(403).json({ message: "Forbidden: you can only access your own resources" });
+      return;
+    }
+    next();
+  }
+
+  /**
+   * Ensures the caller is either the resource owner OR an admin/supervisor.
+   * Use for reads that are private but admins need to manage (e.g. payment-methods, coupons).
+   */
+  static requireSelfOrAdmin(req: Request, res: Response, next: NextFunction): void {
+    const caller = res.locals.user;
+    const resourceId: string = req.params.id;
+    const adminRoles: UserRole[] = [UserRole.ADMIN, UserRole.SUPERVISOR];
+    if (!caller || (caller.id !== resourceId && !adminRoles.includes(caller.roles as UserRole))) {
+      res.status(403).json({ message: "Forbidden" });
+      return;
+    }
+    next();
+  }
+
   private static checkMethodPrivileges(
     method: string,
     resource: Resource,

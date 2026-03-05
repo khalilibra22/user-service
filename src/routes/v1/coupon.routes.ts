@@ -21,6 +21,7 @@ router.post(
 router.get(
   "/",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.requireSelfOrAdmin,
   AuthMiddleware.authorize("coupons", "list"),
   couponController.getAllCoupons
 );
@@ -38,6 +39,7 @@ router.get(
 router.post(
   "/",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.requireSelf,
   AuthMiddleware.authorize("coupons", "create"),
   ValidationMiddleware.validate(couponValidationSchema),
   couponController.createCoupon
@@ -47,6 +49,7 @@ router.post(
 router.put(
   "/:couponId",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.requireSelf,
   AuthMiddleware.authorize("coupons", "update"),
   ValidationMiddleware.validate(couponValidationSchema),
   couponController.updateCoupon
@@ -56,6 +59,7 @@ router.put(
 router.delete(
   "/:couponId",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.requireSelf,
   AuthMiddleware.authorize("coupons", "delete"),
   couponController.deleteCoupon
 );
@@ -64,6 +68,7 @@ router.delete(
 router.patch(
   "/:couponId/toggle",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.requireSelf,
   AuthMiddleware.authorize("coupons", "update"),
   couponController.toggleCouponStatus
 );

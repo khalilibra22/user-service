@@ -14,6 +14,7 @@ const academicBackgroundController = new AcademicBackgroundController();
 router.post(
   "/",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.requireSelf,
   AuthMiddleware.authorize("academic_backgrounds", "create"),
   ValidationMiddleware.validate(academicBackgroundSchema),
   academicBackgroundController.createAcademicBackground
@@ -23,6 +24,7 @@ router.post(
 router.put(
   "/:academicBackgroundId",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.requireSelf,
   AuthMiddleware.authorize("academic_backgrounds", "update"),
   ValidationMiddleware.validate(updateAcademicBackgroundSchema),
   academicBackgroundController.updateAcademicBackground
@@ -32,6 +34,7 @@ router.put(
 router.delete(
   "/:academicBackgroundId",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.requireSelf,
   AuthMiddleware.authorize("academic_backgrounds", "delete"),
   academicBackgroundController.deleteAcademicBackground
 );

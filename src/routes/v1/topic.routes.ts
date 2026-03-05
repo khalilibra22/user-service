@@ -10,6 +10,7 @@ const academicBackgroundController = new AcademicBackgroundController();
 router.post(
   "/:topicId",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.requireSelf,
   AuthMiddleware.authorize("catalogs", "pick"),
   ValidationMiddleware.validate(addTopicToUserValidationSchema),
   academicBackgroundController.addTopicToUser
@@ -19,6 +20,7 @@ router.post(
 router.put(
   "/:topicId",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.requireSelf,
   AuthMiddleware.authorize("catalogs", "adjust"),
   ValidationMiddleware.validate(addTopicToUserValidationSchema),
   academicBackgroundController.updateUserTopicPrice
@@ -28,6 +30,7 @@ router.put(
 router.delete(
   "/:topicId",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.requireSelf,
   AuthMiddleware.authorize("catalogs", "drop"),
   academicBackgroundController.deleteUserTopic
 );
@@ -44,6 +47,7 @@ router.get(
 router.patch(
   "/:topicId/toggle-status",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.requireSelf,
   AuthMiddleware.authorize("catalogs", "toggle"),
   academicBackgroundController.toggleUserTopicStatus
 );

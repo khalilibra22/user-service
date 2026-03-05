@@ -11,6 +11,7 @@ const availabilityController = new AvailabilityController();
 router.post(
   "/",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.requireSelf,
   AuthMiddleware.authorize("availabilities", "create"),
   ValidationMiddleware.validate(availabilityExceptionSchema),
   availabilityController.createAvailabilityException
@@ -20,6 +21,7 @@ router.post(
 router.put(
   "/:exceptionId",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.requireSelf,
   AuthMiddleware.authorize("availabilities", "update"),
   ValidationMiddleware.validate(availabilityExceptionSchema),
   availabilityController.updateAvailabilityException
@@ -29,6 +31,7 @@ router.put(
 router.delete(
   "/:exceptionId",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.requireSelf,
   AuthMiddleware.authorize("availabilities", "delete"),
   availabilityController.deleteAvailabilityException
 );

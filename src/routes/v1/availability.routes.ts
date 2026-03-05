@@ -12,6 +12,7 @@ const availabilityController = new AvailabilityController();
 router.post(
   "/",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.requireSelf,
   AuthMiddleware.authorize("availabilities", "create"),
   ValidationMiddleware.validate(availabilitySchema),
   availabilityController.createAvailability
@@ -21,6 +22,7 @@ router.post(
 router.put(
   "/:availabilityId",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.requireSelf,
   AuthMiddleware.authorize("availabilities", "update"),
   ValidationMiddleware.validate(availabilitySchema),
   availabilityController.updateAvailability
@@ -30,6 +32,7 @@ router.put(
 router.delete(
   "/:availabilityId",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.requireSelf,
   AuthMiddleware.authorize("availabilities", "delete"),
   availabilityController.deleteAvailability
 );
@@ -46,6 +49,7 @@ router.get(
 router.patch(
   "/deactivate-all",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.requireSelf,
   AuthMiddleware.authorize("availabilities", "toggle"),
   availabilityController.deactivateAllAvailabilities
 );
@@ -54,6 +58,7 @@ router.patch(
 router.patch(
   "/activate-all",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.requireSelf,
   AuthMiddleware.authorize("availabilities", "toggle"),
   availabilityController.activateAllAvailabilities
 );
@@ -62,6 +67,7 @@ router.patch(
 router.patch(
   "/:availabilityId/toggle-status",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.requireSelf,
   AuthMiddleware.authorize("availabilities", "toggle"),
   availabilityController.toggleAvailabilityStatus
 );
