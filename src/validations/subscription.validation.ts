@@ -30,11 +30,8 @@ export const updatePlanValidationSchema = Joi.object({
 }).min(1); // At least one field required
 
 export const userSubscriptionValidationSchema = Joi.object({
-  userId: Joi.string().uuid({ version: "uuidv4" }).required(),
   paymentMethod: Joi.string()
     .valid("satim", "baridimob", "ccp_transfer", "wallet")
     .optional(),
   couponCode: Joi.string().max(50).optional(),
-  returnUrl: Joi.string().uri().optional(),
-  failUrl: Joi.string().uri().optional(),
 });

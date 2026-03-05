@@ -122,9 +122,11 @@ export class SubscriptionService {
       subscription.startDate = now;
 
       if (subscription.plan) {
-        const durationInMonths = this.getDurationInMonths(subscription.plan.duration, subscription.plan.durationUnit);
-        subscription.endDate = new Date(now);
-        subscription.endDate.setMonth(now.getMonth() + durationInMonths);
+        subscription.endDate = this.addDurationToDate(
+          now,
+          subscription.plan.duration,
+          subscription.plan.durationUnit
+        );
       }
 
       const updatedSubscription = await this.subscriptionRepo.save(subscription);
@@ -268,9 +270,11 @@ export class SubscriptionService {
       subscription.startDate = renewsFrom;
 
       if (subscription.plan) {
-        const durationInMonths = this.getDurationInMonths(subscription.plan.duration, subscription.plan.durationUnit);
-        subscription.endDate = new Date(renewsFrom);
-        subscription.endDate.setMonth(renewsFrom.getMonth() + durationInMonths);
+        subscription.endDate = this.addDurationToDate(
+          renewsFrom,
+          subscription.plan.duration,
+          subscription.plan.durationUnit
+        );
       }
 
       const updated = await this.subscriptionRepo.save(subscription);
@@ -400,8 +404,17 @@ export class SubscriptionService {
     }
   }
 
-  private getDurationInMonths(duration: number = 1, unit: string = 'months'): number {
-    return unit === 'years' ? duration * 12 : duration;
+  private addDurationToDate(startDate: Date, duration: number = 1, unit: string = 'months'): Date {
+    const date = new Date(startDate);
+    if (unit === 'days') {
+      date.setDate(date.getDate() + duration);
+    } else if (unit === 'years') {
+      date.setFullYear(date.getFullYear() + duration);
+    } else {
+      // Default to months
+      date.setMonth(date.getMonth() + duration);
+    }
+    return date;
   }
 
   async getActiveSubscriptionsByUserId(
