@@ -30,6 +30,7 @@ export const permissions: Record<UserRole, Record<Resource, Action[]>> = {
       "list",
     ],
     payments: [],
+    withdrawals: ["create", "read", "list", "approve"],
   },
   [UserRole.TEACHER]: {
     availabilities: ["create", "read", "update", "delete", "toggle", "list"],
@@ -48,6 +49,7 @@ export const permissions: Record<UserRole, Record<Resource, Action[]>> = {
     subscriptions: ["subscribe", "cancel", "view"],
     catalogs: ["pick", "toggle", "adjust", "drop", "view", "list"],
     payments: [],
+    withdrawals: ["create", "read"],
   },
   [UserRole.STUDENT]: {
     availabilities: ["read"],
@@ -58,6 +60,7 @@ export const permissions: Record<UserRole, Record<Resource, Action[]>> = {
     subscriptions: [],
     catalogs: [],
     payments: [],
+    withdrawals: [],
   },
   [UserRole.ACADEMY]: {
     availabilities: [],
@@ -68,6 +71,7 @@ export const permissions: Record<UserRole, Record<Resource, Action[]>> = {
     subscriptions: ["subscribe", "cancel", "view"],
     catalogs: ["pick", "toggle", "list"],
     payments: [],
+    withdrawals: [],
   },
   [UserRole.ADMIN]: {
     availabilities: ["create", "read", "update", "delete", "toggle", "list"],
@@ -89,6 +93,7 @@ export const permissions: Record<UserRole, Record<Resource, Action[]>> = {
       "list",
     ],
     payments: ["validate", "read", "list"],
+    withdrawals: ["read", "list", "approve"],
   },
   [UserRole.ACADEMY_TEACHER]: {
     availabilities: [],
@@ -99,6 +104,7 @@ export const permissions: Record<UserRole, Record<Resource, Action[]>> = {
     subscriptions: [],
     catalogs: [],
     payments: [],
+    withdrawals: [],
   },
   [UserRole.GUEST]: {
     availabilities: [],
@@ -109,6 +115,7 @@ export const permissions: Record<UserRole, Record<Resource, Action[]>> = {
     subscriptions: [],
     catalogs: [],
     payments: [],
+    withdrawals: [],
   },
 };
 
@@ -122,6 +129,7 @@ export const privileges: Record<string, Record<Resource, Action[]>> = {
     subscriptions: [],
     catalogs: [],
     payments: ["validate"],
+    withdrawals: [],
   },
   ["GET"]: {
     availabilities: ["list"],
@@ -132,6 +140,7 @@ export const privileges: Record<string, Record<Resource, Action[]>> = {
     subscriptions: [],
     catalogs: [],
     payments: [],
+    withdrawals: [],
   },
   ["PATCH"]: {
     availabilities: [],
@@ -142,6 +151,7 @@ export const privileges: Record<string, Record<Resource, Action[]>> = {
     subscriptions: [],
     catalogs: [],
     payments: [],
+    withdrawals: [],
   },
   ["DELETE"]: {
     availabilities: [],
@@ -152,6 +162,7 @@ export const privileges: Record<string, Record<Resource, Action[]>> = {
     subscriptions: [],
     catalogs: [],
     payments: [],
+    withdrawals: [],
   },
   ["PUT"]: {
     availabilities: [],
@@ -162,5 +173,6 @@ export const privileges: Record<string, Record<Resource, Action[]>> = {
     subscriptions: [],
     catalogs: [],
     payments: [],
+    withdrawals: [],
   },
 };

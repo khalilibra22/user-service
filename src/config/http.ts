@@ -56,5 +56,8 @@ if (!chatServiceBaseUrl) {
 
 export const chatHttpClient = createHttpClient({
   baseURL: chatServiceBaseUrl,
+  headers: {
+    "x-internal-api-key": process.env.INBOUND_API_KEY ?? "",
+  },
 });
 

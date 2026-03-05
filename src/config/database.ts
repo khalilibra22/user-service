@@ -14,6 +14,10 @@ import { AvailabilityModel } from "../models/availability.model";
 import { AvailabilityExceptionModel } from "../models/availability-exception.model";
 import { CouponModel } from "../models/coupon.model";
 import { TransactionModel } from "../models/transaction.model";
+import { UserWalletModel } from "../models/user-wallet.model";
+import { EarningModel } from "../models/earning.model";
+import { WithdrawalModel } from "../models/withdrawal-request.model";
+import { WalletTransactionModel } from "../models/wallet-transaction.model";
 
 import config from ".";
 
@@ -39,7 +43,11 @@ export const AppDataSource = new DataSource({
     AvailabilityModel,
     AvailabilityExceptionModel,
     CouponModel,
-    TransactionModel
+    TransactionModel,
+    UserWalletModel,
+    EarningModel,
+    WithdrawalModel,
+    WalletTransactionModel
   ],
   synchronize: config.env === "development",
   // Add cache configuration

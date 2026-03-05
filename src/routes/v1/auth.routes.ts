@@ -3,6 +3,7 @@ import { AuthController } from "../../controllers/auth.controller";
 import { ValidationMiddleware } from "../../utils/validation.middleware";
 import {
   changeEmailSchema,
+  forgotPasswordSchema,
   loginValidationSchema,
   resetPasswordSchema,
   userValidationSchema,
@@ -10,11 +11,13 @@ import {
 import { uploadMemory } from "../../config/multer";
 import { s3UploadMiddleware } from "../../middlewares/s3-upload.middleware";
 import { validateFileUploads } from "../../middlewares/file-validation.middleware";
+import { loginLimiter, forgotPasswordLimiter } from "../../config/rate-limit";
 import passport from "passport";
 
 const router = express.Router();
 
 const authController = new AuthController();
+
 
 router.post(
   "/",
@@ -29,13 +32,15 @@ router.post(
 );
 router.post(
   "/login",
+  loginLimiter,
   ValidationMiddleware.validate(loginValidationSchema),
   authController.login
 );
 
 router.post(
   "/forgot-password",
-  ValidationMiddleware.validate(changeEmailSchema),
+  forgotPasswordLimiter,
+  ValidationMiddleware.validate(forgotPasswordSchema),
   authController.forgotPassword
 );
 

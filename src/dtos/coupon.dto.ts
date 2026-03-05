@@ -1,4 +1,4 @@
-import { Expose, Transform, Type } from "class-transformer";
+import { Expose, Transform } from "class-transformer";
 
 export class CouponDto {
   @Expose()
@@ -17,7 +17,16 @@ export class CouponDto {
   discountValue?: number;
 
   @Expose()
+  maxDiscountAmount?: number;
+
+  @Expose()
+  minOrderAmount?: number;
+
+  @Expose()
   usageLimit?: number;
+
+  @Expose()
+  usedCount?: number;
 
   @Expose()
   startDate?: Date;
@@ -32,8 +41,16 @@ export class CouponDto {
   applicableResource?: string;
 
   @Expose()
-  @Transform(({ value }) => {
-    return value === null ? undefined : value;
-  })
+  @Transform(({ value }) => (value === null ? undefined : value))
   resourceIds?: string[];
+}
+
+export class CouponValidationResponseDto {
+  couponCode!: string;
+  originalAmount!: number;
+  discountAmount!: number;
+  finalAmount!: number;
+  discountType!: string;
+  discountValue!: number;
+  couponName?: string;
 }

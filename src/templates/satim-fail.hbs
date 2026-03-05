@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paiement Échoué - E-Learning Platform</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap');
+
+        :root {
+            --primary: #4A90E2;
+            --danger: #E74C3C;
+            --bg: #fff8f8;
+            --text: #2c3e50;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #fff8f8 0%, #ffeaea 100%);
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 48px 40px;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(231, 76, 60, 0.1), 0 4px 20px rgba(0, 0, 0, 0.06);
+            text-align: center;
+            max-width: 420px;
+            width: 100%;
+            animation: slideUp 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px) scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .icon-ring {
+            width: 88px;
+            height: 88px;
+            background: rgba(231, 76, 60, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 28px;
+            animation: popIn 0.5s 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+        }
+
+        @keyframes popIn {
+            from {
+                transform: scale(0);
+            }
+
+            to {
+                transform: scale(1);
+            }
+        }
+
+        .icon-ring svg {
+            width: 44px;
+            height: 44px;
+            stroke: var(--danger);
+        }
+
+        h1 {
+            font-size: 26px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #c0392b 0%, #E74C3C 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 15px;
+            font-weight: 300;
+            color: #7f8c8d;
+            line-height: 1.7;
+            margin-bottom: 10px;
+        }
+
+        .order-info {
+            background: #fff5f5;
+            border: 1px solid rgba(231, 76, 60, 0.15);
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin: 20px 0 28px;
+            font-size: 13px;
+            color: #555;
+            text-align: left;
+        }
+
+        .order-info span {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .order-info strong {
+            color: var(--text);
+        }
+
+        .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #c0392b 0%, #E74C3C 100%);
+            color: white;
+            padding: 14px 36px;
+            border-radius: 14px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 24px rgba(231, 76, 60, 0.3);
+            letter-spacing: 0.3px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(231, 76, 60, 0.42);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .hint {
+            margin-top: 20px;
+            font-size: 13px;
+            color: #aaa;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <div class="icon-ring">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </div>
+        <h1>Paiement Échoué</h1>
+        <p class="subtitle">Votre paiement n'a pas pu être complété. Il a été annulé ou refusé.</p>
+
+        {{#if transactionId}}
+        <div class="order-info">
+            <span><strong>Référence :</strong> {{transactionId}}</span>
+            {{#if reason}}<span><strong>Raison :</strong> {{reason}}</span>{{/if}}
+        </div>
+        {{/if}}
+
+        <a href="{{frontendUrl}}" class="btn">Retour à l'accueil</a>
+        <p class="hint">Vous pouvez réessayer votre paiement depuis votre tableau de bord.</p>
+    </div>
+</body>
+
+</html>

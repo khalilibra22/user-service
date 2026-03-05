@@ -6,13 +6,17 @@ class ValidationMiddleware {
   static validate(schema: Schema) {
     return (req: Request, res: Response, next: NextFunction): void => {
       try {
-        const { error } = schema.validate(req.body, { abortEarly: false });
+        const { error, value } = schema.validate(req.body, {
+          abortEarly: false,
+          stripUnknown: true,  // remove fields not in schema (prevents mass-assignment)
+        });
         if (error) {
           res.status(400).json({
             error: error.details.map((detail) => detail.message),
           });
           return;
         }
+        req.body = value;  // replace body with sanitized value
         next();
       } catch (err) {
         (req.log || getLogger()).error({ err }, 'Validation Middleware Error');
@@ -24,7 +28,10 @@ class ValidationMiddleware {
   static validateQuery(schema: Schema) {
     return (req: Request, res: Response, next: NextFunction): void => {
       try {
-        const { error, value } = schema.validate(req.query, { abortEarly: false });
+        const { error, value } = schema.validate(req.query, {
+          abortEarly: false,
+          stripUnknown: true,
+        });
         if (error) {
           res.status(400).json({
             error: error.details.map((detail) => detail.message),
@@ -42,3 +49,4 @@ class ValidationMiddleware {
 }
 
 export { ValidationMiddleware };
+

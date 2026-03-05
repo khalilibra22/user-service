@@ -1,5 +1,13 @@
 import "dotenv/config";
 
+// ── Startup validation: fail fast if required secrets are missing ──────────
+const required = ["JWT_SECRET"] as const;
+for (const key of required) {
+    if (!process.env[key]) {
+        throw new Error(`[CONFIG] Required environment variable "${key}" is not set. Refusing to start.`);
+    }
+}
+
 const config = {
     port: process.env.PORT || 5000,
     env: process.env.NODE_ENV || "development",
@@ -8,9 +16,9 @@ const config = {
         host: process.env.DB_HOST || "localhost",
         port: parseInt(process.env.DB_PORT || "5432", 10),
         username: process.env.DB_USER || "postgres",
-        password: process.env.DB_PASSWORD || "12345",
+        password: process.env.DB_PASSWORD, // No fallback — must be set via env
         database: process.env.DB_NAME || "user-service-db",
-        ssl: process.env.DB_SSL === "true" || true, // Defaulting to true as per current database.ts
+        ssl: process.env.DB_SSL === "true" || true,
     },
     redis: {
         host: process.env.REDIS_HOST,
@@ -20,7 +28,7 @@ const config = {
         enabled: process.env.REDIS_ENABLED === "true" || false,
     },
     jwt: {
-        secret: process.env.JWT_SECRET || "secret",
+        secret: process.env.JWT_SECRET!, // Validated above
         expiresIn: process.env.JWT_EXPIRES_IN || "1d",
     },
     s3: {
@@ -35,6 +43,13 @@ const config = {
         port: parseInt(process.env.GRPC_PORT || "50051", 10),
     },
     chatServiceUrl: process.env.CHAT_SERVICE_URL,
+    smtp: {
+        host: process.env.SMTP_HOST || "smtp.gmail.com",
+        port: parseInt(process.env.SMTP_PORT || "587", 10),
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+        from: process.env.SMTP_FROM || '"E-Learning Platform" <noreply@elearning.com>',
+    },
     apiKeys: {
         userService: process.env.USER_SERVICE_API_KEY,
         bookingService: process.env.BOOKING_SERVICE_API_KEY,

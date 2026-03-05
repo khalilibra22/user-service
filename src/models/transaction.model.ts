@@ -61,6 +61,12 @@ export class TransactionModel {
     @Column({ name: "reference_id" })
     referenceId!: string; // ID of the related entity
 
+    @Column({ nullable: true })
+    description?: string;
+
+    @Column({ type: "json", nullable: true })
+    metadata?: any;
+
     @ManyToOne(() => UserModel, (user) => user.transactions)
     user!: UserModel;
 

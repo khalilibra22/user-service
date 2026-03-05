@@ -7,11 +7,31 @@ import { initiatePaymentSchema, submitReceiptSchema } from "../../validations/pa
 const router = express.Router();
 const paymentController = new PaymentController();
 
-// Public route? Or protected? Often payment initiation is protected.
-// Assuming protected for now as we need userId.
+// Middlewares
+const flexibleAuth = (req: any, res: any, next: any) => {
+    const INBOUND_API_KEY = process.env.INBOUND_API_KEY;
+    const providedKey = req.headers["x-internal-api-key"];
+
+    if (INBOUND_API_KEY && providedKey === INBOUND_API_KEY) {
+        return next();
+    }
+    return AuthMiddleware.verifyToken(req, res, next);
+};
+
+/** Strictly internal — rejects anything without the correct service-to-service API key. */
+const requireInternalApiKey = (req: any, res: any, next: any) => {
+    const INBOUND_API_KEY = process.env.INBOUND_API_KEY;
+    const providedKey = req.headers["x-internal-api-key"];
+
+    if (!INBOUND_API_KEY || providedKey !== INBOUND_API_KEY) {
+        return res.status(403).json({ error: "Forbidden: internal service access only" });
+    }
+    return next();
+};
+
 router.post(
     "/initiate",
-    AuthMiddleware.verifyToken,
+    flexibleAuth,
     ValidationMiddleware.validate(initiatePaymentSchema),
     paymentController.initiatePayment
 );
@@ -24,9 +44,40 @@ router.post(
 );
 
 router.get(
+    "/reference/:type/:id",
+    requireInternalApiKey,
+    paymentController.getTransactionByReference
+);
+
+// Wallet & Refund routes
+router.get(
+    "/wallet/balance",
+    AuthMiddleware.verifyToken,
+    paymentController.getWalletBalance
+);
+
+router.post(
+    "/refund/wallet",
+    requireInternalApiKey,
+    paymentController.refundToWallet
+);
+
+// Manual verify (kept for admin/debug use)
+router.get(
     "/:transactionId/verify",
     AuthMiddleware.verifyToken,
     paymentController.verifyPayment
+);
+
+/**
+ * PUBLIC — SATIM browser redirect callback.
+ * SATIM redirects the user's browser here after payment (success or fail).
+ * No JWT required — this is a browser redirect, not an API call.
+ * Query params: transactionId (our internal ID)
+ */
+router.get(
+    "/satim/callback",
+    paymentController.satimCallback
 );
 
 export { router as paymentRouter };

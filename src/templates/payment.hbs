@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reçu de paiement</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f0fdf4;
+            font-family: 'Outfit', Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .email-wrapper {
+            max-width: 560px;
+            margin: 40px auto;
+            background: #ffffff;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+        }
+
+        /* ── Header ── */
+        .header {
+            background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
+            padding: 36px 40px 32px;
+            text-align: center;
+        }
+
+        .header-icon {
+            width: 64px;
+            height: 64px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        .checkmark {
+            width: 32px;
+            height: 32px;
+            stroke: white;
+        }
+
+        .header h1 {
+            margin: 0 0 6px;
+            font-size: 22px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .header p {
+            margin: 0;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.85);
+            font-weight: 300;
+        }
+
+        /* ── Amount badge ── */
+        .amount-section {
+            padding: 28px 40px;
+            text-align: center;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .amount-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: #9ca3af;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .amount-value {
+            font-size: 44px;
+            font-weight: 700;
+            color: #14532d;
+            line-height: 1;
+        }
+
+        .amount-currency {
+            font-size: 22px;
+            font-weight: 400;
+            color: #16a34a;
+            margin-left: 4px;
+        }
+
+        /* ── Body ── */
+        .body {
+            padding: 28px 40px;
+        }
+
+        .greeting {
+            font-size: 16px;
+            color: #1f2937;
+            margin-bottom: 8px;
+            font-weight: 400;
+        }
+
+        .intro {
+            font-size: 14px;
+            color: #6b7280;
+            line-height: 1.7;
+            margin-bottom: 28px;
+            font-weight: 300;
+        }
+
+        /* ── Receipt table ── */
+        .receipt-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #9ca3af;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .receipt-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #f9fafb;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 28px;
+        }
+
+        .receipt-table tr {
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .receipt-table tr:last-child {
+            border-bottom: none;
+        }
+
+        .receipt-table td {
+            padding: 12px 16px;
+            font-size: 13px;
+        }
+
+        .td-label {
+            color: #9ca3af;
+            font-weight: 400;
+            width: 40%;
+        }
+
+        .td-value {
+            color: #1f2937;
+            font-weight: 500;
+            text-align: right;
+        }
+
+        .td-value.mono {
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            color: #374151;
+        }
+
+        .td-value.status-ok {
+            color: #16a34a;
+            font-weight: 600;
+        }
+
+        /* ── CTA button ── */
+        .cta-block {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
+            color: #ffffff !important;
+            text-decoration: none;
+            padding: 14px 36px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+        }
+
+        /* ── Footer ── */
+        .footer {
+            background: #f9fafb;
+            border-top: 1px solid #f3f4f6;
+            padding: 20px 40px;
+            text-align: center;
+        }
+
+        .footer p {
+            margin: 0;
+            font-size: 12px;
+            color: #9ca3af;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="email-wrapper">
+
+        <!-- Header -->
+        <div class="header">
+            <div class="header-icon">
+                <svg class="checkmark" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+            </div>
+            <h1>Paiement confirmé !</h1>
+            <p>Votre transaction a été traitée avec succès.</p>
+        </div>
+
+        <!-- Amount -->
+        <div class="amount-section">
+            <div class="amount-label">Montant payé</div>
+            <div class="amount-value">
+                {{amount}}<span class="amount-currency">{{currency}}</span>
+            </div>
+        </div>
+
+        <!-- Body -->
+        <div class="body">
+            <p class="greeting">Bonjour {{name}},</p>
+            <p class="intro">
+                Nous vous confirmons que votre paiement pour <strong>{{itemName}}</strong>
+                a bien été reçu et traité. Vous trouverez ci-dessous le détail de votre reçu.
+            </p>
+
+            <div class="receipt-title">Détail de la transaction</div>
+            <table class="receipt-table">
+                <tr>
+                    <td class="td-label">Description</td>
+                    <td class="td-value">{{itemName}}</td>
+                </tr>
+                <tr>
+                    <td class="td-label">Montant</td>
+                    <td class="td-value">{{amount}} {{currency}}</td>
+                </tr>
+                <tr>
+                    <td class="td-label">Méthode</td>
+                    <td class="td-value">Carte bancaire (SATIM)</td>
+                </tr>
+                <tr>
+                    <td class="td-label">Référence</td>
+                    <td class="td-value mono">{{transactionId}}</td>
+                </tr>
+                <tr>
+                    <td class="td-label">Statut</td>
+                    <td class="td-value status-ok">✓ Approuvé</td>
+                </tr>
+            </table>
+
+            <div class="cta-block">
+                <a href="{{frontendUrl}}" class="cta-button">Accéder à ma plateforme</a>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>Conservez cet email comme preuve de paiement.<br>
+                © 2025 E-Learning Platform. Tous droits réservés.</p>
+        </div>
+
+    </div>
+</body>
+
+</html>

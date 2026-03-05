@@ -4,7 +4,9 @@ export const couponValidationSchema = Joi.object({
   code: Joi.string().required(),
   name: Joi.string().required(),
   type: Joi.string().valid("percentage", "amount").required(),
-  discountValue: Joi.number().required(),
+  discountValue: Joi.number().positive().required(),
+  maxDiscountAmount: Joi.number().positive().optional().allow(null),
+  minOrderAmount: Joi.number().positive().optional().allow(null),
   usageLimit: Joi.number().integer().min(1).required(),
   startDate: Joi.date().required(),
   expiryDate: Joi.date()
@@ -27,4 +29,14 @@ export const couponValidationSchema = Joi.object({
       otherwise: Joi.required(),
     })
     .allow(null),
+});
+
+export const validateCouponSchema = Joi.object({
+  couponCode: Joi.string().required(),
+  amount: Joi.number().positive().precision(2).required(),
+  resourceType: Joi.string()
+    .valid("group", "live", "prerecorded", "one-on-one")
+    .optional()
+    .allow(null, ""),
+  resourceId: Joi.string().optional().allow(null, ""),
 });

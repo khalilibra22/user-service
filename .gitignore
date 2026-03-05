@@ -3,3 +3,4 @@ dist
 coverage
 src/uploads
 .env
+docs

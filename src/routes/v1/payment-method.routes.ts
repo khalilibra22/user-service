@@ -12,6 +12,7 @@ const userController = new UserController();
 router.post(
   "/",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.requireSelf,
   AuthMiddleware.authorize("payment_methods", "create"),
   ValidationMiddleware.validate(paymentMethodValidationSchema),
   userController.addPaymentMethod
@@ -21,6 +22,7 @@ router.post(
 router.put(
   "/:paymentMethodId",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.requireSelf,
   AuthMiddleware.authorize("payment_methods", "update"),
   ValidationMiddleware.validate(paymentMethodValidationSchema),
   userController.updatePaymentMethod
@@ -30,6 +32,7 @@ router.put(
 router.get(
   "/",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.requireSelfOrAdmin,
   AuthMiddleware.authorize("payment_methods", "list"),
   userController.getPaymentMethodsByUserId
 );
@@ -38,6 +41,7 @@ router.get(
 router.delete(
   "/:paymentMethodId",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.requireSelf,
   AuthMiddleware.authorize("payment_methods", "delete"),
   userController.deletePaymentMethod
 );

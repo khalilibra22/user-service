@@ -32,6 +32,7 @@ router.use("/:id/coupons", couponRouter);
 router.put(
   "/:id",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.requireSelf,
   AuthMiddleware.authorize("users", "update"),
   ValidationMiddleware.validate(updateUserValidationSchema),
   userController.updateUser
@@ -40,6 +41,7 @@ router.put(
 router.get(
   "/:id/details",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.requireSelfOrAdmin,
   AuthMiddleware.authorize("users", "read"),
   userController.getUserById
 );
@@ -48,6 +50,7 @@ router.get(
 router.get(
   "/:id/plans",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.requireSelfOrAdmin,
   AuthMiddleware.authorize("subscriptions", "view"),
   userController.getUserPlan
 );
@@ -94,6 +97,7 @@ router.post(
 router.patch(
   "/:id/phone-number",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.requireSelf,
   AuthMiddleware.authorize("users", "update"),
   ValidationMiddleware.validate(updateUserPhoneNumberValidationSchema),
   userController.updateUserPhoneNumber
@@ -103,6 +107,7 @@ router.patch(
 router.delete(
   "/:id",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.requireSelfOrAdmin,
   AuthMiddleware.authorize("users", "delete"),
   userController.deleteUser
 );
@@ -111,6 +116,7 @@ router.delete(
 router.patch(
   "/:id/password",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.requireSelf,
   AuthMiddleware.authorize("users", "update"),
   ValidationMiddleware.validate(changePasswordSchema),
   userController.updateUserPassword
@@ -120,6 +126,7 @@ router.patch(
 router.patch(
   "/:id/email",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.requireSelf,
   AuthMiddleware.authorize("users", "update"),
   ValidationMiddleware.validate(changeEmailSchema),
   userController.updateUserEmail
@@ -129,6 +136,7 @@ router.patch(
 router.patch(
   "/:id/contact-info",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.requireSelf,
   AuthMiddleware.authorize("users", "update"),
   ValidationMiddleware.validate(contactInfoValidationSchema),
   userController.updateUserContactInfo
@@ -138,6 +146,7 @@ router.patch(
 router.get(
   "/:id/contact-info",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.requireSelfOrAdmin,
   AuthMiddleware.authorize("users", "read"),
   userController.getUserContactInfo
 );
@@ -147,6 +156,7 @@ router.get("/:id/minimal", userController.getUserMinimalInfo);
 router.get(
   "/:id/switch-role",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.requireSelfOrAdmin,
   AuthMiddleware.authorize("users", "update"),
   userController.switchUserRole
 );
@@ -155,6 +165,7 @@ router.get(
 router.patch(
   "/:id/location",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.requireSelf,
   AuthMiddleware.authorize("users", "update"),
   ValidationMiddleware.validate(updateUserLocationValidationSchema),
   userController.updateUserLocation
