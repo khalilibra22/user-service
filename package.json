@@ -4,7 +4,7 @@
   "description": "E-learning Platform User Service with gRPC support",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && node -e \"require('fs').cpSync('src/templates', 'dist/src/templates', {recursive: true})\"",
     "start": "node dist/index.js",
     "dev": "nodemon index.ts --exec ts-node index.ts",
     "prestart": "npm run build",
