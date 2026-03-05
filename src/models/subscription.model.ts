@@ -22,10 +22,10 @@ export class SubscriptionModel {
   @PrimaryGeneratedColumn()
   id?: number;
 
-  @Column({ name: "start_date", type: "timestamp" })
+  @Column({ name: "start_date", type: "timestamp", nullable: true })
   startDate?: Date;
 
-  @Column({ name: "end_date", type: "timestamp" })
+  @Column({ name: "end_date", type: "timestamp", nullable: true })
   endDate?: Date;
 
   @Column({ default: "pending_payment" })
