@@ -47,7 +47,7 @@ export class PaymentService {
         userId: string;
         amount: number;
         method: PaymentMethod;
-        referenceType: "SUBSCRIPTION" | "COURSE_ENROLLMENT" | "ONE_ON_ONE_ENROLLMENT";
+        referenceType: "SUBSCRIPTION" | "COURSE_ENROLLMENT" | "ONE_ON_ONE_ENROLLMENT" | "WALLET_TOPUP";
         referenceId: string;
         description: string;
         metadata?: any;
@@ -96,6 +96,10 @@ export class PaymentService {
         transaction.metadata = couponMeta
             ? { ...metadata, coupon: couponMeta }
             : metadata;
+
+        if (method === PaymentMethod.WALLET && referenceType === "WALLET_TOPUP") {
+            throw new Error("Cannot top-up wallet using wallet balance");
+        }
 
         // Determine Provider based on Method
         if (method === PaymentMethod.SATIM) {
@@ -244,6 +248,38 @@ export class PaymentService {
                 await subscriptionService.deactivateSubscription(transaction.referenceId);
             }
 
+        } else if (transaction.referenceType === "WALLET_TOPUP") {
+            if (isSuccess) {
+                try {
+                    await AppDataSource.transaction(async (transactionalEntityManager) => {
+                        const transUserId = transaction.user?.id || (transaction as any).userId;
+                        if (!transUserId) throw new Error("Transaction user ID is missing");
+
+                        let wallet = await transactionalEntityManager.findOne(UserWalletModel, { where: { userId: transUserId } });
+                        if (!wallet) {
+                            wallet = new UserWalletModel();
+                            wallet.userId = transUserId;
+                            wallet.totalEarned = 0;
+                            wallet.currentBalance = 0;
+                            wallet.frozenBalance = 0;
+                        }
+
+                        wallet.currentBalance = Number(wallet.currentBalance) + Number(transaction.amount);
+                        await transactionalEntityManager.save(UserWalletModel, wallet);
+
+                        const walletTx = new WalletTransactionModel();
+                        walletTx.userId = transUserId;
+                        walletTx.amount = transaction.amount;
+                        walletTx.type = WalletTransactionType.CREDIT;
+                        walletTx.purpose = WalletTransactionPurpose.TOPUP;
+                        walletTx.metadata = { transactionId: transaction.id, referenceType: transaction.referenceType, referenceId: transaction.referenceId };
+                        await transactionalEntityManager.save(WalletTransactionModel, walletTx);
+                    });
+                    log.info({ transactionId: transaction.id }, "Wallet top-up successful");
+                } catch (error: any) {
+                    log.error({ err: error, transactionId: transaction.id }, "Failed to process wallet top-up");
+                }
+            }
         } else if (transaction.referenceType === "COURSE_ENROLLMENT" || transaction.referenceType === "ONE_ON_ONE_ENROLLMENT") {
             // Handle Earnings if successful
             if (isSuccess && transaction.metadata?.teacherId) {
