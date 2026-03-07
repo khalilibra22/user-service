@@ -18,6 +18,7 @@ export enum WalletTransactionPurpose {
     PURCHASE = "purchase",
     WITHDRAWAL = "withdrawal",
     EARNING_RELEASE = "earning_release",
+    TOPUP = "topup",
 }
 
 @Entity("wallet_transactions")

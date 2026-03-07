@@ -119,6 +119,7 @@ export class PaymentController {
                 COURSE_ENROLLMENT: "Inscription au cours",
                 ONE_ON_ONE_ENROLLMENT: "Session individuelle",
                 SUBSCRIPTION: "Abonnement",
+                WALLET_TOPUP: "Recharge de portefeuille",
             };
 
             const receiptData = {
