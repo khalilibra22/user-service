@@ -302,7 +302,7 @@ export class PaymentService {
                 fs.appendFileSync(debugPath, `[${new Date().toISOString()}] Attempting webhook: ${courseServiceUrl} payload: ${JSON.stringify(payload)} metadata: ${JSON.stringify(transaction.metadata)}\n`);
                 log.info({ courseServiceUrl, transactionId: transaction.id }, "Notifying Course Service via webhook");
 
-                const response = await axios.post(`${courseServiceUrl}/v1/payments/webhook`, payload, {
+                const response = await axios.post(`${courseServiceUrl}/v1/payment-webhooks/webhook`, payload, {
                     headers: {
                         "x-internal-api-key": process.env.INBOUND_API_KEY || "12345"
                     }
