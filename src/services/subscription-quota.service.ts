@@ -31,11 +31,17 @@ export class SubscriptionQuotaService {
     async getQuotaForUser(userId: string): Promise<QuotaResponse> {
         try {
             // Find the user's current active subscription with plan
-            const subscription = await this.subscriptionRepo.findOne({
+            let subscription: SubscriptionModel | null = await this.subscriptionRepo.findOne({
                 where: { user: { id: userId }, status: "active" },
                 relations: ["plan"],
                 order: { createdAt: "DESC" },
             });
+
+            if (!subscription) {
+                const { SubscriptionService } = await import("./subscription.service");
+                const subscriptionService = new SubscriptionService();
+                subscription = await subscriptionService.assignDefaultFreePlan(userId);
+            }
 
             const NO_SUBSCRIPTION: QuotaResponse = {
                 hasActiveSubscription: false,
@@ -56,12 +62,26 @@ export class SubscriptionQuotaService {
             const groupLimit = subscription.plan.groupCourseCount ?? 0;
             const liveLimit = subscription.plan.liveCourseCount ?? 0;
 
+            let sinceDate = subscription.startDate ?? new Date(0);
+            const endDate = subscription.endDate ?? new Date();
+
+            // Safety Buffer: If the DB server cluster has clock drift or is in a different timezone from the Node server without timezone mapping,
+            // the DB's CURRENT_TIMESTAMP (used for courses.createdAt) may lag behind Node's new Date() (used for subscription.startDate).
+            // By picking the earlier of the two for the start bounds, we guarantee we don't accidentally ignore courses created right after subscription.
+            if (subscription.createdAt && subscription.createdAt < sinceDate) {
+                // If they differ by more than a day, it's a renewal, so don't override. But if they are close, use createdAt.
+                const diffHours = Math.abs(sinceDate.getTime() - subscription.createdAt.getTime()) / 3600000;
+                if (diffHours < 24) {
+                    sinceDate = subscription.createdAt;
+                }
+            }
+
             // Count how many group/live courses this teacher has created
             // during the current subscription period by calling course-service
             const { groupCreated, liveCreated } = await this.countCreatedCourses(
                 userId,
-                subscription.startDate ?? new Date(0),
-                subscription.endDate ?? new Date()
+                sinceDate,
+                endDate
             );
 
             return {

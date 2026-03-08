@@ -41,17 +41,29 @@ export class PlanModel {
   @Column({ name: "duration_unit", default: "months" })
   durationUnit?: string; // 'months' | 'years'
 
-  @Column({ name: "one_on_one_course_count", nullable: true })
-  oneOnOneCourseCount?: number;
-
   @Column({ name: "group_course_count", nullable: true })
   groupCourseCount?: number;
 
   @Column({ name: "live_course_count", nullable: true })
   liveCourseCount?: number;
 
-  @Column({ name: "prerecorded_course_count", nullable: true })
-  prerecordedCourseCount?: number;
+  @Column({ name: "one_on_one_fee_percentage", type: "decimal", precision: 5, scale: 2, default: 8 })
+  oneOnOneFeePercentage?: number;
+
+  @Column({ name: "prerecorded_fee_percentage", type: "decimal", precision: 5, scale: 2, default: 8 })
+  prerecordedFeePercentage?: number;
+
+  @Column({ name: "has_pro_badge", default: false })
+  hasProBadge?: boolean;
+
+  @Column({ name: "is_listed_in_distinguished", default: false })
+  isListedInDistinguished?: boolean;
+
+  @Column({ name: "has_search_priority", default: false })
+  hasSearchPriority?: boolean;
+
+  @Column({ name: "has_page_customization", default: false })
+  hasPageCustomization?: boolean;
 
   @OneToMany(() => UserModel, (user) => user.plan)
   users?: UserModel[];

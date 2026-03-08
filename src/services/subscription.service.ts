@@ -404,6 +404,57 @@ export class SubscriptionService {
     }
   }
 
+  /**
+   * Automatically assigns the default free plan to a user if they don't have an active subscription.
+   * Finds the active plan with type='free', creates a subscription for it, and activates it immediately.
+   */
+  async assignDefaultFreePlan(userId: string): Promise<SubscriptionModel | null> {
+    try {
+      const freePlan = await this.planRepo.findOne({ where: { type: "free", isActive: true } });
+      if (!freePlan) {
+        log.warn({ userId }, "Failed to auto-assign free plan: No active free plan exists in the database.");
+        return null;
+      }
+
+      const { UserService } = await import("./user.service");
+      const userService = new UserService();
+      const user = await userService.getUserById(userId);
+      if (!user) {
+        log.error({ userId }, "Failed to auto-assign free plan: User not found.");
+        return null;
+      }
+
+      // Check one more time to avoid duplicates
+      const existingActive = await this.getActiveSubscriptionByUserAndPlan(userId, freePlan.id!);
+      if (existingActive) return existingActive;
+
+      const now = new Date();
+      // Ensure we have a valid duration even if the DB returns null
+      const planDuration = freePlan.duration || 1;
+      const planDurationUnit = freePlan.durationUnit || 'months';
+
+      const newSubscription = this.subscriptionRepo.create({
+        user: user,
+        plan: freePlan,
+        status: "active",
+        startDate: now,
+        endDate: this.addDurationToDate(now, planDuration, planDurationUnit),
+      });
+
+      const saved = await this.subscriptionRepo.save(newSubscription);
+
+      // Update user's current plan
+      user.plan = freePlan;
+      await userService.updateUser(userId, user);
+
+      log.info({ userId, subscriptionId: saved.id }, "Successfully auto-assigned default free plan");
+      return saved;
+    } catch (error) {
+      log.error({ err: error, ctx: { service: 'SubscriptionService', op: 'assignDefaultFreePlan', userId } }, 'Error assigning default free plan');
+      return null;
+    }
+  }
+
   private addDurationToDate(startDate: Date, duration: number = 1, unit: string = 'months'): Date {
     const date = new Date(startDate);
     if (unit === 'days') {

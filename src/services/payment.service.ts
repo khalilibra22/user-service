@@ -16,6 +16,7 @@ import { UserWalletModel } from "../models/user-wallet.model";
 import { EarningModel } from "../models/earning.model";
 import { EarningStatus } from "../enums/earning-status.enum";
 import { SubscriptionModel } from "../models/subscription.model";
+import { PlanModel } from "../models/plan.model";
 import { WalletTransactionModel, WalletTransactionPurpose, WalletTransactionType } from "../models/wallet-transaction.model";
 
 const log = getLogger();
@@ -358,25 +359,28 @@ export class PaymentService {
         const totalAmount = transaction.amount;
         let feePercentage = 0;
 
-        if (courseType === "one_on_one" || courseType === "prerecorded") {
-            feePercentage = 0.08; // 8%
-        } else if (courseType === "live" || courseType === "group") {
-            // Check teacher subscription
-            const subscription = await this.subscriptionRepo.findOne({
-                where: { user: { id: teacherId }, status: "active" },
-                relations: ["plan"]
-            });
+        // Fetch teacher subscription to determine dynamic fees
+        const subscription = await this.subscriptionRepo.findOne({
+            where: { user: { id: teacherId }, status: "active" },
+            relations: ["plan"]
+        });
+        let plan = subscription?.plan;
 
-            // If teacher has no active subscription of 'basic', 'pro', or 'premium', maybe apply a default fee or handle differently
-            // User said: live or group based on subscription ('basic', 'pro', 'premium')
-            // I'll assume 0% fee if they have any of these active subscriptions.
-            if (subscription && ["basic", "pro", "premium"].includes(subscription.plan?.type || "")) {
-                feePercentage = 0;
-            } else {
-                // Default fee for live/group without subscription? User didn't specify. 
-                // I'll assume 8% as well to be safe, or 10%. Let's go with 8% for now.
-                feePercentage = 0.08;
-            }
+        // Fallback to default free plan if teacher has no active subscription
+        if (!plan) {
+            const { SubscriptionService } = await import("./subscription.service");
+            const subscriptionService = new SubscriptionService();
+            const newSubscription = await subscriptionService.assignDefaultFreePlan(teacherId);
+            plan = newSubscription?.plan;
+        }
+
+        if (courseType === "one_on_one") {
+            feePercentage = plan?.oneOnOneFeePercentage !== undefined ? Number(plan.oneOnOneFeePercentage) / 100 : 0.08;
+        } else if (courseType === "prerecorded") {
+            feePercentage = plan?.prerecordedFeePercentage !== undefined ? Number(plan.prerecordedFeePercentage) / 100 : 0.08;
+        } else if (courseType === "live" || courseType === "group") {
+            // Live and Group courses are limited by count quota via subscription, not platform fees
+            feePercentage = 0;
         }
 
         const feeAmount = totalAmount * feePercentage;
