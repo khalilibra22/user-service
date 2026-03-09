@@ -52,7 +52,7 @@ export const permissions: Record<UserRole, Record<Resource, Action[]>> = {
     withdrawals: ["create", "read"],
   },
   [UserRole.STUDENT]: {
-    availabilities: ["read"],
+    availabilities: ["read", "list"],
     coupons: ["read", "use"],
     academic_backgrounds: ["read"],
     users: ["create", "read", "update", "delete"],
