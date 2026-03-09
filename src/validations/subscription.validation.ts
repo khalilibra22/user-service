@@ -9,10 +9,14 @@ export const planSValdationSchema = Joi.object({
   durationUnit: Joi.string()
     .valid("days", "weeks", "months", "years")
     .required(),
-  oneOnOneCourseCount: Joi.number().integer().min(0).required(),
   groupCourseCount: Joi.number().integer().min(0).required(),
   liveCourseCount: Joi.number().integer().min(0).required(),
-  prerecordedCourseCount: Joi.number().integer().min(0).required(),
+  oneOnOneFeePercentage: Joi.number().min(0).max(100).required(),
+  prerecordedFeePercentage: Joi.number().min(0).max(100).required(),
+  hasProBadge: Joi.boolean().required(),
+  isListedInDistinguished: Joi.boolean().required(),
+  hasSearchPriority: Joi.boolean().required(),
+  hasPageCustomization: Joi.boolean().required(),
 });
 
 export const updatePlanValidationSchema = Joi.object({
@@ -22,10 +26,14 @@ export const updatePlanValidationSchema = Joi.object({
   type: Joi.string().valid("free", "pro", "premium"),
   duration: Joi.number().integer().min(1),
   durationUnit: Joi.string().valid("days", "weeks", "months", "years"),
-  oneOnOneCourseCount: Joi.number().integer().min(0),
   groupCourseCount: Joi.number().integer().min(0),
   liveCourseCount: Joi.number().integer().min(0),
-  prerecordedCourseCount: Joi.number().integer().min(0),
+  oneOnOneFeePercentage: Joi.number().min(0).max(100),
+  prerecordedFeePercentage: Joi.number().min(0).max(100),
+  hasProBadge: Joi.boolean(),
+  isListedInDistinguished: Joi.boolean(),
+  hasSearchPriority: Joi.boolean(),
+  hasPageCustomization: Joi.boolean(),
   isActive: Joi.boolean(),
 }).min(1); // At least one field required
 

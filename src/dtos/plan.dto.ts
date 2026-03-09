@@ -26,14 +26,26 @@ export class PlanDto {
   durationUnit?: string; // 'months' | 'years'
 
   @Expose()
-  oneOnOneCourseCount?: number;
-
-  @Expose()
   groupCourseCount?: number;
 
   @Expose()
   liveCourseCount?: number;
 
   @Expose()
-  prerecordedCourseCount?: number;
+  oneOnOneFeePercentage?: number;
+
+  @Expose()
+  prerecordedFeePercentage?: number;
+
+  @Expose()
+  hasProBadge?: boolean;
+
+  @Expose()
+  isListedInDistinguished?: boolean;
+
+  @Expose()
+  hasSearchPriority?: boolean;
+
+  @Expose()
+  hasPageCustomization?: boolean;
 }
