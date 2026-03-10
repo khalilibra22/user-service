@@ -30,6 +30,7 @@ router.get(
 router.get(
   "/:couponId",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.requireSelfOrAdmin,
   AuthMiddleware.authorize("coupons", "read"),
   couponController.getCouponByIdAdmin
 );

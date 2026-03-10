@@ -428,6 +428,16 @@ export class PaymentService {
         });
     }
 
+    /**
+     * Returns the transaction only if it belongs to the given userId.
+     * Used to enforce ownership on receipt submission and manual verification.
+     */
+    async getTransactionByOwner(transactionId: string, userId: string): Promise<TransactionModel | null> {
+        return await this.transactionRepo.findOne({
+            where: { id: transactionId, user: { id: userId } },
+        });
+    }
+
     async getWalletBalance(userId: string): Promise<UserWalletModel | null> {
         return await this.walletRepo.findOne({ where: { userId } });
     }

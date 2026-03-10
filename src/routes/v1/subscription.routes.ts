@@ -55,8 +55,9 @@ router.get(
 
 // User: get all subscriptions for a specific user (self or admin)
 router.get(
-  "/users/:userId",
+  "/users/:id",
   AuthMiddleware.verifyToken,
+  AuthMiddleware.requireSelfOrAdmin,
   AuthMiddleware.authorize("subscriptions", "view"),
   subscriptionController.getUserSubscriptions
 );
