@@ -52,10 +52,7 @@ export class SubscriptionService {
     try {
       return await this.planRepo.findOne({
         where: { id: planId },
-        cache: {
-          id: `plan_${planId}`,
-          milliseconds: 1800000, // 30 minutes
-        },
+        cache: false,
       });
     } catch (error) {
       log.error({ err: error, ctx: { service: 'SubscriptionService', op: 'getPlanById', planId } }, 'Error fetching plan');
@@ -67,10 +64,7 @@ export class SubscriptionService {
     try {
       return await this.planRepo.find({
         where: { isActive: true },
-        cache: {
-          id: 'all_plans',
-          milliseconds: 1800000, // 30 minutes
-        },
+        cache: false,
       });
     } catch (error) {
       log.error({ err: error, ctx: { service: 'SubscriptionService', op: 'getPlans' } }, 'Error fetching plans');
@@ -473,12 +467,9 @@ export class SubscriptionService {
   ): Promise<SubscriptionModel[]> {
     try {
       return await this.subscriptionRepo.find({
-        where: { user: { id: userId }, status: "active" }, // Fixed: was isActive: true (field doesn't exist)
+        where: { user: { id: userId }, status: "active" },
         relations: ["plan"],
-        cache: {
-          id: `active_subscriptions_${userId}`,
-          milliseconds: 300000, // 5 minutes
-        },
+        cache: false,
       });
     } catch (error) {
       log.error({ err: error, ctx: { service: 'SubscriptionService', op: 'getActiveSubscriptionsByUserId', userId } }, 'Error fetching active subscriptions');
@@ -539,10 +530,7 @@ export class SubscriptionService {
       return await this.subscriptionRepo.find({
         where: { status: "active" },
         relations: ["user", "plan"],
-        cache: {
-          id: 'all_active_subscriptions',
-          milliseconds: 120000, // 2 minutes
-        },
+        cache: false,
       });
     } catch (error) {
       log.error({ err: error, ctx: { service: 'SubscriptionService', op: 'getActiveSubscriptions' } }, 'Error fetching active subscriptions');
