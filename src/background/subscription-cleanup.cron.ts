@@ -139,11 +139,27 @@ export const startSubscriptionCleanupCron = () => {
                             logger.warn({ scheduledPlanId: sub.scheduledPlanId, subId: sub.id }, "Scheduled plan not found — expiring subscription without downgrade");
                         }
                     } else if (sub.user) {
-                        // ── No downgrade scheduled — just clear user plan ──
-                        const { UserService } = await import("../services/user.service");
-                        const userService = new UserService();
-                        sub.user.plan = undefined;
-                        await userService.updateUser(sub.user.id!, sub.user);
+                        // ── No downgrade scheduled — fallback to default free plan ──
+                        const { SubscriptionService } = await import("../services/subscription.service");
+                        const subscriptionService = new SubscriptionService();
+                        try {
+                            const freeSubscription = await subscriptionService.assignDefaultFreePlan(sub.user.id!);
+                            if (!freeSubscription) {
+                                // If no free plan was assigned (e.g. none exists), clear the user's plan completely
+                                const { UserService } = await import("../services/user.service");
+                                const userService = new UserService();
+                                sub.user.plan = undefined;
+                                await userService.updateUser(sub.user.id!, sub.user);
+                            } else {
+                                logger.info({ userId: sub.user.id }, "Auto-assigned default free plan upon expiration of active subscription");
+                            }
+                        } catch (assignError) {
+                            logger.error({ err: assignError, userId: sub.user.id }, "Error auto-assigning free plan, falling back to clearing user plan");
+                            const { UserService } = await import("../services/user.service");
+                            const userService = new UserService();
+                            sub.user.plan = undefined;
+                            await userService.updateUser(sub.user.id!, sub.user);
+                        }
                     }
 
                     // Mark current subscription as inactive

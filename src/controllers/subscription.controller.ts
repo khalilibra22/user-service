@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { UserService } from "../services/user.service";
 import { SubscriptionService } from "../services/subscription.service";
-import { getDurationInMonths } from "../utils";
+
 import { plainToInstance } from "class-transformer";
 import { PlanDto } from "../dtos/plan.dto";
 import { SubscriptionDto } from "../dtos/subscription.dto";
@@ -86,7 +86,7 @@ export class SubscriptionController {
         return;
       }
 
-      const isFree = !plan.price || plan.price === 0;
+      const isFree = !plan.price || Number(plan.price) === 0;
 
       const subscriptionBody = {
         // startDate and endDate are set at activation, not creation
@@ -95,12 +95,12 @@ export class SubscriptionController {
         status: isFree ? "active" : "pending_payment"
       };
 
-      // For free plans, set dates immediately since there's no payment step
       if (isFree) {
-        const durationInMonths = getDurationInMonths(plan.duration, plan.durationUnit);
         (subscriptionBody as any).startDate = new Date();
-        (subscriptionBody as any).endDate = new Date(
-          new Date().setMonth(new Date().getMonth() + durationInMonths)
+        (subscriptionBody as any).endDate = this.subscriptionService.addDurationToDate(
+          new Date(),
+          plan.duration,
+          plan.durationUnit
         );
       }
 
@@ -186,7 +186,7 @@ export class SubscriptionController {
 
       const { newSubscription, plan, renewsFrom } = await this.subscriptionService.renewSubscription(userId);
 
-      const isFree = !plan.price || plan.price === 0;
+      const isFree = !plan.price || Number(plan.price) === 0;
 
       if (isFree) {
         // Free plan: just activate immediately

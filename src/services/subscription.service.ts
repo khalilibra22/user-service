@@ -465,10 +465,12 @@ export class SubscriptionService {
     }
   }
 
-  private addDurationToDate(startDate: Date, duration: number = 1, unit: string = 'months'): Date {
+  public addDurationToDate(startDate: Date, duration: number = 1, unit: string = 'months'): Date {
     const date = new Date(startDate);
     if (unit === 'days') {
       date.setDate(date.getDate() + duration);
+    } else if (unit === 'weeks') {
+      date.setDate(date.getDate() + (duration * 7));
     } else if (unit === 'years') {
       date.setFullYear(date.getFullYear() + duration);
     } else {
@@ -523,12 +525,25 @@ export class SubscriptionService {
       if (expiredSubscriptions.length > 0) {
         for (const sub of expiredSubscriptions) {
           sub.status = "inactive";
-          // Clear user plan on expiry
+          // Try to assigns default free plan on expiry instead of just clearing
           if (sub.user) {
-            const { UserService } = await import("./user.service");
-            const userService = new UserService();
-            sub.user.plan = undefined;
-            await userService.updateUser(sub.user.id, sub.user);
+            try {
+              const freeSubscription = await this.assignDefaultFreePlan(sub.user.id!);
+              if (!freeSubscription) {
+                 const { UserService } = await import("./user.service");
+                 const userService = new UserService();
+                 sub.user.plan = undefined;
+                 await userService.updateUser(sub.user.id, sub.user);
+              } else {
+                 log.info({ userId: sub.user.id }, "Auto-assigned default free plan upon expiration of active subscription");
+              }
+            } catch (assignError) {
+              log.error({ err: assignError, userId: sub.user.id }, "Error auto-assigning free plan, falling back to clearing user plan");
+              const { UserService } = await import("./user.service");
+              const userService = new UserService();
+              sub.user.plan = undefined;
+              await userService.updateUser(sub.user.id, sub.user);
+            }
           }
         }
         await this.subscriptionRepo.save(expiredSubscriptions);
