@@ -50,18 +50,18 @@ export const AppDataSource = new DataSource({
     WalletTransactionModel
   ],
   synchronize: config.env === "development",
-  // Add cache configuration
-  cache: config.redis.enabled
-    ? {
-      type: "ioredis",
-      options: {
-        host: config.redis.host,
-        port: config.redis.port,
-        password: config.redis.password,
-      },
-      duration: config.redis.cacheDuration,
-    }
-    : false,
+  // Cache is ENABLED — Redis connection is always active.
+  // Cache is only used on specific queries (search endpoints).
+  // All other queries explicitly set cache: false to avoid stale data.
+  cache: {
+    type: "ioredis",
+    options: {
+      host: config.redis.host,
+      port: config.redis.port,
+      password: config.redis.password,
+    },
+    duration: config.redis.cacheDuration,
+  },
 });
 
 import { getLogger } from "../utils/logger";

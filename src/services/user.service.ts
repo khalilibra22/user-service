@@ -48,10 +48,7 @@ export class UserService {
           id: id,
         },
         relations: ["settings"],
-        cache: {
-          id: `user_${id}`,
-          milliseconds: 300000, // 5 minutes
-        },
+        cache: false,
       });
     } catch (error) {
       log.error({ err: error, ctx: { service: 'UserService', op: 'getUserById', userId: id } }, 'Error fetching user');
@@ -117,10 +114,7 @@ export class UserService {
           id: id,
         },
         relations: ["permissions"],
-        cache: {
-          id: `user_permissions_${id}`,
-          milliseconds: 600000, // 10 minutes
-        },
+        cache: false,
       });
     } catch (error) {
       log.error({ err: error, ctx: { service: 'UserService', op: 'getPermissions', userId: id } }, 'Error fetching user permissions');
@@ -145,10 +139,7 @@ export class UserService {
           id: id,
         },
         relations: ["plan"],
-        cache: {
-          id: `user_plan_${id}`,
-          milliseconds: 900000, // 15 minutes
-        },
+        cache: false,
       });
     } catch (error) {
       log.error({ err: error, ctx: { service: 'UserService', op: 'getUserPlan', userId: id } }, 'Error fetching user plan');
@@ -192,10 +183,7 @@ export class UserService {
             id: userId,
           },
         },
-        cache: {
-          id: `payment_methods_${userId}`,
-          milliseconds: 180000, // 3 minutes
-        },
+        cache: false,
       });
     } catch (error) {
       log.error({ err: error, ctx: { service: 'UserService', op: 'getPaymentMethodsByUserId', userId } }, 'Error fetching payment methods');
@@ -212,10 +200,7 @@ export class UserService {
         where: {
           id: id,
         },
-        cache: {
-          id: `payment_method_${id}`,
-          milliseconds: 180000, // 3 minutes
-        },
+        cache: false,
       });
     } catch (error) {
       log.error({ err: error, ctx: { service: 'UserService', op: 'getPaymentMethodById', paymentMethodId: id } }, 'Error fetching payment method');
@@ -236,10 +221,7 @@ export class UserService {
             id: userId,
           },
         },
-        cache: {
-          id: `payment_method_${type}_${userId}`,
-          milliseconds: 180000, // 3 minutes
-        },
+        cache: false,
       });
     } catch (error) {
       log.error({ err: error, ctx: { service: 'UserService', op: 'getPaymentMethodByTypeAndUserId', type, userId } }, 'Error fetching payment method by type and user ID');
@@ -264,10 +246,7 @@ export class UserService {
         where: {
           googleId: googleId,
         },
-        cache: {
-          id: `user_google_${googleId}`,
-          milliseconds: 300000, // 5 minutes
-        },
+        cache: false,
       });
     } catch (error) {
       log.error({ err: error, ctx: { service: 'UserService', op: 'getUserByGoogleId', googleId } }, 'Error fetching user by Google ID');
@@ -287,10 +266,7 @@ export class UserService {
         },
         skip: (page - 1) * limit,
         take: limit,
-        cache: {
-          id: `users_${role}_page_${page}_limit_${limit}`,
-          milliseconds: 120000, // 2 minutes
-        },
+        cache: false,
       });
       return { data, total };
     } catch (error) {
@@ -448,9 +424,10 @@ export class UserService {
 
       query.skip((page - 1) * limit).take(limit);
 
-      // Create a deterministic cache key based on params
-      const cacheKey = `search_teachers_${JSON.stringify(params)}`;
-      query.cache(cacheKey, 120000);
+      // Deterministic cache key — each unique combination of filters gets
+      // its own Redis entry. TTL = 60 seconds (fresh enough, fast enough).
+      const cacheKey = `search:teachers:${JSON.stringify(params)}`;
+      query.cache(cacheKey, 60000);
 
       const [data, total] = await query.getManyAndCount();
 
@@ -543,7 +520,9 @@ export class UserService {
         .skip(skip)
         .take(limit);
 
-      const [users, total] = await query.getManyAndCount();
+      const [users, total] = await query
+        .cache(`search:nearby:${latitude}:${longitude}:${radiusKm}:${limit}:${page}`, 30000)
+        .getManyAndCount();
 
       return { users, total };
     } catch (error) {
