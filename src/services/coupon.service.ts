@@ -42,10 +42,7 @@ export class CouponService {
     try {
       return await this.couponRepo.findOne({
         where: { id },
-        cache: {
-          id: `coupon_${id}`,
-          milliseconds: 900000, // 15 minutes
-        },
+        cache: false,
       });
     } catch (error) {
       log.error({ err: error, ctx: { service: "CouponService", op: "getCouponById", couponId: id } }, "Error fetching coupon");
@@ -57,10 +54,7 @@ export class CouponService {
     try {
       return await this.couponRepo.findOne({
         where: { code },
-        cache: {
-          id: `coupon_code_${code}`,
-          milliseconds: 300000, // 5 minutes
-        },
+        cache: false,
       });
     } catch (error) {
       log.error({ err: error, ctx: { service: "CouponService", op: "getCouponByCode", code } }, "Error fetching coupon by code");
@@ -71,10 +65,7 @@ export class CouponService {
   async getAllCoupons(): Promise<CouponModel[]> {
     try {
       return await this.couponRepo.find({
-        cache: {
-          id: "all_coupons",
-          milliseconds: 900000, // 15 minutes
-        },
+        cache: false,
       });
     } catch (error) {
       log.error({ err: error, ctx: { service: "CouponService", op: "getAllCoupons" } }, "Error fetching coupons");
@@ -95,10 +86,7 @@ export class CouponService {
     try {
       return await this.couponRepo.find({
         where: { user: { id: userId } },
-        cache: {
-          id: `user_coupons_${userId}`,
-          milliseconds: 300000, // 5 minutes
-        },
+        cache: false,
       });
     } catch (error) {
       log.error({ err: error, ctx: { service: "CouponService", op: "getUserCoupons", userId } }, "Error fetching user coupons");
@@ -110,10 +98,7 @@ export class CouponService {
     try {
       const coupon = await this.couponRepo.findOne({
         where: { code: couponCode, user: { id: userId } },
-        cache: {
-          id: `user_coupon_check_${userId}_${couponCode}`,
-          milliseconds: 180000, // 3 minutes
-        },
+        cache: false,
       });
       return !!coupon;
     } catch (error) {

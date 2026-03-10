@@ -17,7 +17,10 @@ export class SubscriptionService {
 
   async createPlan(plan: PlanModel): Promise<PlanModel> {
     try {
-      return await this.planRepo.save(plan);
+      const saved = await this.planRepo.save(plan);
+      // Invalidate the plan list cache so new plan is visible immediately
+      await AppDataSource.queryResultCache?.remove(['all_plans']);
+      return saved;
     } catch (error) {
       log.error({ err: error, ctx: { service: 'SubscriptionService', op: 'createPlan' } }, 'Error creating plan');
       throw new Error("Error creating plan");
@@ -29,7 +32,10 @@ export class SubscriptionService {
       const plan = await this.planRepo.findOne({ where: { id: planId } });
       if (!plan) throw new Error("Plan not found");
       Object.assign(plan, data);
-      return await this.planRepo.save(plan);
+      const saved = await this.planRepo.save(plan);
+      // Bust both the list and the individual plan cache
+      await AppDataSource.queryResultCache?.remove(['all_plans', `plan_${planId}`]);
+      return saved;
     } catch (error) {
       log.error({ err: error, ctx: { service: 'SubscriptionService', op: 'updatePlan', planId } }, 'Error updating plan');
       throw error;
@@ -41,7 +47,9 @@ export class SubscriptionService {
       const plan = await this.planRepo.findOne({ where: { id: planId } });
       if (!plan) throw new Error("Plan not found");
       plan.isActive = false;
-      return await this.planRepo.save(plan);
+      const saved = await this.planRepo.save(plan);
+      await AppDataSource.queryResultCache?.remove(['all_plans', `plan_${planId}`]);
+      return saved;
     } catch (error) {
       log.error({ err: error, ctx: { service: 'SubscriptionService', op: 'deactivatePlan', planId } }, 'Error deactivating plan');
       throw error;
@@ -52,6 +60,7 @@ export class SubscriptionService {
     try {
       return await this.planRepo.findOne({
         where: { id: planId },
+        // ✅ CACHED — admin-only writes. Invalidated on updatePlan / deactivatePlan.
         cache: {
           id: `plan_${planId}`,
           milliseconds: 1800000, // 30 minutes
@@ -67,6 +76,7 @@ export class SubscriptionService {
     try {
       return await this.planRepo.find({
         where: { isActive: true },
+        // ✅ CACHED — admin-only writes. Invalidated on createPlan / updatePlan / deactivatePlan.
         cache: {
           id: 'all_plans',
           milliseconds: 1800000, // 30 minutes
@@ -455,10 +465,12 @@ export class SubscriptionService {
     }
   }
 
-  private addDurationToDate(startDate: Date, duration: number = 1, unit: string = 'months'): Date {
+  public addDurationToDate(startDate: Date, duration: number = 1, unit: string = 'months'): Date {
     const date = new Date(startDate);
     if (unit === 'days') {
       date.setDate(date.getDate() + duration);
+    } else if (unit === 'weeks') {
+      date.setDate(date.getDate() + (duration * 7));
     } else if (unit === 'years') {
       date.setFullYear(date.getFullYear() + duration);
     } else {
@@ -473,12 +485,9 @@ export class SubscriptionService {
   ): Promise<SubscriptionModel[]> {
     try {
       return await this.subscriptionRepo.find({
-        where: { user: { id: userId }, status: "active" }, // Fixed: was isActive: true (field doesn't exist)
+        where: { user: { id: userId }, status: "active" },
         relations: ["plan"],
-        cache: {
-          id: `active_subscriptions_${userId}`,
-          milliseconds: 300000, // 5 minutes
-        },
+        cache: false,
       });
     } catch (error) {
       log.error({ err: error, ctx: { service: 'SubscriptionService', op: 'getActiveSubscriptionsByUserId', userId } }, 'Error fetching active subscriptions');
@@ -516,12 +525,25 @@ export class SubscriptionService {
       if (expiredSubscriptions.length > 0) {
         for (const sub of expiredSubscriptions) {
           sub.status = "inactive";
-          // Clear user plan on expiry
+          // Try to assigns default free plan on expiry instead of just clearing
           if (sub.user) {
-            const { UserService } = await import("./user.service");
-            const userService = new UserService();
-            sub.user.plan = undefined;
-            await userService.updateUser(sub.user.id, sub.user);
+            try {
+              const freeSubscription = await this.assignDefaultFreePlan(sub.user.id!);
+              if (!freeSubscription) {
+                 const { UserService } = await import("./user.service");
+                 const userService = new UserService();
+                 sub.user.plan = undefined;
+                 await userService.updateUser(sub.user.id, sub.user);
+              } else {
+                 log.info({ userId: sub.user.id }, "Auto-assigned default free plan upon expiration of active subscription");
+              }
+            } catch (assignError) {
+              log.error({ err: assignError, userId: sub.user.id }, "Error auto-assigning free plan, falling back to clearing user plan");
+              const { UserService } = await import("./user.service");
+              const userService = new UserService();
+              sub.user.plan = undefined;
+              await userService.updateUser(sub.user.id, sub.user);
+            }
           }
         }
         await this.subscriptionRepo.save(expiredSubscriptions);
@@ -539,10 +561,7 @@ export class SubscriptionService {
       return await this.subscriptionRepo.find({
         where: { status: "active" },
         relations: ["user", "plan"],
-        cache: {
-          id: 'all_active_subscriptions',
-          milliseconds: 120000, // 2 minutes
-        },
+        cache: false,
       });
     } catch (error) {
       log.error({ err: error, ctx: { service: 'SubscriptionService', op: 'getActiveSubscriptions' } }, 'Error fetching active subscriptions');

@@ -121,10 +121,7 @@ export class AvailabilityService {
             id: teacherId,
           },
         },
-        cache: {
-          id: `teacher_availability_${teacherId}`,
-          milliseconds: 120000, // 2 minutes
-        },
+        cache: false,
       });
 
       return await Promise.all(
@@ -147,10 +144,7 @@ export class AvailabilityService {
             id: teacherId,
           },
         },
-        cache: {
-          id: `teacher_availability_exceptions_${teacherId}`,
-          milliseconds: 120000, // 2 minutes
-        },
+        cache: false,
       });
     } catch (error) {
       log.error({ err: error, ctx: { service: 'AvailabilityService', op: 'getTeacherAvailabilityExceptions', teacherId } }, 'Error fetching teachers availability exceptions');

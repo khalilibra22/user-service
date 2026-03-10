@@ -8,16 +8,19 @@ import { MinimalUserDto } from "../dtos/minimal-user.dto";
 import { getLogger } from "../utils/logger";
 import { ChatService } from "../services/chat.service";
 import { NotificationService } from "../services/notification.service";
+import { SubscriptionService } from "../services/subscription.service";
 
 
 export class AuthController {
   private userService: UserService;
   private chatService: ChatService;
   private notificationService: NotificationService;
+  private subscriptionService: SubscriptionService;
   constructor() {
     this.userService = new UserService();
     this.chatService = new ChatService();
     this.notificationService = new NotificationService();
+    this.subscriptionService = new SubscriptionService();
   }
   register = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -40,7 +43,23 @@ export class AuthController {
       const createdUser = await this.userService.createUser(req.body);
       const token = await AuthMiddleware.generateToken(createdUser);
 
-      const verificationUrl = `${process.env.BASE_URL || 'http://localhost:5000'}/auth/verify-email?token=${token}`;
+      // --- Auto-assign Free Plan to Teachers and Academies ---
+      if (
+        createdUser.id &&
+        (createdUser.role === UserRole.TEACHER || createdUser.role === UserRole.ACADEMY)
+      ) {
+        try {
+          await this.subscriptionService.assignDefaultFreePlan(createdUser.id);
+        } catch (subError) {
+          (req.log || getLogger()).error(
+            { err: subError, userId: createdUser.id },
+            "Failed to auto-assign free plan during registration"
+          );
+          // Non-blocking: we still complete registration even if assigning the plan fails
+        }
+      }
+
+      const verificationUrl = `${process.env.BASE_URL || 'http://localhost:5000'}/v1/auth/verify-email?token=${token}`;
       void this.notificationService.sendEmailVerification(createdUser.email ?? email, createdUser.fullname ?? 'Utilisateur', verificationUrl);
 
       let userDto;

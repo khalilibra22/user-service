@@ -61,6 +61,13 @@ export class PaymentController {
             const { transactionId } = req.params;
             const { receiptUrl } = req.body;
 
+            // Ownership check — only the transaction owner can submit a receipt
+            const existing = await this.paymentService.getTransactionByOwner(transactionId, res.locals.user.id);
+            if (!existing) {
+                res.status(403).json({ error: "Forbidden: this transaction does not belong to you" });
+                return;
+            }
+
             const transaction = await this.paymentService.submitReceipt(transactionId, receiptUrl);
             res.status(200).json(transaction);
         } catch (error: any) {
@@ -73,6 +80,14 @@ export class PaymentController {
     verifyPayment = async (req: Request, res: Response): Promise<void> => {
         try {
             const { transactionId } = req.params;
+
+            // Ownership check — only the transaction owner can trigger verify
+            const existing = await this.paymentService.getTransactionByOwner(transactionId, res.locals.user.id);
+            if (!existing) {
+                res.status(403).json({ error: "Forbidden: this transaction does not belong to you" });
+                return;
+            }
+
             const status = await this.paymentService.verifySatimTransaction(transactionId);
             res.status(200).json({ status, message: `Payment status: ${status}` });
         } catch (error: any) {
