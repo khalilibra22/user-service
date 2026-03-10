@@ -17,7 +17,10 @@ export class SubscriptionService {
 
   async createPlan(plan: PlanModel): Promise<PlanModel> {
     try {
-      return await this.planRepo.save(plan);
+      const saved = await this.planRepo.save(plan);
+      // Invalidate the plan list cache so new plan is visible immediately
+      await AppDataSource.queryResultCache?.remove(['all_plans']);
+      return saved;
     } catch (error) {
       log.error({ err: error, ctx: { service: 'SubscriptionService', op: 'createPlan' } }, 'Error creating plan');
       throw new Error("Error creating plan");
@@ -29,7 +32,10 @@ export class SubscriptionService {
       const plan = await this.planRepo.findOne({ where: { id: planId } });
       if (!plan) throw new Error("Plan not found");
       Object.assign(plan, data);
-      return await this.planRepo.save(plan);
+      const saved = await this.planRepo.save(plan);
+      // Bust both the list and the individual plan cache
+      await AppDataSource.queryResultCache?.remove(['all_plans', `plan_${planId}`]);
+      return saved;
     } catch (error) {
       log.error({ err: error, ctx: { service: 'SubscriptionService', op: 'updatePlan', planId } }, 'Error updating plan');
       throw error;
@@ -41,7 +47,9 @@ export class SubscriptionService {
       const plan = await this.planRepo.findOne({ where: { id: planId } });
       if (!plan) throw new Error("Plan not found");
       plan.isActive = false;
-      return await this.planRepo.save(plan);
+      const saved = await this.planRepo.save(plan);
+      await AppDataSource.queryResultCache?.remove(['all_plans', `plan_${planId}`]);
+      return saved;
     } catch (error) {
       log.error({ err: error, ctx: { service: 'SubscriptionService', op: 'deactivatePlan', planId } }, 'Error deactivating plan');
       throw error;
@@ -52,7 +60,11 @@ export class SubscriptionService {
     try {
       return await this.planRepo.findOne({
         where: { id: planId },
-        cache: false,
+        // ✅ CACHED — admin-only writes. Invalidated on updatePlan / deactivatePlan.
+        cache: {
+          id: `plan_${planId}`,
+          milliseconds: 1800000, // 30 minutes
+        },
       });
     } catch (error) {
       log.error({ err: error, ctx: { service: 'SubscriptionService', op: 'getPlanById', planId } }, 'Error fetching plan');
@@ -64,7 +76,11 @@ export class SubscriptionService {
     try {
       return await this.planRepo.find({
         where: { isActive: true },
-        cache: false,
+        // ✅ CACHED — admin-only writes. Invalidated on createPlan / updatePlan / deactivatePlan.
+        cache: {
+          id: 'all_plans',
+          milliseconds: 1800000, // 30 minutes
+        },
       });
     } catch (error) {
       log.error({ err: error, ctx: { service: 'SubscriptionService', op: 'getPlans' } }, 'Error fetching plans');

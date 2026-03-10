@@ -64,7 +64,10 @@ export class AcademicBackgroundService {
 
   async createCategory(category: CategoryModel): Promise<CategoryModel> {
     try {
-      return await this.categoryRepo.save(category);
+      const saved = await this.categoryRepo.save(category);
+      // Invalidate the shared categories cache so the new category is visible immediately
+      await AppDataSource.queryResultCache?.remove(['all_categories']);
+      return saved;
     } catch (error) {
       log.error({ err: error, ctx: { service: 'AcademicBackgroundService', op: 'createCategory' } }, 'Error creating category');
       throw new Error("Error creating category");
@@ -73,7 +76,9 @@ export class AcademicBackgroundService {
 
   async createSubject(subject: SubjectModel): Promise<SubjectModel> {
     try {
-      return await this.subjectRepo.save(subject);
+      const saved = await this.subjectRepo.save(subject);
+      await AppDataSource.queryResultCache?.remove(['all_categories']);
+      return saved;
     } catch (error) {
       log.error({ err: error, ctx: { service: 'AcademicBackgroundService', op: 'createSubject' } }, 'Error creating subject');
       throw new Error("Error creating subject");
@@ -82,7 +87,9 @@ export class AcademicBackgroundService {
 
   async createTopic(topic: TopicModel): Promise<TopicModel> {
     try {
-      return await this.topicRepo.save(topic);
+      const saved = await this.topicRepo.save(topic);
+      await AppDataSource.queryResultCache?.remove(['all_categories']);
+      return saved;
     } catch (error) {
       log.error({ err: error, ctx: { service: 'AcademicBackgroundService', op: 'createTopic' } }, 'Error creating topic');
       throw new Error("Error creating topic");
@@ -166,7 +173,12 @@ export class AcademicBackgroundService {
     try {
       return await this.categoryRepo.find({
         relations: ["subjects", "subjects.topics"],
-        cache: false,
+        // ✅ CACHED — admin-only writes, read by every user on the platform.
+        // Invalidated on createCategory / createSubject / createTopic / updateTopic / deleteTopic.
+        cache: {
+          id: 'all_categories',
+          milliseconds: 3600000, // 1 hour
+        },
       });
     } catch (error) {
       log.error({ err: error, ctx: { service: 'AcademicBackgroundService', op: 'getAllCategories' } }, 'Error fetching categories');
@@ -195,6 +207,7 @@ export class AcademicBackgroundService {
   async deleteTopic(id: number): Promise<void> {
     try {
       await this.topicRepo.softDelete(id);
+      await AppDataSource.queryResultCache?.remove(['all_categories']);
     } catch (error) {
       log.error({ err: error, ctx: { service: 'AcademicBackgroundService', op: 'deleteTopic', topicId: id } }, 'Error deleting topic');
       throw new Error("Error deleting topic");
@@ -203,7 +216,9 @@ export class AcademicBackgroundService {
 
   async updateTopic(topic: TopicModel): Promise<void> {
     try {
-      return await this.topicRepo.save(topic);
+      await this.topicRepo.save(topic);
+      // Bust the categories cache so updated topic names are reflected
+      await AppDataSource.queryResultCache?.remove(['all_categories']);
     } catch (error) {
       log.error({ err: error, ctx: { service: 'AcademicBackgroundService', op: 'updateTopic' } }, 'Error updating topic');
       throw new Error("Error updating topic");
