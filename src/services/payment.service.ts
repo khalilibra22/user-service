@@ -49,7 +49,7 @@ export class PaymentService {
         amount: number;
         method: PaymentMethod;
         referenceType: "SUBSCRIPTION" | "COURSE_ENROLLMENT" | "ONE_ON_ONE_ENROLLMENT" | "WALLET_TOPUP";
-        referenceId: string;
+        referenceId?: string;
         description: string;
         metadata?: any;
         couponCode?: string;
@@ -89,7 +89,10 @@ export class PaymentService {
         transaction.currency = currency;
         transaction.method = method;
         transaction.referenceType = referenceType;
-        transaction.referenceId = referenceId;
+        // Generate a random reference ID for WALLET_TOPUP if not provided
+        transaction.referenceId = referenceType === "WALLET_TOPUP" && !referenceId 
+            ? require("crypto").randomUUID() 
+            : referenceId!;
         transaction.description = description;
         transaction.user = user;
         transaction.status = TransactionStatus.PENDING;
@@ -511,5 +514,17 @@ export class PaymentService {
         });
 
         log.info({ userId, amount }, "Refund to wallet completed successfully");
+    }
+
+    async getUserTransactions(userId: string, page: number = 1, limit: number = 10): Promise<{ transactions: TransactionModel[], total: number }> {
+        const skip = (page - 1) * limit;
+        const [transactions, total] = await this.transactionRepo.findAndCount({
+            where: { user: { id: userId } },
+            order: { createdAt: "DESC" },
+            skip,
+            take: limit
+        });
+        
+        return { transactions, total };
     }
 }

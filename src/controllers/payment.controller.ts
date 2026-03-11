@@ -3,6 +3,9 @@ import { PaymentService } from "../services/payment.service";
 import { SubscriptionService } from "../services/subscription.service";
 import { NotificationService } from "../services/notification.service";
 import { getLogger } from "../utils/logger";
+import { plainToInstance } from "class-transformer";
+import { TransactionDto } from "../dtos/transaction.dto";
+import { UserWalletDto } from "../dtos/user-wallet.dto";
 
 
 const log = getLogger();
@@ -208,10 +211,39 @@ export class PaymentController {
         try {
             const userId = res.locals.user.id;
             const balance = await this.paymentService.getWalletBalance(userId);
-            res.status(200).json(balance || { userId, currentBalance: 0, frozenBalance: 0, totalEarned: 0 });
+            
+            const defaultBalance = { userId, currentBalance: 0, frozenBalance: 0, totalEarned: 0 };
+            const balanceDto = plainToInstance(UserWalletDto, balance || defaultBalance, {
+                excludeExtraneousValues: true,
+            });
+            
+            res.status(200).json(balanceDto);
         } catch (error: any) {
             log.error({ err: error }, "Error getting wallet balance");
             res.status(500).json({ error: error.message });
+        }
+    }
+
+    getUserTransactions = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const userId = res.locals.user.id;
+            const page = parseInt(req.query.page as string) || 1;
+            const limit = parseInt(req.query.limit as string) || 10;
+            
+            const result = await this.paymentService.getUserTransactions(userId, page, limit);
+            
+            const transactionDtos = plainToInstance(TransactionDto, result.transactions, {
+                excludeExtraneousValues: true,
+            });
+
+            res.setHeader("X-Total-Count", result.total.toString());
+            res.setHeader("X-Page", page.toString());
+            res.setHeader("X-Limit", limit.toString());
+
+            res.status(200).json(transactionDtos);
+        } catch (error: any) {
+            log.error({ err: error }, "Error getting user transactions");
+            res.status(500).json({ error: "Internal Server Error" });
         }
     }
 }
