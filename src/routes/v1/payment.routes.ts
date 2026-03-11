@@ -44,6 +44,12 @@ router.post(
 );
 
 router.get(
+    "/user",
+    AuthMiddleware.verifyToken,
+    paymentController.getUserTransactions
+);
+
+router.get(
     "/reference/:type/:id",
     requireInternalApiKey,
     paymentController.getTransactionByReference

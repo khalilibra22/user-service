@@ -214,4 +214,26 @@ export class PaymentController {
             res.status(500).json({ error: error.message });
         }
     }
+
+    getUserTransactions = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const userId = res.locals.user.id;
+            const page = parseInt(req.query.page as string) || 1;
+            const limit = parseInt(req.query.limit as string) || 10;
+            
+            const result = await this.paymentService.getUserTransactions(userId, page, limit);
+            res.status(200).json({
+                data: result.transactions,
+                meta: {
+                    total: result.total,
+                    page,
+                    limit,
+                    totalPages: Math.ceil(result.total / limit)
+                }
+            });
+        } catch (error: any) {
+            log.error({ err: error }, "Error getting user transactions");
+            res.status(500).json({ error: error.message });
+        }
+    }
 }
