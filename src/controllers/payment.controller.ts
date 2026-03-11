@@ -3,6 +3,8 @@ import { PaymentService } from "../services/payment.service";
 import { SubscriptionService } from "../services/subscription.service";
 import { NotificationService } from "../services/notification.service";
 import { getLogger } from "../utils/logger";
+import { plainToInstance } from "class-transformer";
+import { TransactionDto } from "../dtos/transaction.dto";
 
 
 const log = getLogger();
@@ -222,18 +224,19 @@ export class PaymentController {
             const limit = parseInt(req.query.limit as string) || 10;
             
             const result = await this.paymentService.getUserTransactions(userId, page, limit);
-            res.status(200).json({
-                data: result.transactions,
-                meta: {
-                    total: result.total,
-                    page,
-                    limit,
-                    totalPages: Math.ceil(result.total / limit)
-                }
+            
+            const transactionDtos = plainToInstance(TransactionDto, result.transactions, {
+                excludeExtraneousValues: true,
             });
+
+            res.setHeader("X-Total-Count", result.total.toString());
+            res.setHeader("X-Page", page.toString());
+            res.setHeader("X-Limit", limit.toString());
+
+            res.status(200).json(transactionDtos);
         } catch (error: any) {
             log.error({ err: error }, "Error getting user transactions");
-            res.status(500).json({ error: error.message });
+            res.status(500).json({ error: "Internal Server Error" });
         }
     }
 }
