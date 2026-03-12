@@ -18,6 +18,7 @@ import { UserModel } from "./user.model";
 @Index("IDX_subscriptions_created_at", ["createdAt"])
 @Index("IDX_subscriptions_status_end_date", ["status", "endDate"])
 @Index("IDX_subscriptions_user_status", ["user", "status"])
+@Index("IDX_unique_active_user_subscription", ["user"], { unique: true, where: "status = 'active'" })
 export class SubscriptionModel {
   @PrimaryGeneratedColumn()
   id?: number;

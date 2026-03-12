@@ -2,6 +2,7 @@ import { LessThan, Not } from "typeorm";
 import { AppDataSource } from "../config/database";
 import { PlanModel } from "../models/plan.model";
 import { SubscriptionModel } from "../models/subscription.model";
+import { UserModel } from "../models/user.model";
 import { getLogger } from "../utils/logger";
 
 const log = getLogger();
@@ -427,75 +428,82 @@ export class SubscriptionService {
   /**
    * Automatically assigns the default free plan to a user if they don't have an active subscription.
    * Finds the active plan with type='free', creates a subscription for it, and activates it immediately.
+   * COMPREHENSIVE FIX: Uses a database transaction and Pessimistic Lock to prevent duplicates.
    */
   async assignDefaultFreePlan(userId: string): Promise<SubscriptionModel | null> {
-    try {
-      const freePlan = await this.planRepo.findOne({ where: { type: "free", isActive: true } });
-      if (!freePlan) {
-        log.warn({ userId }, "Failed to auto-assign free plan: No active free plan exists in the database.");
-        return null;
-      }
+    const { AppDataSource } = await import("../config/database");
 
-      const { UserService } = await import("./user.service");
-      const userService = new UserService();
-      const user = await userService.getUserById(userId);
-      if (!user) {
-        log.error({ userId }, "Failed to auto-assign free plan: User not found.");
-        return null;
-      }
+    return await AppDataSource.transaction(async (manager) => {
+      try {
+        // 1. Lock the user row to prevent concurrent assignment from multiple servers
+        const user = await manager.getRepository(UserModel).findOne({
+          where: { id: userId },
+          lock: { mode: "pessimistic_write" }
+        });
 
-      // Check if user has ANY active subscription. 
-      // If they do, we don't need to auto-assign a free one unless that active one is expiring, 
-      // but in that case the expiration job handles it. 
-      // Let's just double check here to prevent assigning free plan while another plan is active.
-      const activeSubscriptions = await this.getActiveSubscriptionsByUserId(userId);
-      if (activeSubscriptions && activeSubscriptions.length > 0) {
-        log.info({ userId, activeSubscriptionIds: activeSubscriptions.map(s => s.id) }, "User has existing active subscriptions");
-        
-        // Find if one of them is the free plan we are trying to assign
-        const activeFreeSub = activeSubscriptions.find((sub: SubscriptionModel) => sub.plan?.id === freePlan.id);
-        if (activeFreeSub) {
-          log.info({ userId, subscriptionId: activeFreeSub.id }, "User already has an active FREE subscription. Skipping assignment.");
-          return activeFreeSub;
+        if (!user) {
+          log.error({ userId }, "Failed to auto-assign free plan: User not found.");
+          return null;
         }
-        
-        // If they have another active plan (e.g. Pro), we shouldn't force assign free plan,
-        // but wait for their pro plan to expire. So we return null.
-        log.info({ userId, planTypes: activeSubscriptions.map(s => s.plan?.type) }, "User has other active plans. Skipping free plan assignment.");
-        return null;
+
+        const freePlan = await manager.getRepository(PlanModel).findOne({
+          where: { type: "free", isActive: true },
+          cache: false
+        });
+
+        if (!freePlan) {
+          log.error("Default free plan (type: free, isActive: true) not found.");
+          return null;
+        }
+
+        // 2. Double check active subscriptions WHILE HOLDING THE LOCK
+        // We use an explicit QueryBuilder to avoid any relationship-mapping ambiguities.
+        const activeSubs = await manager.getRepository(SubscriptionModel)
+          .createQueryBuilder("sub")
+          .leftJoinAndSelect("sub.plan", "plan")
+          .where("sub.userId = :userId", { userId })
+          .andWhere("sub.status = :status", { status: "active" })
+          .setLock("pessimistic_write")
+          .getMany();
+
+        if (activeSubs.length > 0) {
+          const activeFreeSub = activeSubs.find(s => s.plan?.id === freePlan.id);
+          if (activeFreeSub) {
+            log.info({ userId, subId: activeFreeSub.id }, "User already has active free plan. Skipping duplicate creation.");
+            return activeFreeSub;
+          }
+          
+          log.info({ userId, planTypes: activeSubs.map(s => s.plan?.type) }, "User has another active plan. Skipping free plan.");
+          return null;
+        }
+
+        // 3. Deactivate any stray plans (safety guard)
+        await this.deactivateOtherActiveSubscriptions(userId, undefined, manager);
+
+        // 4. Create new plan
+        const now = new Date();
+        const newSub = manager.getRepository(SubscriptionModel).create({
+          user,
+          plan: freePlan,
+          status: "active",
+          startDate: now,
+          endDate: this.addDurationToDate(now, freePlan.duration || 1, freePlan.durationUnit || 'months'),
+        });
+
+        const saved = await manager.getRepository(SubscriptionModel).save(newSub);
+
+        // 5. Update User's plan reference
+        user.plan = freePlan;
+        await manager.getRepository(UserModel).save(user);
+
+        log.info({ userId, subscriptionId: saved.id }, "Successfully assigned default free plan via Atomic Transaction with Lock");
+        return saved;
+
+      } catch (error) {
+        log.error({ err: error, userId }, "Error in assignDefaultFreePlan transaction");
+        throw error; // Rollback
       }
-
-      log.warn({ userId }, "No active subscriptions found. Proceeding with free plan assignment...");
-
-      // CRITICAL: Deactivate any currently active plans BEFORE assigning a new free one.
-      // This prevents the "multiple active plans" issue.
-      await this.deactivateOtherActiveSubscriptions(userId);
-
-      const now = new Date();
-      // Ensure we have a valid duration even if the DB returns null
-      const planDuration = freePlan.duration || 1;
-      const planDurationUnit = freePlan.durationUnit || 'months';
-
-      const newSubscription = this.subscriptionRepo.create({
-        user: user,
-        plan: freePlan,
-        status: "active",
-        startDate: now,
-        endDate: this.addDurationToDate(now, planDuration, planDurationUnit),
-      });
-
-      const saved = await this.subscriptionRepo.save(newSubscription);
-
-      // Update user's current plan
-      user.plan = freePlan;
-      await userService.updateUser(userId, user);
-
-      log.info({ userId, subscriptionId: saved.id }, "Successfully auto-assigned default free plan");
-      return saved;
-    } catch (error) {
-      log.error({ err: error, ctx: { service: 'SubscriptionService', op: 'assignDefaultFreePlan', userId } }, 'Error assigning default free plan');
-      return null;
-    }
+    });
   }
 
   public addDurationToDate(startDate: Date, duration: number = 1, unit: string = 'months'): Date {
@@ -615,9 +623,10 @@ export class SubscriptionService {
    * Internal helper to deactivate all active subscriptions for a user EXCEPT a specific one.
    * This ensures atomicity and prevents multiple concurrent active plans.
    */
-  public async deactivateOtherActiveSubscriptions(userId: string, excludeId?: number): Promise<void> {
+  public async deactivateOtherActiveSubscriptions(userId: string, excludeId?: number, manager?: any): Promise<void> {
     try {
-      const activeSubs = await this.subscriptionRepo.find({
+      const repo = manager ? manager.getRepository(SubscriptionModel) : this.subscriptionRepo;
+      const activeSubs = await repo.find({
         where: { user: { id: userId }, status: "active" },
         cache: false,
       });
@@ -628,7 +637,7 @@ export class SubscriptionService {
           for (const sub of toDeactivate) {
             sub.status = "inactive";
           }
-          await this.subscriptionRepo.save(toDeactivate);
+          await repo.save(toDeactivate);
           log.info({ userId, excludeId, deactivatedCount: toDeactivate.length }, "Deactivated other active subscriptions via find/save");
         }
       }
@@ -645,7 +654,7 @@ export class SubscriptionService {
     try {
       const activeSubs = await this.subscriptionRepo.find({
         where: { user: { id: userId }, status: "active" },
-        order: { createdAt: "DESC" },
+        order: { id: "DESC" },
         cache: false,
       });
 
