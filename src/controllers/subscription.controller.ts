@@ -331,7 +331,7 @@ export class SubscriptionController {
 
   getUserSubscriptions = async (req: Request, res: Response): Promise<void> => {
     try {
-      const userId = req.params.userId;
+      const userId = req.params.id;
       
       // CLEANUP: Fix corrupted data (multiple active subscriptions)
       await this.subscriptionService.cleanupDuplicateSubscriptions(userId).catch(err => {
