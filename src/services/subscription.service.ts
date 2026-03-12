@@ -139,6 +139,21 @@ export class SubscriptionService {
         );
       }
 
+      // Deactivate any currently active subscriptions for this user
+      if (subscription.user) {
+        const activeSubscriptions = await this.subscriptionRepo.find({
+          where: { user: { id: subscription.user.id }, status: "active" }
+        });
+        
+        for (const activeSub of activeSubscriptions) {
+          if (activeSub.id !== subscription.id) {
+            activeSub.status = "inactive";
+            await this.subscriptionRepo.save(activeSub);
+            log.info({ subscriptionId: activeSub.id, userId: subscription.user.id }, "Deactivated old subscription upon new activation");
+          }
+        }
+      }
+
       const updatedSubscription = await this.subscriptionRepo.save(subscription);
 
       // Update user's active plan
@@ -285,6 +300,21 @@ export class SubscriptionService {
           subscription.plan.duration,
           subscription.plan.durationUnit
         );
+      }
+
+      // Deactivate any currently active subscriptions for this user
+      if (subscription.user) {
+        const activeSubscriptions = await this.subscriptionRepo.find({
+          where: { user: { id: subscription.user.id }, status: "active" }
+        });
+        
+        for (const activeSub of activeSubscriptions) {
+          if (activeSub.id !== subscription.id) {
+            activeSub.status = "inactive";
+            await this.subscriptionRepo.save(activeSub);
+            log.info({ subscriptionId: activeSub.id, userId: subscription.user.id }, "Deactivated old subscription upon renewal activation");
+          }
+        }
       }
 
       const updated = await this.subscriptionRepo.save(subscription);
@@ -434,9 +464,23 @@ export class SubscriptionService {
         return null;
       }
 
-      // Check one more time to avoid duplicates
-      const existingActive = await this.getActiveSubscriptionByUserAndPlan(userId, freePlan.id!);
-      if (existingActive) return existingActive;
+      // Check if user has ANY active subscription. 
+      // If they do, we don't need to auto-assign a free one unless that active one is expiring, 
+      // but in that case the expiration job handles it. 
+      // Let's just double check here to prevent assigning free plan while another plan is active.
+      const activeSubscriptions = await this.getActiveSubscriptionsByUserId(userId);
+      if (activeSubscriptions && activeSubscriptions.length > 0) {
+        // Find if one of them is the free plan we are trying to assign
+        const activeFreeSub = activeSubscriptions.find((sub: SubscriptionModel) => sub.plan?.id === freePlan.id);
+        if (activeFreeSub) {
+          return activeFreeSub;
+        }
+        
+        // If they have another active plan (e.g. Pro), we shouldn't force assign free plan,
+        // but wait for their pro plan to expire. So we return null.
+        log.info({ userId }, "User already has an active subscription. Skipping free plan assignment.");
+        return null;
+      }
 
       const now = new Date();
       // Ensure we have a valid duration even if the DB returns null
