@@ -79,10 +79,21 @@ export class SubscriptionController {
         return;
       }
 
-      // Guard: prevent duplicate active subscription for the same plan
-      const existingActive = await this.subscriptionService.getActiveSubscriptionByUserAndPlan(userId, planId);
-      if (existingActive) {
-        res.status(409).json({ error: "User already has an active subscription for this plan" });
+      // Guard: prevent multiple concurrent active subscriptions
+      const activeSubscriptions = await this.subscriptionService.getActiveSubscriptionsByUserId(userId);
+      if (activeSubscriptions && activeSubscriptions.length > 0) {
+        // If they already have an active subscription for THIS specific plan
+        const samePlan = activeSubscriptions.find(s => s.plan?.id === Number(planId));
+        if (samePlan) {
+          res.status(409).json({ error: "User already has an active subscription for this plan" });
+          return;
+        }
+        
+        // If they have a different active plan (e.g. Pro vs Free), they should use Upgrade/Downgrade instead of create
+        res.status(400).json({ 
+          error: "User already has an active subscription. Please use upgrade or downgrade to change your plan.",
+          activePlans: activeSubscriptions.map(s => s.plan?.name)
+        });
         return;
       }
 
@@ -96,6 +107,9 @@ export class SubscriptionController {
       };
 
       if (isFree) {
+        // CRITICAL: Deactivate other plans before activating this one
+        await this.subscriptionService.deactivateOtherActiveSubscriptions(userId);
+
         (subscriptionBody as any).startDate = new Date();
         (subscriptionBody as any).endDate = this.subscriptionService.addDurationToDate(
           new Date(),
@@ -318,6 +332,12 @@ export class SubscriptionController {
   getUserSubscriptions = async (req: Request, res: Response): Promise<void> => {
     try {
       const userId = req.params.userId;
+      
+      // CLEANUP: Fix corrupted data (multiple active subscriptions)
+      await this.subscriptionService.cleanupDuplicateSubscriptions(userId).catch(err => {
+        (req.log || getLogger()).error({ err, userId }, "Failed subscription cleanup");
+      });
+
       const subscriptions = await this.subscriptionService.getAllSubscriptionsByUserId(userId);
       const subscriptionDtos = plainToInstance(SubscriptionDto, subscriptions, {
         excludeExtraneousValues: true,

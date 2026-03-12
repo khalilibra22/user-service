@@ -290,39 +290,55 @@ export class PaymentService {
                 await this.createEarningRecord(transaction);
             }
 
-            try {
-                const courseServiceUrl = process.env.COURSE_SERVICE_URL || "http://localhost:5001";
-                const debugPath = path.join(process.cwd(), "user-webhook-debug.log");
-                const payload = {
-                    transactionId: transaction.id,
-                    externalId: transaction.externalId,
-                    referenceId: transaction.referenceId,
-                    referenceType: transaction.referenceType,
-                    status: isSuccess ? "success" : "failed",
-                    provider: transaction.provider,
-                    method: transaction.method
-                };
+            // Notify Course Service via webhook with retries
+            const notifyCourseService = async (attempt: number = 1) => {
+                const maxAttempts = 3;
+                const delays = [1000, 5000, 30000]; // 1s, 5s, 30s
 
-                fs.appendFileSync(debugPath, `[${new Date().toISOString()}] Attempting webhook: ${courseServiceUrl} payload: ${JSON.stringify(payload)} metadata: ${JSON.stringify(transaction.metadata)}\n`);
-                log.info({ courseServiceUrl, transactionId: transaction.id }, "Notifying Course Service via webhook");
+                try {
+                    const courseServiceUrl = process.env.COURSE_SERVICE_URL || "http://localhost:5001";
+                    const debugPath = path.join(process.cwd(), "user-webhook-debug.log");
+                    const payload = {
+                        transactionId: transaction.id,
+                        externalId: transaction.externalId,
+                        referenceId: transaction.referenceId,
+                        referenceType: transaction.referenceType,
+                        status: isSuccess ? "success" : "failed",
+                        provider: transaction.provider,
+                        method: transaction.method
+                    };
 
-                const response = await axios.post(`${courseServiceUrl}/v1/payment-webhooks/webhook`, payload, {
-                    headers: {
-                        "x-internal-api-key": process.env.INBOUND_API_KEY || "12345"
+                    fs.appendFileSync(debugPath, `[${new Date().toISOString()}] Attempt ${attempt}/${maxAttempts}: ${courseServiceUrl} payload: ${JSON.stringify(payload)}\n`);
+                    log.info({ courseServiceUrl, transactionId: transaction.id, attempt }, "Notifying Course Service via webhook");
+
+                    const response = await axios.post(`${courseServiceUrl}/v1/payment-webhooks/webhook`, payload, {
+                        headers: {
+                            "x-internal-api-key": process.env.INBOUND_API_KEY || "12345"
+                        }
+                    });
+
+                    fs.appendFileSync(debugPath, `[${new Date().toISOString()}] Response: ${response.status} ${JSON.stringify(response.data)}\n`);
+                    log.info({ status: response.status, data: response.data, attempt }, "Course Service notified successfully");
+                } catch (error: any) {
+                    const debugPath = path.join(process.cwd(), "user-webhook-debug.log");
+                    fs.appendFileSync(debugPath, `[${new Date().toISOString()}] Attempt ${attempt} ERROR: ${error.message}\n`);
+                    
+                    if (attempt < maxAttempts) {
+                        const delay = delays[attempt - 1];
+                        log.warn({ err: error.message, nextRetryIn: delay, attempt }, "Webhook failed, retrying...");
+                        setTimeout(() => notifyCourseService(attempt + 1), delay);
+                    } else {
+                        log.error({
+                            err: error.message,
+                            response: error.response?.data,
+                            status: error.response?.status,
+                            attempts: attempt
+                        }, "CRITICAL: Webhook failed after all retry attempts");
                     }
-                });
+                }
+            };
 
-                fs.appendFileSync(debugPath, `[${new Date().toISOString()}] Response: ${response.status} ${JSON.stringify(response.data)}\n`);
-                log.info({ status: response.status, data: response.data }, "Course Service notified successfully");
-            } catch (error: any) {
-                const debugPath = path.join(process.cwd(), "user-webhook-debug.log");
-                fs.appendFileSync(debugPath, `[${new Date().toISOString()}] ERROR: ${error.message} RESP: ${JSON.stringify(error.response?.data)}\n`);
-                log.error({
-                    err: error.message,
-                    response: error.response?.data,
-                    status: error.response?.status
-                }, "Failed to notify Course Service");
-            }
+            void notifyCourseService();
         }
     }
 
@@ -365,7 +381,8 @@ export class PaymentService {
         // Fetch teacher subscription to determine dynamic fees
         const subscription = await this.subscriptionRepo.findOne({
             where: { user: { id: teacherId }, status: "active" },
-            relations: ["plan"]
+            relations: ["plan"],
+            cache: false,
         });
         let plan = subscription?.plan;
 

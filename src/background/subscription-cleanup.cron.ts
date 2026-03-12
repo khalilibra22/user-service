@@ -86,8 +86,8 @@ export const startSubscriptionCleanupCron = () => {
         }
     });
 
-    // ── Job 2: Expire active subscriptions + apply scheduled downgrades (daily at midnight) ──
-    cron.schedule("0 0 * * *", async () => {
+    // ── Job 2: Expire active subscriptions + apply scheduled downgrades (hourly) ──
+    cron.schedule("0 * * * *", async () => {
         logger.info("Running subscription expiration checker...");
         try {
             const subscriptionRepo = AppDataSource.getRepository(SubscriptionModel);
@@ -106,35 +106,36 @@ export const startSubscriptionCleanupCron = () => {
 
             for (const sub of expiredSubs) {
                 try {
+                    const { SubscriptionService } = await import("../services/subscription.service");
+                    const subscriptionService = new SubscriptionService();
+
                     if (sub.scheduledPlanId && sub.user) {
                         // ── Apply scheduled downgrade ──
-                        const newPlan = await AppDataSource.getRepository(require("../models/plan.model").PlanModel)
-                            .findOne({ where: { id: sub.scheduledPlanId } });
+                        const planRepo = AppDataSource.getRepository(require("../models/plan.model").PlanModel);
+                        const newPlan = await planRepo.findOne({ where: { id: sub.scheduledPlanId } });
 
                         if (newPlan) {
+                            // Atomicly deactivate previous plans FIRST
+                            await subscriptionService.deactivateOtherActiveSubscriptions(sub.user.id!);
+
                             // Create new active subscription under the downgraded plan
                             const newSub = subscriptionRepo.create({
                                 user: sub.user,
                                 plan: newPlan,
                                 status: "active",
                                 startDate: now,
+                                endDate: subscriptionService.addDurationToDate(now, newPlan.duration!, newPlan.durationUnit!),
                             });
-                            // Compute endDate from new plan duration
-                            const durationInMonths = newPlan.durationUnit === "years"
-                                ? (newPlan.duration ?? 1) * 12
-                                : (newPlan.duration ?? 1);
-                            newSub.endDate = new Date(now);
-                            newSub.endDate.setMonth(now.getMonth() + durationInMonths);
 
                             await subscriptionRepo.save(newSub);
 
-                            // Update user's plan reference to downgraded plan
+                            // Update user's plan reference
                             const { UserService } = await import("../services/user.service");
                             const userService = new UserService();
                             sub.user.plan = newPlan;
                             await userService.updateUser(sub.user.id!, sub.user);
 
-                            logger.info({ userId: sub.user.id, newPlanId: newPlan.id, subId: sub.id }, "Scheduled downgrade applied");
+                            logger.info({ userId: sub.user.id, newPlanId: newPlan.id, subId: sub.id }, "Scheduled downgrade applied atomicly");
                         } else {
                             logger.warn({ scheduledPlanId: sub.scheduledPlanId, subId: sub.id }, "Scheduled plan not found — expiring subscription without downgrade");
                         }

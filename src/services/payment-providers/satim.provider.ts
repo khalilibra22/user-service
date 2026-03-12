@@ -30,7 +30,7 @@ export class SatimProvider implements PaymentProviderInterface {
             params.append("password", this.password);
             params.append("orderNumber", orderNumber);
             params.append("amount", (amount * 100).toString()); // Amount in cents
-            params.append("currency", "012"); // 012 is the test currency code required by Satim test environment
+            params.append("currency", process.env.SATIM_CURRENCY || "012"); // 012 is test (DZD equivalent in SATIM test), 604 is real DZD
             params.append("returnUrl", returnUrl);
             params.append("description", "Payment for order " + orderNumber);
             params.append("failUrl", failUrl);

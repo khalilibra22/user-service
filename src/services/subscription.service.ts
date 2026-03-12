@@ -1,4 +1,4 @@
-import { LessThan } from "typeorm";
+import { LessThan, Not } from "typeorm";
 import { AppDataSource } from "../config/database";
 import { PlanModel } from "../models/plan.model";
 import { SubscriptionModel } from "../models/subscription.model";
@@ -115,6 +115,7 @@ export class SubscriptionService {
       return await this.subscriptionRepo.findOne({
         where: { user: { id: userId }, plan: { id: planId }, status: "active" },
         relations: ["plan"],
+        cache: false,
       });
     } catch (error) {
       log.error({ err: error, ctx: { service: 'SubscriptionService', op: 'getActiveSubscriptionByUserAndPlan', userId, planId } }, 'Error checking existing subscription');
@@ -124,7 +125,11 @@ export class SubscriptionService {
 
   async activateSubscription(subscriptionId: string | number): Promise<SubscriptionModel> {
     try {
-      const subscription = await this.subscriptionRepo.findOne({ where: { id: subscriptionId }, relations: ["user", "plan"] });
+      const subscription = await this.subscriptionRepo.findOne({ 
+        where: { id: subscriptionId }, 
+        relations: ["user", "plan"],
+        cache: false,
+      });
       if (!subscription) throw new Error("Subscription not found");
 
       subscription.status = "active";
@@ -137,6 +142,11 @@ export class SubscriptionService {
           subscription.plan.duration,
           subscription.plan.durationUnit
         );
+      }
+
+      // Deactivate any currently active subscriptions for this user
+      if (subscription.user) {
+        await this.deactivateOtherActiveSubscriptions(subscription.user.id, Number(subscription.id));
       }
 
       const updatedSubscription = await this.subscriptionRepo.save(subscription);
@@ -161,6 +171,7 @@ export class SubscriptionService {
       const subscription = await this.subscriptionRepo.findOne({
         where: { id: subscriptionId },
         relations: ["user", "plan"],
+        cache: false,
       });
       if (!subscription) throw new Error("Subscription not found");
 
@@ -233,6 +244,7 @@ export class SubscriptionService {
         ],
         relations: ["user", "plan"],
         order: { createdAt: "DESC" },
+        cache: false,
       });
 
       if (!existing || !existing.plan) {
@@ -273,6 +285,7 @@ export class SubscriptionService {
       const subscription = await this.subscriptionRepo.findOne({
         where: { id: subscriptionId },
         relations: ["user", "plan"],
+        cache: false,
       });
       if (!subscription) throw new Error("Subscription not found");
 
@@ -285,6 +298,11 @@ export class SubscriptionService {
           subscription.plan.duration,
           subscription.plan.durationUnit
         );
+      }
+
+      // Deactivate any currently active subscriptions for this user
+      if (subscription.user) {
+        await this.deactivateOtherActiveSubscriptions(subscription.user.id, Number(subscription.id));
       }
 
       const updated = await this.subscriptionRepo.save(subscription);
@@ -333,18 +351,10 @@ export class SubscriptionService {
         throw new Error("Target plan is not an upgrade. Use downgradeSubscription to switch to a lower-tier plan.");
       }
 
-      // Cancel the current subscription immediately
-      currentSubscription.status = "cancelled";
+      // DO NOT cancel the current subscription immediately.
+      // It will be deactivated automatically in activateSubscription() when the new one is paid.
       currentSubscription.renewalStatus = "upgrade";
       await this.subscriptionRepo.save(currentSubscription);
-
-      // Clear user plan (will be re-set when new subscription activates)
-      if (currentSubscription.user) {
-        const { UserService } = await import("./user.service");
-        const userService = new UserService();
-        currentSubscription.user.plan = undefined;
-        await userService.updateUser(currentSubscription.user.id, currentSubscription.user);
-      }
 
       // Create new subscription (pending_payment — activateSubscription sets dates on payment success)
       const newSubscription = this.subscriptionRepo.create({
@@ -434,9 +444,32 @@ export class SubscriptionService {
         return null;
       }
 
-      // Check one more time to avoid duplicates
-      const existingActive = await this.getActiveSubscriptionByUserAndPlan(userId, freePlan.id!);
-      if (existingActive) return existingActive;
+      // Check if user has ANY active subscription. 
+      // If they do, we don't need to auto-assign a free one unless that active one is expiring, 
+      // but in that case the expiration job handles it. 
+      // Let's just double check here to prevent assigning free plan while another plan is active.
+      const activeSubscriptions = await this.getActiveSubscriptionsByUserId(userId);
+      if (activeSubscriptions && activeSubscriptions.length > 0) {
+        log.info({ userId, activeSubscriptionIds: activeSubscriptions.map(s => s.id) }, "User has existing active subscriptions");
+        
+        // Find if one of them is the free plan we are trying to assign
+        const activeFreeSub = activeSubscriptions.find((sub: SubscriptionModel) => sub.plan?.id === freePlan.id);
+        if (activeFreeSub) {
+          log.info({ userId, subscriptionId: activeFreeSub.id }, "User already has an active FREE subscription. Skipping assignment.");
+          return activeFreeSub;
+        }
+        
+        // If they have another active plan (e.g. Pro), we shouldn't force assign free plan,
+        // but wait for their pro plan to expire. So we return null.
+        log.info({ userId, planTypes: activeSubscriptions.map(s => s.plan?.type) }, "User has other active plans. Skipping free plan assignment.");
+        return null;
+      }
+
+      log.warn({ userId }, "No active subscriptions found. Proceeding with free plan assignment...");
+
+      // CRITICAL: Deactivate any currently active plans BEFORE assigning a new free one.
+      // This prevents the "multiple active plans" issue.
+      await this.deactivateOtherActiveSubscriptions(userId);
 
       const now = new Date();
       // Ensure we have a valid duration even if the DB returns null
@@ -467,6 +500,8 @@ export class SubscriptionService {
 
   public addDurationToDate(startDate: Date, duration: number = 1, unit: string = 'months'): Date {
     const date = new Date(startDate);
+    const dayOfMonth = date.getDate();
+
     if (unit === 'days') {
       date.setDate(date.getDate() + duration);
     } else if (unit === 'weeks') {
@@ -475,7 +510,14 @@ export class SubscriptionService {
       date.setFullYear(date.getFullYear() + duration);
     } else {
       // Default to months
+      // Logic for month-end: if we add a month and the resulting month has fewer days,
+      // JS naturally overflows. We want to clamp it to the last day of the target month.
       date.setMonth(date.getMonth() + duration);
+      
+      // Check if we overflowed (e.g. Jan 31 -> March 3)
+      if (date.getDate() < dayOfMonth) {
+        date.setDate(0); // Set to last day of previous month (which is the target month)
+      }
     }
     return date;
   }
@@ -566,6 +608,58 @@ export class SubscriptionService {
     } catch (error) {
       log.error({ err: error, ctx: { service: 'SubscriptionService', op: 'getActiveSubscriptions' } }, 'Error fetching active subscriptions');
       throw new Error("Error fetching active subscriptions");
+    }
+  }
+
+  /**
+   * Internal helper to deactivate all active subscriptions for a user EXCEPT a specific one.
+   * This ensures atomicity and prevents multiple concurrent active plans.
+   */
+  public async deactivateOtherActiveSubscriptions(userId: string, excludeId?: number): Promise<void> {
+    try {
+      const activeSubs = await this.subscriptionRepo.find({
+        where: { user: { id: userId }, status: "active" },
+        cache: false,
+      });
+
+      if (activeSubs.length > 0) {
+        const toDeactivate = activeSubs.filter((sub: any) => sub.id !== excludeId);
+        if (toDeactivate.length > 0) {
+          for (const sub of toDeactivate) {
+            sub.status = "inactive";
+          }
+          await this.subscriptionRepo.save(toDeactivate);
+          log.info({ userId, excludeId, deactivatedCount: toDeactivate.length }, "Deactivated other active subscriptions via find/save");
+        }
+      }
+    } catch (error) {
+      log.error({ err: error, userId, excludeId }, "Failed to deactivate other active subscriptions");
+    }
+  }
+
+  /**
+   * For existing corrupted data: find all active subscriptions for a user, 
+   * keep only the latest one and deactivate others.
+   */
+  async cleanupDuplicateSubscriptions(userId: string): Promise<void> {
+    try {
+      const activeSubs = await this.subscriptionRepo.find({
+        where: { user: { id: userId }, status: "active" },
+        order: { createdAt: "DESC" },
+        cache: false,
+      });
+
+      if (activeSubs.length > 1) {
+        const [latest, ...others] = activeSubs;
+        // Keep 'latest', deactivate 'others'
+        for (const sub of others) {
+          sub.status = "inactive";
+        }
+        await this.subscriptionRepo.save(others);
+        log.info({ userId, cleaned: others.length, keptId: latest.id }, "Cleanup complete: kept latest subscription active");
+      }
+    } catch (error) {
+      log.error({ err: error, userId }, "Failed to cleanup duplicate subscriptions");
     }
   }
 }
