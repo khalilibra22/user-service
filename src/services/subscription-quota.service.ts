@@ -35,6 +35,7 @@ export class SubscriptionQuotaService {
                 where: { user: { id: userId }, status: "active" },
                 relations: ["plan"],
                 order: { createdAt: "DESC" },
+                cache: false,
             });
 
             if (!subscription) {

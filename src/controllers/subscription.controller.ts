@@ -107,6 +107,9 @@ export class SubscriptionController {
       };
 
       if (isFree) {
+        // CRITICAL: Deactivate other plans before activating this one
+        await this.subscriptionService.deactivateOtherActiveSubscriptions(userId);
+
         (subscriptionBody as any).startDate = new Date();
         (subscriptionBody as any).endDate = this.subscriptionService.addDurationToDate(
           new Date(),
@@ -329,6 +332,12 @@ export class SubscriptionController {
   getUserSubscriptions = async (req: Request, res: Response): Promise<void> => {
     try {
       const userId = req.params.userId;
+      
+      // CLEANUP: Fix corrupted data (multiple active subscriptions)
+      await this.subscriptionService.cleanupDuplicateSubscriptions(userId).catch(err => {
+        (req.log || getLogger()).error({ err, userId }, "Failed subscription cleanup");
+      });
+
       const subscriptions = await this.subscriptionService.getAllSubscriptionsByUserId(userId);
       const subscriptionDtos = plainToInstance(SubscriptionDto, subscriptions, {
         excludeExtraneousValues: true,
