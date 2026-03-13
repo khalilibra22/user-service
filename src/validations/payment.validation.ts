@@ -31,6 +31,11 @@ export const initiatePaymentSchema = Joi.object({
 
 export const submitReceiptSchema = Joi.object({
     receiptUrl: Joi.string().required(),
+    senderCcpAccount: Joi.string().optional().allow(null, ""),
+    senderFullName: Joi.string().optional().allow(null, ""),
+    phoneNumber: Joi.string().optional().allow(null, ""),
+    externalTransactionId: Joi.string().optional().allow(null, ""),
+    notes: Joi.string().optional().allow(null, ""),
 });
 
 export const validateTransactionSchema = Joi.object({

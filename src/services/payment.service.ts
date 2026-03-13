@@ -183,7 +183,14 @@ export class PaymentService {
         }
     }
 
-    async submitReceipt(transactionId: string, receiptUrl: string): Promise<TransactionModel> {
+    async submitReceipt(transactionId: string, data: {
+        receiptUrl: string;
+        senderCcpAccount?: string;
+        senderFullName?: string;
+        phoneNumber?: string;
+        externalTransactionId?: string;
+        notes?: string;
+    }): Promise<TransactionModel> {
         const transaction = await this.transactionRepo.findOne({ where: { id: transactionId } });
         if (!transaction) throw new Error("Transaction not found");
 
@@ -191,8 +198,25 @@ export class PaymentService {
             throw new Error("Transaction cannot be updated");
         }
 
-        transaction.receiptUrl = receiptUrl;
+        transaction.receiptUrl = data.receiptUrl;
         transaction.status = TransactionStatus.PENDING_VERIFICATION;
+
+        // Store extra details in metadata
+        transaction.metadata = {
+            ...transaction.metadata,
+            manualPaymentDetails: {
+                senderCcpAccount: data.senderCcpAccount,
+                senderFullName: data.senderFullName,
+                phoneNumber: data.phoneNumber,
+                externalTransactionId: data.externalTransactionId,
+                notes: data.notes,
+            }
+        };
+
+        // If BaridiMob, also update externalId with the transaction ID provided
+        if (transaction.method === PaymentMethod.BARIDIMOB && data.externalTransactionId) {
+            transaction.externalId = data.externalTransactionId;
+        }
 
         return await this.transactionRepo.save(transaction);
     }

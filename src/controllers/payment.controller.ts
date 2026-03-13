@@ -62,7 +62,7 @@ export class PaymentController {
     submitReceipt = async (req: Request, res: Response): Promise<void> => {
         try {
             const { transactionId } = req.params;
-            const { receiptUrl } = req.body;
+            const { receiptUrl, senderCcpAccount, senderFullName, phoneNumber, externalTransactionId, notes } = req.body;
 
             // Ownership check — only the transaction owner can submit a receipt
             const existing = await this.paymentService.getTransactionByOwner(transactionId, res.locals.user.id);
@@ -71,7 +71,14 @@ export class PaymentController {
                 return;
             }
 
-            const transaction = await this.paymentService.submitReceipt(transactionId, receiptUrl);
+            const transaction = await this.paymentService.submitReceipt(transactionId, {
+                receiptUrl,
+                senderCcpAccount,
+                senderFullName,
+                phoneNumber,
+                externalTransactionId,
+                notes,
+            });
             res.status(200).json(transaction);
         } catch (error: any) {
             log.error({ err: error }, "Error submitting receipt");
