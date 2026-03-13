@@ -27,6 +27,12 @@ export const initiatePaymentSchema = Joi.object({
         then: Joi.forbidden(),
         otherwise: Joi.string().optional().allow(null, ""),
     }),
+    receiptUrl: Joi.string().optional().allow(null, ""),
+    senderCcpAccount: Joi.string().optional().allow(null, ""),
+    senderFullName: Joi.string().optional().allow(null, ""),
+    phoneNumber: Joi.string().optional().allow(null, ""),
+    externalTransactionId: Joi.string().optional().allow(null, ""),
+    notes: Joi.string().optional().allow(null, ""),
 });
 
 export const submitReceiptSchema = Joi.object({

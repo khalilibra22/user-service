@@ -53,8 +53,29 @@ export class PaymentService {
         description: string;
         metadata?: any;
         couponCode?: string;
+        receiptUrl?: string;
+        senderCcpAccount?: string;
+        senderFullName?: string;
+        phoneNumber?: string;
+        externalTransactionId?: string;
+        notes?: string;
     }): Promise<{ transactionId: string; paymentUrl?: string; message?: string; currency?: string; discount?: { couponCode: string; originalAmount: number; discountAmount: number; finalAmount: number } }> {
-        const { userId, amount, method, referenceType, referenceId, description, metadata, couponCode } = payload;
+        const {
+            userId,
+            amount,
+            method,
+            referenceType,
+            referenceId,
+            description,
+            metadata,
+            couponCode,
+            receiptUrl,
+            senderCcpAccount,
+            senderFullName,
+            phoneNumber,
+            externalTransactionId,
+            notes,
+        } = payload;
         const currency = process.env.PAYMENT_CURRENCY || "DZD";
 
         const user = await this.userRepo.findOne({ where: { id: userId } });
@@ -112,6 +133,28 @@ export class PaymentService {
             transaction.provider = PaymentProvider.MANUAL; // Wallet is internal but handled as manual for provider tracking
         } else {
             transaction.provider = PaymentProvider.MANUAL;
+        }
+
+        // If manual method and receipt is provided directly
+        if ((method === PaymentMethod.BARIDIMOB || method === PaymentMethod.CCP_TRANSFER) && receiptUrl) {
+            transaction.receiptUrl = receiptUrl;
+            transaction.status = TransactionStatus.PENDING_VERIFICATION;
+            
+            // Store extra details in metadata
+            transaction.metadata = {
+                ...transaction.metadata,
+                manualPaymentDetails: {
+                    senderCcpAccount,
+                    senderFullName,
+                    phoneNumber,
+                    externalTransactionId,
+                    notes,
+                }
+            };
+
+            if (method === PaymentMethod.BARIDIMOB && externalTransactionId) {
+                transaction.externalId = externalTransactionId;
+            }
         }
 
         const savedTransaction = await this.transactionRepo.save(transaction);
