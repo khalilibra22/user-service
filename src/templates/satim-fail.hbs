@@ -121,6 +121,29 @@
             color: var(--text);
         }
 
+        .redirect-status {
+            font-size: 13px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .countdown-circle {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(231, 76, 60, 0.2);
+            border-top-color: var(--danger);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
         .btn {
             display: inline-block;
             background: linear-gradient(135deg, #c0392b 0%, #E74C3C 100%);
@@ -133,6 +156,7 @@
             transition: all 0.3s ease;
             box-shadow: 0 8px 24px rgba(231, 76, 60, 0.3);
             letter-spacing: 0.3px;
+            width: 100%;
         }
 
         .btn:hover {
@@ -150,6 +174,7 @@
             color: #aaa;
         }
     </style>
+    <meta http-equiv="refresh" content="4;url={{returnUrl}}">
 </head>
 
 <body>
@@ -170,9 +195,24 @@
         </div>
         {{/if}}
 
-        <a href="{{frontendUrl}}" class="btn">Retour à l'accueil</a>
+        <div class="redirect-status">
+            <div class="countdown-circle"></div>
+            <span>Redirection dans <span id="countdown">4</span> secondes...</span>
+        </div>
+
+        <a href="{{returnUrl}}" class="btn">Retourner maintenant</a>
         <p class="hint">Vous pouvez réessayer votre paiement depuis votre tableau de bord.</p>
     </div>
+
+    <script>
+        let seconds = 4;
+        const countdownEl = document.getElementById('countdown');
+        const interval = setInterval(() => {
+            seconds--;
+            countdownEl.textContent = seconds;
+            if (seconds <= 0) clearInterval(interval);
+        }, 1000);
+    </script>
 </body>
 
 </html>

@@ -274,6 +274,29 @@
             text-align: center;
         }
 
+        .redirect-status {
+            font-size: 14px;
+            color: var(--muted);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .countdown-circle {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--success-border);
+            border-top-color: var(--success);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
         .btn {
             display: inline-flex;
             align-items: center;
@@ -308,6 +331,7 @@
             color: var(--muted);
         }
     </style>
+    <meta http-equiv="refresh" content="4;url={{returnUrl}}">
 </head>
 
 <body>
@@ -386,17 +410,32 @@
 
         <!-- Footer -->
         <div class="footer-card">
-            <a href="{{frontendUrl}}" class="btn">
+            <div class="redirect-status">
+                <div class="countdown-circle"></div>
+                <span>Redirection vers votre section dans <span id="countdown">4</span> secondes...</span>
+            </div>
+
+            <a href="{{returnUrl}}" class="btn">
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                     <polyline points="9 22 9 12 15 12 15 22"></polyline>
                 </svg>
-                Retour à l'accueil
+                Retourner maintenant
             </a>
             <p class="hint">Conservez votre numéro de référence pour tout renseignement.</p>
         </div>
 
     </div>
+
+    <script>
+        let seconds = 4;
+        const countdownEl = document.getElementById('countdown');
+        const interval = setInterval(() => {
+            seconds--;
+            countdownEl.textContent = seconds;
+            if (seconds <= 0) clearInterval(interval);
+        }, 1000);
+    </script>
 </body>
 
 </html>

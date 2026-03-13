@@ -57,6 +57,7 @@ export const initiatePaymentSchema = Joi.object({
         then: Joi.optional().allow(null, ""),
         otherwise: Joi.forbidden(),
     }),
+    returnUrl: Joi.string().uri().optional().allow(null, ""),
 });
 
 export const submitReceiptSchema = Joi.object({

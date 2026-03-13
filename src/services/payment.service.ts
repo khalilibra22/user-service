@@ -59,6 +59,7 @@ export class PaymentService {
         phoneNumber?: string;
         externalTransactionId?: string;
         notes?: string;
+        returnUrl?: string;
     }): Promise<{ transactionId: string; paymentUrl?: string; message?: string; currency?: string; discount?: { couponCode: string; originalAmount: number; discountAmount: number; finalAmount: number } }> {
         const {
             userId,
@@ -75,6 +76,7 @@ export class PaymentService {
             phoneNumber,
             externalTransactionId,
             notes,
+            returnUrl,
         } = payload;
         const currency = process.env.PAYMENT_CURRENCY || "DZD";
 
@@ -118,9 +120,11 @@ export class PaymentService {
         transaction.user = user;
         transaction.status = TransactionStatus.PENDING;
         // Merge coupon metadata with any caller-provided metadata
-        transaction.metadata = couponMeta
-            ? { ...metadata, coupon: couponMeta }
-            : metadata;
+        transaction.metadata = {
+            ...metadata,
+            ...(couponMeta && { coupon: couponMeta }),
+            ...(returnUrl && { returnUrl })
+        };
 
         if (method === PaymentMethod.WALLET && referenceType === "WALLET_TOPUP") {
             throw new Error("Cannot top-up wallet using wallet balance");

@@ -53,6 +53,7 @@ export class PaymentController {
                 phoneNumber,
                 externalTransactionId,
                 notes,
+                returnUrl,
             } = req.body;
 
             const result = await this.paymentService.initiateTransaction({
@@ -70,6 +71,7 @@ export class PaymentController {
                 phoneNumber,
                 externalTransactionId,
                 notes,
+                returnUrl,
             });
 
             res.status(201).json(result);
@@ -133,7 +135,7 @@ export class PaymentController {
      * This endpoint is PUBLIC — no JWT required.
      */
     satimCallback = async (req: Request, res: Response): Promise<void> => {
-        const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+        const defaultFrontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
         const { transactionId, orderId } = req.query as { transactionId?: string; orderId?: string };
 
         log.info({ transactionId, orderId }, "SATIM callback received");
@@ -141,7 +143,8 @@ export class PaymentController {
         if (!transactionId) {
             log.warn("SATIM callback received without transactionId");
             const html = this.notificationService.renderTemplate("satim-fail", {
-                frontendUrl,
+                frontendUrl: defaultFrontendUrl,
+                returnUrl: defaultFrontendUrl,
                 reason: "Référence de transaction manquante.",
             });
             res.status(400).send(html);
@@ -166,9 +169,12 @@ export class PaymentController {
                 SUBSCRIPTION: "Abonnement",
                 WALLET_TOPUP: "Recharge de portefeuille",
             };
+            
+            const returnUrl = transaction.metadata?.returnUrl || defaultFrontendUrl;
 
             const receiptData = {
-                frontendUrl,
+                frontendUrl: defaultFrontendUrl,
+                returnUrl,
                 transactionId: transaction.id,
                 amount: Number(transaction.amount).toFixed(2),
                 currency: transaction.currency || "DZD",
@@ -191,7 +197,8 @@ export class PaymentController {
         } catch (error: any) {
             log.error({ err: error, transactionId }, "Error in SATIM callback");
             const html = this.notificationService.renderTemplate("satim-fail", {
-                frontendUrl,
+                frontendUrl: defaultFrontendUrl,
+                returnUrl: defaultFrontendUrl,
                 transactionId,
                 reason: "Une erreur interne est survenue.",
             });
