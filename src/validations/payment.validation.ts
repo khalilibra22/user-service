@@ -8,10 +8,10 @@ export const initiatePaymentSchema = Joi.object({
         then: Joi.forbidden(),
         otherwise: Joi.optional(),
     }),
-    amount: Joi.number().positive().precision(2).required(),
+    amount: Joi.number().positive().precision(3).required(),
     method: Joi.string().when("referenceType", {
         is: "WALLET_TOPUP",
-        then: Joi.valid(PaymentMethod.SATIM).required(),
+        then: Joi.valid(PaymentMethod.SATIM, PaymentMethod.BARIDIMOB, PaymentMethod.CCP_TRANSFER).required(),
         otherwise: Joi.valid(...Object.values(PaymentMethod)).required(),
     }),
     referenceType: Joi.string().valid("SUBSCRIPTION", "COURSE_ENROLLMENT", "ONE_ON_ONE_ENROLLMENT", "WALLET_TOPUP").required(),

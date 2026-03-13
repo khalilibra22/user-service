@@ -34,7 +34,7 @@ export class SubscriptionQuotaService {
             let subscription: SubscriptionModel | null = await this.subscriptionRepo.findOne({
                 where: { user: { id: userId }, status: "active" },
                 relations: ["plan"],
-                order: { createdAt: "DESC" },
+                order: { id: "DESC" },
                 cache: false,
             });
 

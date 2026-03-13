@@ -46,7 +46,7 @@ export class AuthController {
       // --- Auto-assign Free Plan to Teachers and Academies ---
       if (
         createdUser.id &&
-        (createdUser.role === UserRole.TEACHER || createdUser.role === UserRole.ACADEMY)
+        (Number(createdUser.role) === UserRole.TEACHER || Number(createdUser.role) === UserRole.ACADEMY)
       ) {
         try {
           await this.subscriptionService.assignDefaultFreePlan(createdUser.id);

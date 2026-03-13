@@ -126,8 +126,8 @@ export class SubscriptionService {
 
   async activateSubscription(subscriptionId: string | number): Promise<SubscriptionModel> {
     try {
-      const subscription = await this.subscriptionRepo.findOne({ 
-        where: { id: subscriptionId }, 
+      const subscription = await this.subscriptionRepo.findOne({
+        where: { id: subscriptionId },
         relations: ["user", "plan"],
         cache: false,
       });
@@ -460,7 +460,7 @@ export class SubscriptionService {
         // We use an explicit QueryBuilder to avoid any relationship-mapping ambiguities.
         const activeSubs = await manager.getRepository(SubscriptionModel)
           .createQueryBuilder("sub")
-          .leftJoinAndSelect("sub.plan", "plan")
+          .innerJoinAndSelect("sub.plan", "plan")
           .where("sub.userId = :userId", { userId })
           .andWhere("sub.status = :status", { status: "active" })
           .setLock("pessimistic_write")
@@ -472,7 +472,7 @@ export class SubscriptionService {
             log.info({ userId, subId: activeFreeSub.id }, "User already has active free plan. Skipping duplicate creation.");
             return activeFreeSub;
           }
-          
+
           log.info({ userId, planTypes: activeSubs.map(s => s.plan?.type) }, "User has another active plan. Skipping free plan.");
           return null;
         }
@@ -521,7 +521,7 @@ export class SubscriptionService {
       // Logic for month-end: if we add a month and the resulting month has fewer days,
       // JS naturally overflows. We want to clamp it to the last day of the target month.
       date.setMonth(date.getMonth() + duration);
-      
+
       // Check if we overflowed (e.g. Jan 31 -> March 3)
       if (date.getDate() < dayOfMonth) {
         date.setDate(0); // Set to last day of previous month (which is the target month)
@@ -580,12 +580,12 @@ export class SubscriptionService {
             try {
               const freeSubscription = await this.assignDefaultFreePlan(sub.user.id!);
               if (!freeSubscription) {
-                 const { UserService } = await import("./user.service");
-                 const userService = new UserService();
-                 sub.user.plan = undefined;
-                 await userService.updateUser(sub.user.id, sub.user);
+                const { UserService } = await import("./user.service");
+                const userService = new UserService();
+                sub.user.plan = undefined;
+                await userService.updateUser(sub.user.id, sub.user);
               } else {
-                 log.info({ userId: sub.user.id }, "Auto-assigned default free plan upon expiration of active subscription");
+                log.info({ userId: sub.user.id }, "Auto-assigned default free plan upon expiration of active subscription");
               }
             } catch (assignError) {
               log.error({ err: assignError, userId: sub.user.id }, "Error auto-assigning free plan, falling back to clearing user plan");
