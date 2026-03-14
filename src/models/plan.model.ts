@@ -65,6 +65,9 @@ export class PlanModel {
   @Column({ name: "has_page_customization", default: false })
   hasPageCustomization?: boolean;
 
+  @Column({ name: "can_record_session", default: false })
+  canRecordSession?: boolean;
+
   @OneToMany(() => UserModel, (user) => user.plan)
   users?: UserModel[];
 
