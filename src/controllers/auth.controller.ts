@@ -59,7 +59,11 @@ export class AuthController {
         }
       }
 
-      const verificationUrl = `${process.env.BASE_URL || 'http://localhost:5000'}/v1/auth/verify-email?token=${token}`;
+      const returnUrl = req.body.returnUrl || req.query.returnUrl;
+      let verificationUrl = `${process.env.BASE_URL || 'http://localhost:5000'}/v1/auth/verify-email?token=${token}`;
+      if (returnUrl) {
+        verificationUrl += `&returnUrl=${encodeURIComponent(returnUrl as string)}`;
+      }
       void this.notificationService.sendEmailVerification(createdUser.email ?? email, createdUser.fullname ?? 'Utilisateur', verificationUrl);
 
       let userDto;
@@ -206,7 +210,11 @@ export class AuthController {
       user.isActive = true;
       await this.userService.updateUser(id, user);
 
-      const html = this.notificationService.renderTemplate('verification-success', { frontendUrl });
+      const returnUrl = req.query.returnUrl as string;
+      const html = this.notificationService.renderTemplate('verification-success', { 
+        frontendUrl,
+        returnUrl
+      });
       res.status(200).send(html || "Email verified successfully");
     } catch (error) {
       (req.log || getLogger()).error({ err: error }, 'Error in verifyEmail');

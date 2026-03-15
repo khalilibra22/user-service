@@ -49,6 +49,7 @@ export const userValidationSchema = Joi.object({
   }),
   // profilePicture and certificate are handled by multer and S3 middleware
   // They are not validated here as they come as files, not body fields
+  returnUrl: Joi.string().optional(),
 });
 
 export const updateUserValidationSchema = Joi.object({
