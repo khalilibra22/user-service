@@ -126,8 +126,28 @@
         <h1>Succès !</h1>
         <p>Votre adresse e-mail a été vérifiée avec succès. Vous pouvez maintenant accéder à toutes les fonctionnalités
             de la plateforme.</p>
-        <a href="{{frontendUrl}}" class="btn">Accéder à mon compte</a>
+        <p id="countdown-text" style="font-size: 0.9em; margin-bottom: 20px; color: #95a5a6;">
+            Redirection automatique dans <span id="seconds">5</span> secondes...
+        </p>
+        <a href="{{#if returnUrl}}{{returnUrl}}{{else}}{{frontendUrl}}{{/if}}" id="redirect-btn" class="btn">Accéder à mon compte</a>
     </div>
+
+    <script>
+        const returnUrl = "{{returnUrl}}";
+        const frontendUrl = "{{frontendUrl}}";
+        const targetUrl = returnUrl || frontendUrl;
+        let seconds = 5;
+        const secondsSpan = document.getElementById('seconds');
+        
+        const countdown = setInterval(() => {
+            seconds--;
+            secondsSpan.textContent = seconds;
+            if (seconds <= 0) {
+                clearInterval(countdown);
+                window.location.href = targetUrl;
+            }
+        }, 1000);
+    </script>
 </body>
 
 </html>

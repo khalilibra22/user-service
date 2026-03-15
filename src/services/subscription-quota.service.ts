@@ -18,6 +18,7 @@ export interface QuotaResponse {
     liveCourseRemaining: number;
     canCreateGroup: boolean;
     canCreateLive: boolean;
+    canRecordSession: boolean;
 }
 
 export class SubscriptionQuotaService {
@@ -54,6 +55,7 @@ export class SubscriptionQuotaService {
                 liveCourseRemaining: 0,
                 canCreateGroup: false,
                 canCreateLive: false,
+                canRecordSession: false,
             };
 
             if (!subscription || !subscription.plan) {
@@ -98,6 +100,7 @@ export class SubscriptionQuotaService {
                 liveCourseRemaining: Math.max(0, liveLimit - liveCreated),
                 canCreateGroup: groupCreated < groupLimit,
                 canCreateLive: liveCreated < liveLimit,
+                canRecordSession: subscription.plan.canRecordSession ?? false,
             };
         } catch (error) {
             log.error({ err: error, userId }, "Error getting quota for user");

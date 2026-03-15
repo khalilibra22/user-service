@@ -53,8 +53,31 @@ export class PaymentService {
         description: string;
         metadata?: any;
         couponCode?: string;
+        receiptUrl?: string;
+        senderCcpAccount?: string;
+        senderFullName?: string;
+        phoneNumber?: string;
+        externalTransactionId?: string;
+        notes?: string;
+        returnUrl?: string;
     }): Promise<{ transactionId: string; paymentUrl?: string; message?: string; currency?: string; discount?: { couponCode: string; originalAmount: number; discountAmount: number; finalAmount: number } }> {
-        const { userId, amount, method, referenceType, referenceId, description, metadata, couponCode } = payload;
+        const {
+            userId,
+            amount,
+            method,
+            referenceType,
+            referenceId,
+            description,
+            metadata,
+            couponCode,
+            receiptUrl,
+            senderCcpAccount,
+            senderFullName,
+            phoneNumber,
+            externalTransactionId,
+            notes,
+            returnUrl,
+        } = payload;
         const currency = process.env.PAYMENT_CURRENCY || "DZD";
 
         const user = await this.userRepo.findOne({ where: { id: userId } });
@@ -97,9 +120,11 @@ export class PaymentService {
         transaction.user = user;
         transaction.status = TransactionStatus.PENDING;
         // Merge coupon metadata with any caller-provided metadata
-        transaction.metadata = couponMeta
-            ? { ...metadata, coupon: couponMeta }
-            : metadata;
+        transaction.metadata = {
+            ...metadata,
+            ...(couponMeta && { coupon: couponMeta }),
+            ...(returnUrl && { returnUrl })
+        };
 
         if (method === PaymentMethod.WALLET && referenceType === "WALLET_TOPUP") {
             throw new Error("Cannot top-up wallet using wallet balance");
@@ -112,6 +137,28 @@ export class PaymentService {
             transaction.provider = PaymentProvider.MANUAL; // Wallet is internal but handled as manual for provider tracking
         } else {
             transaction.provider = PaymentProvider.MANUAL;
+        }
+
+        // If manual method and receipt is provided directly
+        if ((method === PaymentMethod.BARIDIMOB || method === PaymentMethod.CCP_TRANSFER) && receiptUrl) {
+            transaction.receiptUrl = receiptUrl;
+            transaction.status = TransactionStatus.PENDING_VERIFICATION;
+            
+            // Store extra details in metadata
+            transaction.metadata = {
+                ...transaction.metadata,
+                manualPaymentDetails: {
+                    senderCcpAccount,
+                    senderFullName,
+                    phoneNumber,
+                    externalTransactionId,
+                    notes,
+                }
+            };
+
+            if (method === PaymentMethod.BARIDIMOB && externalTransactionId) {
+                transaction.externalId = externalTransactionId;
+            }
         }
 
         const savedTransaction = await this.transactionRepo.save(transaction);
@@ -183,7 +230,14 @@ export class PaymentService {
         }
     }
 
-    async submitReceipt(transactionId: string, receiptUrl: string): Promise<TransactionModel> {
+    async submitReceipt(transactionId: string, data: {
+        receiptUrl: string;
+        senderCcpAccount?: string;
+        senderFullName?: string;
+        phoneNumber?: string;
+        externalTransactionId?: string;
+        notes?: string;
+    }): Promise<TransactionModel> {
         const transaction = await this.transactionRepo.findOne({ where: { id: transactionId } });
         if (!transaction) throw new Error("Transaction not found");
 
@@ -191,8 +245,25 @@ export class PaymentService {
             throw new Error("Transaction cannot be updated");
         }
 
-        transaction.receiptUrl = receiptUrl;
+        transaction.receiptUrl = data.receiptUrl;
         transaction.status = TransactionStatus.PENDING_VERIFICATION;
+
+        // Store extra details in metadata
+        transaction.metadata = {
+            ...transaction.metadata,
+            manualPaymentDetails: {
+                senderCcpAccount: data.senderCcpAccount,
+                senderFullName: data.senderFullName,
+                phoneNumber: data.phoneNumber,
+                externalTransactionId: data.externalTransactionId,
+                notes: data.notes,
+            }
+        };
+
+        // If BaridiMob, also update externalId with the transaction ID provided
+        if (transaction.method === PaymentMethod.BARIDIMOB && data.externalTransactionId) {
+            transaction.externalId = data.externalTransactionId;
+        }
 
         return await this.transactionRepo.save(transaction);
     }

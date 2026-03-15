@@ -27,10 +27,46 @@ export const initiatePaymentSchema = Joi.object({
         then: Joi.forbidden(),
         otherwise: Joi.string().optional().allow(null, ""),
     }),
+    receiptUrl: Joi.string().when("method", {
+        is: Joi.valid(PaymentMethod.BARIDIMOB, PaymentMethod.CCP_TRANSFER),
+        then: Joi.optional().allow(null, ""),
+        otherwise: Joi.forbidden(),
+    }),
+    senderCcpAccount: Joi.string().when("method", {
+        is: Joi.valid(PaymentMethod.BARIDIMOB, PaymentMethod.CCP_TRANSFER),
+        then: Joi.optional().allow(null, ""),
+        otherwise: Joi.forbidden(),
+    }),
+    senderFullName: Joi.string().when("method", {
+        is: Joi.valid(PaymentMethod.BARIDIMOB, PaymentMethod.CCP_TRANSFER),
+        then: Joi.optional().allow(null, ""),
+        otherwise: Joi.forbidden(),
+    }),
+    phoneNumber: Joi.string().when("method", {
+        is: Joi.valid(PaymentMethod.BARIDIMOB, PaymentMethod.CCP_TRANSFER),
+        then: Joi.optional().allow(null, ""),
+        otherwise: Joi.forbidden(),
+    }),
+    externalTransactionId: Joi.string().when("method", {
+        is: Joi.valid(PaymentMethod.BARIDIMOB, PaymentMethod.CCP_TRANSFER),
+        then: Joi.optional().allow(null, ""),
+        otherwise: Joi.forbidden(),
+    }),
+    notes: Joi.string().when("method", {
+        is: Joi.valid(PaymentMethod.BARIDIMOB, PaymentMethod.CCP_TRANSFER),
+        then: Joi.optional().allow(null, ""),
+        otherwise: Joi.forbidden(),
+    }),
+    returnUrl: Joi.string().uri().optional().allow(null, ""),
 });
 
 export const submitReceiptSchema = Joi.object({
     receiptUrl: Joi.string().required(),
+    senderCcpAccount: Joi.string().optional().allow(null, ""),
+    senderFullName: Joi.string().optional().allow(null, ""),
+    phoneNumber: Joi.string().optional().allow(null, ""),
+    externalTransactionId: Joi.string().optional().allow(null, ""),
+    notes: Joi.string().optional().allow(null, ""),
 });
 
 export const validateTransactionSchema = Joi.object({
