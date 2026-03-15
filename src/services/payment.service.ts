@@ -224,7 +224,7 @@ export class PaymentService {
             // Manual Method (Baridimob or Transfer)
             return {
                 transactionId: savedTransaction.id,
-                message: "Please upload your payment receipt.",
+                message: "Payment receipt submitted successfully. Your transaction is now pending verification.",
                 ...(couponMeta && { discount: couponMeta }),
             };
         }
