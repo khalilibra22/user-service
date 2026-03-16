@@ -29,7 +29,12 @@ export class SatimProvider implements PaymentProviderInterface {
             params.append("userName", this.userName);
             params.append("password", this.password);
             params.append("orderNumber", orderNumber);
-            params.append("amount", (amount * 100).toString()); // Amount in cents
+            if (amount < 1) {
+                log.warn({ amount }, "SATIM payment amount is too low (< 1 DZD)");
+                // We'll still try to proceed, but log a warning as it might fail on the gateway side
+            }
+            params.append("amount", Math.round(amount * 100).toString()); // Amount in cents, must be integer string
+
             params.append("currency", process.env.SATIM_CURRENCY || "012"); // 012 is test (DZD equivalent in SATIM test), 604 is real DZD
             params.append("returnUrl", returnUrl);
             params.append("description", "Payment for order " + orderNumber);
