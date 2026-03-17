@@ -13,11 +13,13 @@ RUN npm ci
 # Copy source code and tsconfig
 COPY . .
 
-# Build the application (generates dist directory)
-RUN npm run build
+# Build and obfuscate the application
+RUN npm run build && npm run obfuscate
 
 # Stage 2: Production Stage
 FROM node:22.14.0-alpine
+
+ENV NODE_ENV production
 
 # Set working directory
 WORKDIR /user-service

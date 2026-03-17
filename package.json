@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc && node -e \"require('fs').cpSync('src/templates', 'dist/src/templates', {recursive: true})\"",
+    "obfuscate": "javascript-obfuscator ./dist --output ./dist --compact true --self-defending false",
     "start": "node dist/index.js",
     "dev": "nodemon index.ts --exec ts-node index.ts",
     "prestart": "npm run build",
@@ -69,6 +70,7 @@
     "@types/passport-google-oauth20": "^2.0.16",
     "@types/pino": "^7.0.4",
     "concurrently": "^9.2.1",
+    "javascript-obfuscator": "^4.1.1",
     "nodemon": "^3.1.9",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.2"
