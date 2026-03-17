@@ -2,7 +2,7 @@ import express from "express";
 import { PaymentController } from "../../controllers/payment.controller";
 import { ValidationMiddleware } from "../../utils/validation.middleware";
 import { AuthMiddleware } from "../../utils/auth.middleware";
-import { initiatePaymentSchema, submitReceiptSchema } from "../../validations/payment.validation";
+import { initiatePaymentSchema, submitReceiptSchema, refundToWalletSchema } from "../../validations/payment.validation";
 
 const router = express.Router();
 const paymentController = new PaymentController();
@@ -50,6 +50,12 @@ router.get(
 );
 
 router.get(
+    "/:transactionId",
+    AuthMiddleware.verifyToken,
+    paymentController.getTransactionDetails
+);
+
+router.get(
     "/reference/:type/:id",
     requireInternalApiKey,
     paymentController.getTransactionByReference
@@ -65,6 +71,7 @@ router.get(
 router.post(
     "/refund/wallet",
     requireInternalApiKey,
+    ValidationMiddleware.validate(refundToWalletSchema),
     paymentController.refundToWallet
 );
 

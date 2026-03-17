@@ -104,6 +104,10 @@ export class PaymentController {
             res.status(200).json(transaction);
         } catch (error: any) {
             log.error({ err: error }, "Error submitting receipt");
+            if (error.message.includes("Transaction cannot be updated")) {
+                res.status(400).json({ error: error.message });
+                return;
+            }
             res.status(500).json({ error: error.message || "Internal Server Error" });
         }
     }
@@ -277,6 +281,28 @@ export class PaymentController {
             res.status(200).json(transactionDtos);
         } catch (error: any) {
             log.error({ err: error }, "Error getting user transactions");
+            res.status(500).json({ error: "Internal Server Error" });
+        }
+    }
+
+    getTransactionDetails = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const { transactionId } = req.params;
+            const userId = res.locals.user.id;
+
+            const transaction = await this.paymentService.getTransactionByOwner(transactionId, userId);
+            if (!transaction) {
+                res.status(404).json({ error: "Transaction not found or unauthorized access" });
+                return;
+            }
+
+            const transactionDto = plainToInstance(TransactionDto, transaction, {
+                excludeExtraneousValues: true,
+            });
+
+            res.status(200).json(transactionDto);
+        } catch (error: any) {
+            log.error({ err: error, transactionId: req.params.transactionId }, "Error getting transaction details");
             res.status(500).json({ error: "Internal Server Error" });
         }
     }
