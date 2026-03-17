@@ -241,8 +241,12 @@ export class PaymentService {
         const transaction = await this.transactionRepo.findOne({ where: { id: transactionId } });
         if (!transaction) throw new Error("Transaction not found");
 
-        if (transaction.status !== TransactionStatus.PENDING && transaction.status !== TransactionStatus.FAILED) {
-            throw new Error("Transaction cannot be updated");
+        if (
+            transaction.status !== TransactionStatus.PENDING && 
+            transaction.status !== TransactionStatus.FAILED &&
+            transaction.status !== TransactionStatus.PENDING_VERIFICATION
+        ) {
+            throw new Error(`Transaction cannot be updated because it is already ${transaction.status}`);
         }
 
         transaction.receiptUrl = data.receiptUrl;
@@ -576,10 +580,42 @@ export class PaymentService {
 
     }
 
-    async refundToWallet(userId: string, amount: number, referenceType: string, referenceId: string): Promise<void> {
+    async refundToWallet(userId: string, amount: number | undefined, referenceType: string, referenceId: string): Promise<void> {
         log.info({ userId, amount, referenceType, referenceId }, "Processing refund to wallet");
 
+        // 1. Find the successful transaction for this reference
+        const transaction = await this.transactionRepo.findOne({
+            where: {
+                user: { id: userId },
+                referenceType: referenceType as any,
+                referenceId: referenceId,
+                status: TransactionStatus.SUCCESS
+            }
+        });
+
+        if (!transaction) {
+            log.error({ userId, referenceType, referenceId }, "Refund failed: No successful transaction found");
+            throw new Error("No successful transaction found for this reference");
+        }
+
+        // 2. Check if already refunded
+        if (transaction.status === TransactionStatus.REFUNDED as any) {
+             throw new Error("Transaction has already been refunded");
+        }
+
+        // 3. Determine refund amount (trust transaction amount if caller didn't provide one or provided a higher one)
+        const refundAmount = (amount && amount <= Number(transaction.amount)) ? amount : Number(transaction.amount);
+        
+        if (amount && amount > Number(transaction.amount)) {
+            log.warn({ requested: amount, actual: transaction.amount }, "Refund amount requested exceeds transaction amount. Using transaction amount.");
+        }
+
         await AppDataSource.transaction(async (transactionalEntityManager) => {
+            // Update transaction status to REFUNDED
+            transaction.status = TransactionStatus.REFUNDED as any;
+            await transactionalEntityManager.save(TransactionModel, transaction);
+
+            // Update user wallet
             let wallet = await transactionalEntityManager.findOne(UserWalletModel, { where: { userId } });
             if (!wallet) {
                 wallet = new UserWalletModel();
@@ -589,19 +625,52 @@ export class PaymentService {
                 wallet.frozenBalance = 0;
             }
 
-            wallet.currentBalance = Number(wallet.currentBalance) + amount;
+            wallet.currentBalance = Number(wallet.currentBalance) + refundAmount;
             await transactionalEntityManager.save(UserWalletModel, wallet);
 
+            // Create Wallet Transaction log for user
             const walletTx = new WalletTransactionModel();
             walletTx.userId = userId;
-            walletTx.amount = amount;
+            walletTx.amount = refundAmount;
             walletTx.type = WalletTransactionType.CREDIT;
             walletTx.purpose = WalletTransactionPurpose.REFUND;
-            walletTx.metadata = { referenceType, referenceId };
+            walletTx.metadata = { transactionId: transaction.id, referenceType, referenceId };
             await transactionalEntityManager.save(WalletTransactionModel, walletTx);
+
+            // 4. Reverse Teacher Earnings
+            const earning = await transactionalEntityManager.findOne(EarningModel, {
+                where: { transactionId: transaction.id }
+            });
+
+            if (earning && earning.status !== EarningStatus.CANCELED as any) {
+                log.info({ earningId: earning.id, teacherId: earning.teacherId }, "Reversing teacher earning");
+                
+                const earningAmount = Number(earning.amount);
+                earning.status = EarningStatus.CANCELED as any;
+                await transactionalEntityManager.save(EarningModel, earning);
+
+                // Deduct from teacher wallet
+                let teacherWallet = await transactionalEntityManager.findOne(UserWalletModel, { 
+                    where: { userId: earning.teacherId } 
+                });
+
+                if (teacherWallet) {
+                    // Reverse the earning addition to totalEarned
+                    teacherWallet.totalEarned = Number(teacherWallet.totalEarned) - earningAmount;
+                    
+                    // If earning was still frozen, deduct from frozenBalance
+                    if (earning.status === EarningStatus.FROZEN) {
+                        teacherWallet.frozenBalance = Number(teacherWallet.frozenBalance) - earningAmount;
+                    } else {
+                        // Otherwise deduct from currentBalance
+                        teacherWallet.currentBalance = Number(teacherWallet.currentBalance) - earningAmount;
+                    }
+                    await transactionalEntityManager.save(UserWalletModel, teacherWallet);
+                }
+            }
         });
 
-        log.info({ userId, amount }, "Refund to wallet completed successfully");
+        log.info({ userId, refundAmount }, "Refund to wallet completed successfully");
     }
 
     async getUserTransactions(userId: string, page: number = 1, limit: number = 10): Promise<{ transactions: TransactionModel[], total: number }> {

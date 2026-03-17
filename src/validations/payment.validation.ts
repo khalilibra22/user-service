@@ -73,3 +73,10 @@ export const validateTransactionSchema = Joi.object({
     status: Joi.string().valid(TransactionStatus.SUCCESS, TransactionStatus.FAILED).required(),
     adminNote: Joi.string().optional().allow(null, ""),
 });
+
+export const refundToWalletSchema = Joi.object({
+    userId: Joi.string().uuid().required(),
+    amount: Joi.number().positive().precision(2).optional(),
+    referenceType: Joi.string().valid("COURSE_ENROLLMENT", "ONE_ON_ONE_ENROLLMENT", "SUBSCRIPTION").required(),
+    referenceId: Joi.string().required(),
+});
