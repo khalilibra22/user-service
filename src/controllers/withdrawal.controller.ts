@@ -26,10 +26,11 @@ export class WithdrawalController {
     requestWithdrawal = async (req: Request, res: Response): Promise<void> => {
         try {
             const userId = res.locals.user.id;
-            const { amount } = req.body;
+            const { amount, paymentMethodId } = req.body;
 
-            const withdrawal = await this.withdrawalService.requestWithdrawal(userId, amount);
+            const withdrawal = await this.withdrawalService.requestWithdrawal(userId, amount, paymentMethodId);
             res.status(201).json(withdrawal);
+
         } catch (error: any) {
             log.error({ err: error }, "Error requesting withdrawal");
             res.status(400).json({ error: error.message });
