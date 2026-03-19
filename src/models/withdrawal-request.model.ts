@@ -36,6 +36,13 @@ export class WithdrawalModel {
     @Column({ type: "decimal", precision: 12, scale: 2 })
     amount!: number;
 
+    @Column({ type: "decimal", precision: 12, scale: 2, default: 0 })
+    fee!: number;
+
+    @Column({ type: "decimal", precision: 12, scale: 2, default: 0, name: "net_amount" })
+    netAmount!: number;
+
+
     @Column({
         type: "enum",
         enum: WithdrawalStatus,
