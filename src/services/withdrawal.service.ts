@@ -2,7 +2,8 @@ import { AppDataSource } from "../config/database";
 import { WithdrawalModel } from "../models/withdrawal-request.model";
 import { UserWalletModel } from "../models/user-wallet.model";
 import { WithdrawalStatus } from "../enums/withdrawal-status.enum";
-import { Repository } from "typeorm";
+import { PaymentMethodModel } from "../models/payment-method.model";
+import { Repository, Between } from "typeorm";
 import { getLogger } from "../utils/logger";
 
 const log = getLogger();
@@ -10,17 +11,59 @@ const log = getLogger();
 export class WithdrawalService {
     private withdrawalRepo: Repository<WithdrawalModel>;
     private balanceRepo: Repository<UserWalletModel>;
+    private paymentMethodRepo: Repository<PaymentMethodModel>;
 
     constructor() {
         this.withdrawalRepo = AppDataSource.getRepository(WithdrawalModel);
         this.balanceRepo = AppDataSource.getRepository(UserWalletModel);
+        this.paymentMethodRepo = AppDataSource.getRepository(PaymentMethodModel);
     }
 
     async getTeacherBalance(teacherId: string): Promise<UserWalletModel | null> {
         return await this.balanceRepo.findOne({ where: { userId: teacherId } });
     }
 
-    async requestWithdrawal(teacherId: string, amount: number): Promise<WithdrawalModel> {
+    async requestWithdrawal(teacherId: string, amount: number, paymentMethodId: string): Promise<WithdrawalModel> {
+        // 1. Validate Amount Limits
+        if (amount < 2000) {
+            throw new Error("Minimum requested amount to withdraw is 2000 DZD");
+        }
+        if (amount > 100000) {
+            throw new Error("Maximum requested amount to withdraw is 100000 DZD");
+        }
+
+        // 2. Validate Withdrawal Frequency (1 per period)
+        // Period 1: [1, 15], Period 2: [16, last day of month]
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth();
+        const day = now.getDate();
+
+        let startDate: Date;
+        let endDate: Date;
+
+        if (day <= 15) {
+            // Period 1: 1st to 15th
+            startDate = new Date(year, month, 1);
+            endDate = new Date(year, month, 15, 23, 59, 59);
+        } else {
+            // Period 2: 16th to last day
+            startDate = new Date(year, month, 16);
+            endDate = new Date(year, month + 1, 0, 23, 59, 59); // 0th day of next month is last day of current month
+        }
+
+        const existingRequest = await this.withdrawalRepo.findOne({
+            where: {
+                teacherId,
+                createdAt: Between(startDate, endDate)
+            }
+        });
+
+        if (existingRequest) {
+            throw new Error("You can only submit one withdrawal request per period (1st-15th or 16th-End of Month)");
+        }
+
+        // 3. Validate Balance
         const balance = await this.balanceRepo.findOne({ where: { userId: teacherId } });
         if (!balance) throw new Error("Balance record not found for this teacher");
 
@@ -28,13 +71,23 @@ export class WithdrawalService {
             throw new Error("Insufficient withdrawable balance");
         }
 
+        // 4. Validate Payment Method
+        const paymentMethod = await this.paymentMethodRepo.findOne({
+            where: { id: paymentMethodId, user: { id: teacherId }, isActived: true }
+        });
+        if (!paymentMethod) {
+            throw new Error("Invalid or inactive payment method selected");
+        }
+
         const withdrawal = new WithdrawalModel();
         withdrawal.teacherId = teacherId;
         withdrawal.amount = amount;
+        withdrawal.paymentMethodId = paymentMethodId;
         withdrawal.status = WithdrawalStatus.PENDING;
 
         return await this.withdrawalRepo.save(withdrawal);
     }
+
 
     async getTeacherWithdrawals(teacherId: string): Promise<WithdrawalModel[]> {
         return await this.withdrawalRepo.find({
