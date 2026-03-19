@@ -79,13 +79,19 @@ export class WithdrawalService {
             throw new Error("Invalid or inactive payment method selected");
         }
 
+        const fee = Number((amount * 0.01).toFixed(2));
+        const netAmount = Number((amount - fee).toFixed(2));
+
         const withdrawal = new WithdrawalModel();
         withdrawal.teacherId = teacherId;
         withdrawal.amount = amount;
+        withdrawal.fee = fee;
+        withdrawal.netAmount = netAmount;
         withdrawal.paymentMethodId = paymentMethodId;
         withdrawal.status = WithdrawalStatus.PENDING;
 
         return await this.withdrawalRepo.save(withdrawal);
+
     }
 
 

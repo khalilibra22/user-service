@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import { WithdrawalService } from "../services/withdrawal.service";
 import { getLogger } from "../utils/logger";
 import { WithdrawalStatus } from "../enums/withdrawal-status.enum";
+import { plainToInstance } from "class-transformer";
+import { WithdrawalDto } from "../dtos/withdrawal.dto";
 
 const log = getLogger();
 
@@ -29,7 +31,8 @@ export class WithdrawalController {
             const { amount, paymentMethodId } = req.body;
 
             const withdrawal = await this.withdrawalService.requestWithdrawal(userId, amount, paymentMethodId);
-            res.status(201).json(withdrawal);
+            const dto = plainToInstance(WithdrawalDto, withdrawal, { excludeExtraneousValues: true });
+            res.status(201).json(dto);
 
         } catch (error: any) {
             log.error({ err: error }, "Error requesting withdrawal");
@@ -41,7 +44,8 @@ export class WithdrawalController {
         try {
             const userId = res.locals.user.id;
             const withdrawals = await this.withdrawalService.getTeacherWithdrawals(userId);
-            res.status(200).json(withdrawals);
+            const dtos = plainToInstance(WithdrawalDto, withdrawals, { excludeExtraneousValues: true });
+            res.status(200).json(dtos);
         } catch (error: any) {
             log.error({ err: error }, "Error getting teacher withdrawals");
             res.status(500).json({ error: error.message });
@@ -53,7 +57,8 @@ export class WithdrawalController {
         try {
             const { status } = req.query;
             const withdrawals = await this.withdrawalService.getAllWithdrawalRequests(status as WithdrawalStatus);
-            res.status(200).json(withdrawals);
+            const dtos = plainToInstance(WithdrawalDto, withdrawals, { excludeExtraneousValues: true });
+            res.status(200).json(dtos);
         } catch (error: any) {
             log.error({ err: error }, "Error getting all withdrawal requests");
             res.status(500).json({ error: error.message });
@@ -66,10 +71,12 @@ export class WithdrawalController {
             const { status, adminNote } = req.body;
 
             const updated = await this.withdrawalService.updateWithdrawalStatus(id, status as WithdrawalStatus, adminNote);
-            res.status(200).json(updated);
+            const dto = plainToInstance(WithdrawalDto, updated, { excludeExtraneousValues: true });
+            res.status(200).json(dto);
         } catch (error: any) {
             log.error({ err: error }, "Error updating withdrawal status");
             res.status(400).json({ error: error.message });
         }
     }
 }
+
