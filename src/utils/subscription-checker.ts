@@ -1,9 +1,10 @@
 // subscription-expiration-checker.ts
 import cron from "node-cron";
+import { container } from "../container";
 import { SubscriptionService } from "../services/subscription.service";
 import { getLogger } from "./logger";
 
-const subscriptionService = new SubscriptionService();
+const subscriptionService = container.resolve(SubscriptionService);
 const logger = getLogger();
 
 //Schedule to run every day at midnight

@@ -1,4 +1,4 @@
-﻿import express from "express";
+import express from "express";
 import { container } from "../../container";
 import { UserController } from "../../controllers/user.controller";
 import { AvailabilityController } from "../../controllers/availability.controller";
@@ -10,7 +10,7 @@ const router = express.Router();
 const userController = container.resolve(UserController);
 const availabilityController = container.resolve(AvailabilityController);
 const academicBackgroundController = container.resolve(AcademicBackgroundController);
-const subscriptionQuotaService = new SubscriptionQuotaService();
+const subscriptionQuotaService = container.resolve(SubscriptionQuotaService);
 
 router.get(
   "/users/:id/minimal",
