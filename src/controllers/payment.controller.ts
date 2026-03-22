@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { injectable, inject } from "tsyringe";
 import { PaymentService } from "../services/payment.service";
 import { SubscriptionService } from "../services/subscription.service";
 import { NotificationService } from "../services/notification.service";
@@ -10,15 +11,20 @@ import { UserWalletDto } from "../dtos/user-wallet.dto";
 
 const log = getLogger();
 
+@injectable()
 export class PaymentController {
     private paymentService: PaymentService;
     private subscriptionService: SubscriptionService;
     private notificationService: NotificationService;
 
-    constructor() {
-        this.paymentService = new PaymentService();
-        this.subscriptionService = new SubscriptionService();
-        this.notificationService = new NotificationService();
+    constructor(
+        @inject(PaymentService) paymentService: PaymentService,
+        @inject(SubscriptionService) subscriptionService: SubscriptionService,
+        @inject(NotificationService) notificationService: NotificationService
+    ) {
+        this.paymentService = paymentService;
+        this.subscriptionService = subscriptionService;
+        this.notificationService = notificationService;
     }
 
     initiatePayment = async (req: Request, res: Response): Promise<void> => {

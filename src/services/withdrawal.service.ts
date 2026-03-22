@@ -1,3 +1,4 @@
+import { injectable } from "tsyringe";
 import { AppDataSource } from "../config/database";
 import { WithdrawalModel } from "../models/withdrawal-request.model";
 import { UserWalletModel } from "../models/user-wallet.model";
@@ -8,6 +9,7 @@ import { getLogger } from "../utils/logger";
 
 const log = getLogger();
 
+@injectable()
 export class WithdrawalService {
     private withdrawalRepo: Repository<WithdrawalModel>;
     private balanceRepo: Repository<UserWalletModel>;

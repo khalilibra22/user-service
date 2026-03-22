@@ -1,4 +1,5 @@
-import express from "express";
+﻿import express from "express";
+import { container } from "../../container";
 import { UserController } from "../../controllers/user.controller";
 import { AvailabilityController } from "../../controllers/availability.controller";
 import { AcademicBackgroundController } from "../../controllers/academic-background.controller";
@@ -6,9 +7,9 @@ import { SubscriptionQuotaService } from "../../services/subscription-quota.serv
 
 const router = express.Router();
 
-const userController = new UserController();
-const availabilityController = new AvailabilityController();
-const academicBackgroundController = new AcademicBackgroundController();
+const userController = container.resolve(UserController);
+const availabilityController = container.resolve(AvailabilityController);
+const academicBackgroundController = container.resolve(AcademicBackgroundController);
 const subscriptionQuotaService = new SubscriptionQuotaService();
 
 router.get(
@@ -40,3 +41,4 @@ router.get("/subscriptions/quota/:userId", async (req, res) => {
 });
 
 export { router as inboundRouter };
+

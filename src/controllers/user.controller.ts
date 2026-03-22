@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { injectable, inject } from "tsyringe";
 import { UserService } from "../services/user.service";
 import { UserDto } from "../dtos/user.dto";
 import { plainToInstance } from "class-transformer";
@@ -10,12 +11,16 @@ import { UserContactInfoDto } from "../dtos/user-contact-info.dto";
 import { getLogger } from "../utils/logger";
 import { ChatService } from "../services/chat.service";
 
+@injectable()
 export class UserController {
   private userService: UserService;
   private chatService: ChatService;
-  constructor() {
-    this.userService = new UserService();
-    this.chatService = new ChatService();
+  constructor(
+    @inject(UserService) userService: UserService,
+    @inject(ChatService) chatService: ChatService
+  ) {
+    this.userService = userService;
+    this.chatService = chatService;
   }
 
   getUserById = async (req: Request, res: Response): Promise<void> => {

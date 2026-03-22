@@ -1,10 +1,11 @@
-import express from "express";
+﻿import express from "express";
+import { container } from "../../container";
 import { AuthMiddleware } from "../../utils/auth.middleware";
 import { CouponController } from "../../controllers/coupon.controller";
 
 const router = express.Router();
 
-const couponController = new CouponController();
+const couponController = container.resolve(CouponController);
 
 router.get(
   "/:couponId",
@@ -21,3 +22,4 @@ router.patch(
 );
 
 export { router as couponManagementRouter };
+

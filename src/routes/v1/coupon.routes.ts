@@ -1,13 +1,14 @@
-import express from "express";
+﻿import express from "express";
+import { container } from "../../container";
 import { AuthMiddleware } from "../../utils/auth.middleware";
 import { CouponController } from "../../controllers/coupon.controller";
 import { ValidationMiddleware } from "../../utils/validation.middleware";
 import { couponValidationSchema, validateCouponSchema } from "../../validations/coupon.validation";
 
 const router = express.Router({ mergeParams: true });
-const couponController = new CouponController();
+const couponController = container.resolve(CouponController);
 
-// ─── Payment integration: validate coupon (preview discount, no user scope) ───
+// â”€â”€â”€ Payment integration: validate coupon (preview discount, no user scope) â”€â”€â”€
 // POST /v1/coupons/validate
 router.post(
   "/validate",
@@ -16,7 +17,7 @@ router.post(
   couponController.validateCoupon
 );
 
-// ─── Admin: list / get all coupons (not user-scoped) ─────────────────────────
+// â”€â”€â”€ Admin: list / get all coupons (not user-scoped) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // GET  /v1/coupons
 router.get(
   "/",
@@ -35,7 +36,7 @@ router.get(
   couponController.getCouponByIdAdmin
 );
 
-// ─── User-scoped CRUD (mounted under /v1/users/:id/coupons) ──────────────────
+// â”€â”€â”€ User-scoped CRUD (mounted under /v1/users/:id/coupons) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // POST /v1/users/:id/coupons
 router.post(
   "/",
@@ -75,3 +76,4 @@ router.patch(
 );
 
 export { router as couponRouter };
+

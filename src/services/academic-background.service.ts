@@ -1,3 +1,4 @@
+import { injectable } from "tsyringe";
 import { AppDataSource } from "../config/database";
 import { AcademicBackgroundModel } from "../models/academic-background.model";
 import { CategoryModel } from "../models/category.model";
@@ -8,6 +9,7 @@ import { getLogger } from "../utils/logger";
 
 const log = getLogger();
 
+@injectable()
 export class AcademicBackgroundService {
   academicBackgroundRepo: any;
   categoryRepo: any;

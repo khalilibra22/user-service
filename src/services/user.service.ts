@@ -1,3 +1,4 @@
+import { injectable, inject } from "tsyringe";
 import { UserModel } from "../models/user.model";
 import { AppDataSource } from "../config/database";
 import { PaymentMethodModel } from "../models/payment-method.model";
@@ -9,16 +10,17 @@ import { ChatService } from "./chat.service";
 
 const log = getLogger();
 
+@injectable()
 export class UserService {
   userRepo: any;
   payementMethodRepo: any;
   userSettingRepo: any;
   chatService: ChatService;
-  constructor() {
+  constructor(@inject(ChatService) chatService: ChatService) {
     this.userRepo = AppDataSource.getRepository(UserModel);
     this.payementMethodRepo = AppDataSource.getRepository(PaymentMethodModel);
     this.userSettingRepo = AppDataSource.getRepository(UserSettingModel);
-    this.chatService = new ChatService();
+    this.chatService = chatService;
   }
 
   async createUser(user: UserModel): Promise<UserModel> {

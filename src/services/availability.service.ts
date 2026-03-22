@@ -1,3 +1,4 @@
+import { injectable } from "tsyringe";
 import { In } from "typeorm";
 import { AppDataSource } from "../config/database";
 import { AvailabilityModel } from "../models/availability.model";
@@ -6,6 +7,7 @@ import { getLogger } from "../utils/logger";
 
 const log = getLogger();
 
+@injectable()
 export class AvailabilityService {
   aviabilityRepo: any;
   availabilityExceptionRepo: any;

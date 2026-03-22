@@ -1,4 +1,5 @@
-import express from "express";
+﻿import express from "express";
+import { container } from "../../container";
 import { ValidationMiddleware } from "../../utils/validation.middleware";
 import { AuthMiddleware } from "../../utils/auth.middleware";
 import { AcademicBackgroundController } from "../../controllers/academic-background.controller";
@@ -6,7 +7,7 @@ import { taxonomyValidationSchema } from "../../validations/academic-background.
 
 const router = express.Router();
 
-const academicBackgroundController = new AcademicBackgroundController();
+const academicBackgroundController = container.resolve(AcademicBackgroundController);
 
 router.post(
   "/",
@@ -61,3 +62,4 @@ router.patch(
   academicBackgroundController.toggleTopicStatus
 );
 export { router as categoriesRouter };
+

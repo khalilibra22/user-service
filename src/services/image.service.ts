@@ -1,8 +1,10 @@
+import { injectable } from "tsyringe";
 import sharp from "sharp";
 import { getLogger } from "../utils/logger";
 
 const logger = getLogger();
 
+@injectable()
 export class ImageService {
   /**
    * Reduce image resolution and compress to optimize file size

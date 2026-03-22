@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { injectable, inject } from "tsyringe";
 import { UserService } from "../services/user.service";
 import { AuthMiddleware } from "../utils/auth.middleware";
 import { UserDto } from "../dtos/user.dto";
@@ -11,16 +12,22 @@ import { NotificationService } from "../services/notification.service";
 import { SubscriptionService } from "../services/subscription.service";
 
 
+@injectable()
 export class AuthController {
   private userService: UserService;
   private chatService: ChatService;
   private notificationService: NotificationService;
   private subscriptionService: SubscriptionService;
-  constructor() {
-    this.userService = new UserService();
-    this.chatService = new ChatService();
-    this.notificationService = new NotificationService();
-    this.subscriptionService = new SubscriptionService();
+  constructor(
+    @inject(UserService) userService: UserService,
+    @inject(ChatService) chatService: ChatService,
+    @inject(NotificationService) notificationService: NotificationService,
+    @inject(SubscriptionService) subscriptionService: SubscriptionService
+  ) {
+    this.userService = userService;
+    this.chatService = chatService;
+    this.notificationService = notificationService;
+    this.subscriptionService = subscriptionService;
   }
   register = async (req: Request, res: Response): Promise<void> => {
     try {

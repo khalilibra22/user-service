@@ -1,9 +1,10 @@
 import { Router, Request, Response, NextFunction } from "express";
+import { container } from "../../container";
 import { NotificationController } from "../../controllers/notification.controller";
 import config from "../../config";
 
 const router = Router();
-const notificationController = new NotificationController();
+const notificationController = container.resolve(NotificationController);
 
 // Middleware to check internal API key
 const internalAuth = (req: Request, res: Response, next: NextFunction): void => {
@@ -27,3 +28,4 @@ router.post("/payment", notificationController.sendPaymentNotification);
 router.post("/unread-message", notificationController.sendUnreadMessageNotification);
 
 export default router;
+

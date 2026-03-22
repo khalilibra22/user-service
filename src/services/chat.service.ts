@@ -1,3 +1,4 @@
+import { injectable } from "tsyringe";
 import { chatHttpClient } from "../config/http";
 import { getLogger } from "../utils/logger";
 
@@ -10,6 +11,7 @@ export type ChatUserPayload = {
   profileImage?: string;
 };
 
+@injectable()
 export class ChatService {
   async createLightUser(payload: ChatUserPayload): Promise<void> {
     if (!chatHttpClient.defaults.baseURL) {

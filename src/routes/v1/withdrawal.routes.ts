@@ -1,11 +1,12 @@
 import { Router } from "express";
+import { container } from "../../container";
 import { WithdrawalController } from "../../controllers/withdrawal.controller";
 import { ValidationMiddleware } from "../../utils/validation.middleware";
 import { AuthMiddleware } from "../../utils/auth.middleware";
 import { withdrawalRequestSchema, adminWithdrawalUpdateSchema } from "../../validations/withdrawal.validation";
 
 const router = Router();
-const withdrawalController = new WithdrawalController();
+const withdrawalController = container.resolve(WithdrawalController);
 
 /**
  * Teacher Routes
@@ -58,3 +59,4 @@ router.put(
 );
 
 export default router;
+

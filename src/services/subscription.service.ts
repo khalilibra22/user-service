@@ -1,3 +1,4 @@
+import { injectable } from "tsyringe";
 import { LessThan, Not } from "typeorm";
 import { AppDataSource } from "../config/database";
 import { PlanModel } from "../models/plan.model";
@@ -7,6 +8,7 @@ import { getLogger } from "../utils/logger";
 
 const log = getLogger();
 
+@injectable()
 export class SubscriptionService {
   subscriptionRepo: any;
   planRepo: any;
@@ -153,9 +155,10 @@ export class SubscriptionService {
       const updatedSubscription = await this.subscriptionRepo.save(subscription);
 
       // Update user's active plan
-      if (subscription.user && subscription.plan) {
+        if (subscription.user && subscription.plan) {
+        const { container: cont } = await import("../container");
         const { UserService } = await import("./user.service");
-        const userService = new UserService();
+        const userService = cont.resolve(UserService);
         subscription.user.plan = subscription.plan;
         await userService.updateUser(subscription.user.id, subscription.user);
       }
@@ -181,8 +184,9 @@ export class SubscriptionService {
 
       // Clear the user's plan reference when deactivating
       if (subscription.user) {
+        const { container: cont } = await import("../container");
         const { UserService } = await import("./user.service");
-        const userService = new UserService();
+        const userService = cont.resolve(UserService);
         subscription.user.plan = undefined;
         await userService.updateUser(subscription.user.id, subscription.user);
       }
@@ -209,8 +213,9 @@ export class SubscriptionService {
 
       // Clear the user's plan reference on cancellation
       if (subscription.user) {
+        const { container: cont } = await import("../container");
         const { UserService } = await import("./user.service");
-        const userService = new UserService();
+        const userService = cont.resolve(UserService);
         subscription.user.plan = undefined;
         await userService.updateUser(subscription.user.id, subscription.user);
       }
@@ -310,8 +315,9 @@ export class SubscriptionService {
 
       // Update user's plan reference
       if (subscription.user && subscription.plan) {
+        const { container: cont } = await import("../container");
         const { UserService } = await import("./user.service");
-        const userService = new UserService();
+        const userService = cont.resolve(UserService);
         subscription.user.plan = subscription.plan;
         await userService.updateUser(subscription.user.id, subscription.user);
       }
@@ -580,8 +586,9 @@ export class SubscriptionService {
             try {
               const freeSubscription = await this.assignDefaultFreePlan(sub.user.id!);
               if (!freeSubscription) {
+                const { container: cont } = await import("../container");
                 const { UserService } = await import("./user.service");
-                const userService = new UserService();
+                const userService = cont.resolve(UserService);
                 sub.user.plan = undefined;
                 await userService.updateUser(sub.user.id, sub.user);
               } else {
@@ -589,8 +596,9 @@ export class SubscriptionService {
               }
             } catch (assignError) {
               log.error({ err: assignError, userId: sub.user.id }, "Error auto-assigning free plan, falling back to clearing user plan");
+              const { container: cont } = await import("../container");
               const { UserService } = await import("./user.service");
-              const userService = new UserService();
+              const userService = cont.resolve(UserService);
               sub.user.plan = undefined;
               await userService.updateUser(sub.user.id, sub.user);
             }

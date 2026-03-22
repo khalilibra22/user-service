@@ -1,4 +1,5 @@
-import express from "express";
+﻿import express from "express";
+import { container } from "../../container";
 import { AvailabilityController } from "../../controllers/availability.controller";
 import { AuthMiddleware } from "../../utils/auth.middleware";
 import { ValidationMiddleware } from "../../utils/validation.middleware";
@@ -6,7 +7,7 @@ import { availabilitySchema } from "../../validations/availability.validation";
 
 const router = express.Router({ mergeParams: true });
 
-const availabilityController = new AvailabilityController();
+const availabilityController = container.resolve(AvailabilityController);
 
 // create availability
 router.post(
@@ -73,3 +74,4 @@ router.patch(
 );
 
 export { router as availabilityRouter };
+

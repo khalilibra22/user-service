@@ -1,11 +1,12 @@
-import express from "express";
+﻿import express from "express";
+import { container } from "../../container";
 import { AuthMiddleware } from "../../utils/auth.middleware";
 import { ValidationMiddleware } from "../../utils/validation.middleware";
 import { addTopicToUserValidationSchema } from "../../validations/user.validation";
 import { AcademicBackgroundController } from "../../controllers/academic-background.controller";
 
 const router = express.Router({ mergeParams: true });
-const academicBackgroundController = new AcademicBackgroundController();
+const academicBackgroundController = container.resolve(AcademicBackgroundController);
 
 router.post(
   "/:topicId",
@@ -53,3 +54,4 @@ router.patch(
 );
 
 export { router as topicRouter };
+

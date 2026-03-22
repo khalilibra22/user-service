@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { injectable, inject } from "tsyringe";
 import { WithdrawalService } from "../services/withdrawal.service";
 import { getLogger } from "../utils/logger";
 import { WithdrawalStatus } from "../enums/withdrawal-status.enum";
@@ -7,11 +8,12 @@ import { WithdrawalDto } from "../dtos/withdrawal.dto";
 
 const log = getLogger();
 
+@injectable()
 export class WithdrawalController {
     private withdrawalService: WithdrawalService;
 
-    constructor() {
-        this.withdrawalService = new WithdrawalService();
+    constructor(@inject(WithdrawalService) withdrawalService: WithdrawalService) {
+        this.withdrawalService = withdrawalService;
     }
 
     getTeacherBalance = async (req: Request, res: Response): Promise<void> => {

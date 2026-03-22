@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { injectable, inject } from "tsyringe";
 import { AvailabilityService } from "../services/availability.service";
 import { AvailabilityDto } from "../dtos/availability.dto";
 import { plainToInstance } from "class-transformer";
@@ -7,12 +8,16 @@ import { AvailabilityExceptionDto } from "../dtos/availability-exception.dto";
 import { boolean } from "joi";
 import { getLogger } from "../utils/logger";
 
+@injectable()
 export class AvailabilityController {
   private availabilityService: AvailabilityService;
   private userService: UserService;
-  constructor() {
-    this.availabilityService = new AvailabilityService();
-    this.userService = new UserService();
+  constructor(
+    @inject(AvailabilityService) availabilityService: AvailabilityService,
+    @inject(UserService) userService: UserService
+  ) {
+    this.availabilityService = availabilityService;
+    this.userService = userService;
   }
 
   getTeacherAvailability = async (req: Request, res: Response): Promise<void> => {

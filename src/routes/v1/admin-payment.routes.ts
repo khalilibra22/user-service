@@ -1,11 +1,12 @@
-import express from "express";
+﻿import express from "express";
+import { container } from "../../container";
 import { AdminPaymentController } from "../../controllers/admin-payment.controller";
 import { ValidationMiddleware } from "../../utils/validation.middleware";
 import { AuthMiddleware } from "../../utils/auth.middleware";
 import { validateTransactionSchema } from "../../validations/payment.validation";
 
 const router = express.Router();
-const adminPaymentController = new AdminPaymentController();
+const adminPaymentController = container.resolve(AdminPaymentController);
 
 router.post(
     "/:transactionId/validate",
@@ -16,3 +17,4 @@ router.post(
 );
 
 export { router as adminPaymentRouter };
+

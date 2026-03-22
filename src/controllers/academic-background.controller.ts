@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { injectable, inject } from "tsyringe";
 import { AcademicBackgroundService } from "../services/academic-background.service";
 import { UserService } from "../services/user.service";
 import { plainToInstance } from "class-transformer";
@@ -9,12 +10,16 @@ import { UserTopicDto } from "../dtos/user-topic.dto";
 import { SubjectDto } from "../dtos/subject.dto";
 import { getLogger } from "../utils/logger";
 
+@injectable()
 export class AcademicBackgroundController {
   private academicBackgroundService: AcademicBackgroundService;
   private userService: UserService;
-  constructor() {
-    this.academicBackgroundService = new AcademicBackgroundService();
-    this.userService = new UserService();
+  constructor(
+    @inject(AcademicBackgroundService) academicBackgroundService: AcademicBackgroundService,
+    @inject(UserService) userService: UserService
+  ) {
+    this.academicBackgroundService = academicBackgroundService;
+    this.userService = userService;
   }
 
   createAcademicBackground = async (

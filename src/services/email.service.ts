@@ -1,3 +1,4 @@
+import { injectable } from "tsyringe";
 import nodemailer from "nodemailer";
 import handlebars from "handlebars";
 import fs from "fs";
@@ -7,6 +8,7 @@ import { getLogger } from "../utils/logger";
 
 const log = getLogger();
 
+@injectable()
 export class EmailService {
     private transporter: nodemailer.Transporter;
 

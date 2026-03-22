@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { injectable, inject } from "tsyringe";
 import { PaymentService } from "../services/payment.service";
 import { SubscriptionService } from "../services/subscription.service";
 import { getLogger } from "../utils/logger";
@@ -9,13 +10,17 @@ import * as path from "path";
 
 const log = getLogger();
 
+@injectable()
 export class AdminPaymentController {
     private paymentService: PaymentService;
     private subscriptionService: SubscriptionService;
 
-    constructor() {
-        this.paymentService = new PaymentService();
-        this.subscriptionService = new SubscriptionService();
+    constructor(
+        @inject(PaymentService) paymentService: PaymentService,
+        @inject(SubscriptionService) subscriptionService: SubscriptionService
+    ) {
+        this.paymentService = paymentService;
+        this.subscriptionService = subscriptionService;
     }
 
     validateTransaction = async (req: Request, res: Response): Promise<void> => {
