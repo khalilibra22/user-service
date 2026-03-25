@@ -1,6 +1,8 @@
 import express from "express";
+import { container } from "../../container";
 import { ValidationMiddleware } from "../../utils/validation.middleware";
-import { UserController } from "../../controllers/user.controller";
+import { UserProfileController } from "../../controllers/user-profile.controller";
+import { UserAdminController } from "../../controllers/user-admin.controller";
 import { AuthMiddleware } from "../../utils/auth.middleware";
 import { topicRouter } from "./topic.routes";
 import { paymentMethodRouter } from "./payment-method.routes";
@@ -16,10 +18,10 @@ import {
   updateUserPhoneNumberValidationSchema,
   updateUserValidationSchema,
   updateUserLocationValidationSchema,
-  nearbyUsersQueryValidationSchema,
 } from "../../validations/user.validation";
 
-const userController = new UserController();
+const profileCtrl = container.resolve(UserProfileController);
+const adminCtrl = container.resolve(UserAdminController);
 
 const router = express.Router();
 router.use("/:id/topics", topicRouter);
@@ -29,13 +31,14 @@ router.use("/:id/availabilities", availabilityRouter);
 router.use("/:id/availability-exceptions", availabilityExceptionRouter);
 router.use("/:id/coupons", couponRouter);
 
+// ── Profile routes (self-service) ────────────────────────────────────────────
 router.put(
   "/:id",
   AuthMiddleware.verifyToken,
   AuthMiddleware.requireSelf,
   AuthMiddleware.authorize("users", "update"),
   ValidationMiddleware.validate(updateUserValidationSchema),
-  userController.updateUser
+  profileCtrl.updateUser
 );
 
 router.get(
@@ -43,134 +46,123 @@ router.get(
   AuthMiddleware.verifyToken,
   AuthMiddleware.requireSelfOrAdmin,
   AuthMiddleware.authorize("users", "read"),
-  userController.getUserById
+  profileCtrl.getUserById
 );
 
-// Get user plan
 router.get(
   "/:id/plans",
   AuthMiddleware.verifyToken,
   AuthMiddleware.requireSelfOrAdmin,
   AuthMiddleware.authorize("subscriptions", "view"),
-  userController.getUserPlan
+  profileCtrl.getUserPlan
 );
 
-// Get all teahers
-router.get(
-  "/teachers",
-  AuthMiddleware.verifyToken,
-  AuthMiddleware.authorize("users", "list"),
-  userController.getAllTeachers
-);
-
-router.get(
-  "/students",
-  AuthMiddleware.verifyToken,
-  AuthMiddleware.authorize("users", "list"),
-  userController.getAllStudents
-);
-
-router.get(
-  "/academies",
-  AuthMiddleware.verifyToken,
-  AuthMiddleware.authorize("users", "list"),
-  userController.getAllAcademies
-);
-
-router.get(
-  "/admins",
-  AuthMiddleware.verifyToken,
-  AuthMiddleware.authorize("users", "overview"),
-  userController.getAllAdmins
-);
-
-//create user
-router.post(
-  "/",
-  AuthMiddleware.verifyToken,
-  AuthMiddleware.authorize("users", "invite"),
-  ValidationMiddleware.validate(createUserValidationSchema),
-  userController.createUser
-);
-
-//update user's phone number
 router.patch(
   "/:id/phone-number",
   AuthMiddleware.verifyToken,
   AuthMiddleware.requireSelf,
   AuthMiddleware.authorize("users", "update"),
   ValidationMiddleware.validate(updateUserPhoneNumberValidationSchema),
-  userController.updateUserPhoneNumber
+  profileCtrl.updateUserPhoneNumber
 );
 
-// delete user
-router.delete(
-  "/:id",
-  AuthMiddleware.verifyToken,
-  AuthMiddleware.requireSelfOrAdmin,
-  AuthMiddleware.authorize("users", "delete"),
-  userController.deleteUser
-);
-
-// update user password
 router.patch(
   "/:id/password",
   AuthMiddleware.verifyToken,
   AuthMiddleware.requireSelf,
   AuthMiddleware.authorize("users", "update"),
   ValidationMiddleware.validate(changePasswordSchema),
-  userController.updateUserPassword
+  profileCtrl.updateUserPassword
 );
 
-// update user email
 router.patch(
   "/:id/email",
   AuthMiddleware.verifyToken,
   AuthMiddleware.requireSelf,
   AuthMiddleware.authorize("users", "update"),
   ValidationMiddleware.validate(changeEmailSchema),
-  userController.updateUserEmail
+  profileCtrl.updateUserEmail
 );
 
-// update user's contact information
 router.patch(
   "/:id/contact-info",
   AuthMiddleware.verifyToken,
   AuthMiddleware.requireSelf,
   AuthMiddleware.authorize("users", "update"),
   ValidationMiddleware.validate(contactInfoValidationSchema),
-  userController.updateUserContactInfo
+  profileCtrl.updateUserContactInfo
 );
 
-// Get user's contact information
 router.get(
   "/:id/contact-info",
   AuthMiddleware.verifyToken,
   AuthMiddleware.requireSelfOrAdmin,
   AuthMiddleware.authorize("users", "read"),
-  userController.getUserContactInfo
+  profileCtrl.getUserContactInfo
 );
 
-router.get("/:id/minimal", userController.getUserMinimalInfo);
+router.get("/:id/minimal", profileCtrl.getUserMinimalInfo);
 
 router.get(
   "/:id/switch-role",
   AuthMiddleware.verifyToken,
   AuthMiddleware.requireSelfOrAdmin,
   AuthMiddleware.authorize("users", "update"),
-  userController.switchUserRole
+  profileCtrl.switchUserRole
 );
 
-// Update user's GPS location
 router.patch(
   "/:id/location",
   AuthMiddleware.verifyToken,
   AuthMiddleware.requireSelf,
   AuthMiddleware.authorize("users", "update"),
   ValidationMiddleware.validate(updateUserLocationValidationSchema),
-  userController.updateUserLocation
+  profileCtrl.updateUserLocation
 );
 
+// ── Admin routes ──────────────────────────────────────────────────────────────
+router.get(
+  "/teachers",
+  AuthMiddleware.verifyToken,
+  AuthMiddleware.authorize("users", "list"),
+  adminCtrl.getAllTeachers
+);
 
+router.get(
+  "/students",
+  AuthMiddleware.verifyToken,
+  AuthMiddleware.authorize("users", "list"),
+  adminCtrl.getAllStudents
+);
+
+router.get(
+  "/academies",
+  AuthMiddleware.verifyToken,
+  AuthMiddleware.authorize("users", "list"),
+  adminCtrl.getAllAcademies
+);
+
+router.get(
+  "/admins",
+  AuthMiddleware.verifyToken,
+  AuthMiddleware.authorize("users", "overview"),
+  adminCtrl.getAllAdmins
+);
+
+router.post(
+  "/",
+  AuthMiddleware.verifyToken,
+  AuthMiddleware.authorize("users", "invite"),
+  ValidationMiddleware.validate(createUserValidationSchema),
+  adminCtrl.createUser
+);
+
+router.delete(
+  "/:id",
+  AuthMiddleware.verifyToken,
+  AuthMiddleware.requireSelfOrAdmin,
+  AuthMiddleware.authorize("users", "delete"),
+  adminCtrl.deleteUser
+);
 
 export { router as userRouter };

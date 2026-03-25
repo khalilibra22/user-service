@@ -1,4 +1,5 @@
-import express from "express";
+﻿import express from "express";
+import { container } from "../../container";
 import { AuthMiddleware } from "../../utils/auth.middleware";
 import { ValidationMiddleware } from "../../utils/validation.middleware";
 import { UserController } from "../../controllers/user.controller";
@@ -6,7 +7,7 @@ import { paymentMethodValidationSchema } from "../../validations/user.validation
 
 const router = express.Router({ mergeParams: true });
 
-const userController = new UserController();
+const userController = container.resolve(UserController);
 
 //Add payment method to user
 router.post(
@@ -47,3 +48,4 @@ router.delete(
 );
 
 export { router as paymentMethodRouter };
+

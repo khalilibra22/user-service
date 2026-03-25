@@ -1,13 +1,15 @@
+import { injectable, inject } from "tsyringe";
 import { EmailService } from "./email.service";
 import { getLogger } from "../utils/logger";
 
 const log = getLogger();
 
+@injectable()
 export class NotificationService {
     private emailService: EmailService;
 
-    constructor() {
-        this.emailService = new EmailService();
+    constructor(@inject(EmailService) emailService: EmailService) {
+        this.emailService = emailService;
     }
 
     async sendPasswordReset(email: string, name: string, resetUrl: string): Promise<boolean> {

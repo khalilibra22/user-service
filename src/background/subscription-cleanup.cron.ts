@@ -106,8 +106,9 @@ export const startSubscriptionCleanupCron = () => {
 
             for (const sub of expiredSubs) {
                 try {
+                    const { container: cont } = await import("../container");
                     const { SubscriptionService } = await import("../services/subscription.service");
-                    const subscriptionService = new SubscriptionService();
+                    const subscriptionService = cont.resolve(SubscriptionService);
 
                     if (sub.scheduledPlanId && sub.user) {
                         // ── Apply scheduled downgrade ──
@@ -130,8 +131,9 @@ export const startSubscriptionCleanupCron = () => {
                             await subscriptionRepo.save(newSub);
 
                             // Update user's plan reference
+                            const { container: cont } = await import("../container");
                             const { UserService } = await import("../services/user.service");
-                            const userService = new UserService();
+                            const userService = cont.resolve(UserService);
                             sub.user.plan = newPlan;
                             await userService.updateUser(sub.user.id!, sub.user);
 
@@ -141,14 +143,16 @@ export const startSubscriptionCleanupCron = () => {
                         }
                     } else if (sub.user) {
                         // ── No downgrade scheduled — fallback to default free plan ──
-                        const { SubscriptionService } = await import("../services/subscription.service");
-                        const subscriptionService = new SubscriptionService();
+                        const { container: cont2 } = await import("../container");
+                        const { SubscriptionService: SS } = await import("../services/subscription.service");
+                        const subscriptionService = cont2.resolve(SS);
                         try {
                             const freeSubscription = await subscriptionService.assignDefaultFreePlan(sub.user.id!);
                             if (!freeSubscription) {
                                 // If no free plan was assigned (e.g. none exists), clear the user's plan completely
+                                const { container: cont3 } = await import("../container");
                                 const { UserService } = await import("../services/user.service");
-                                const userService = new UserService();
+                                const userService = cont3.resolve(UserService);
                                 sub.user.plan = undefined;
                                 await userService.updateUser(sub.user.id!, sub.user);
                             } else {
@@ -156,8 +160,9 @@ export const startSubscriptionCleanupCron = () => {
                             }
                         } catch (assignError) {
                             logger.error({ err: assignError, userId: sub.user.id }, "Error auto-assigning free plan, falling back to clearing user plan");
+                            const { container: cont4 } = await import("../container");
                             const { UserService } = await import("../services/user.service");
-                            const userService = new UserService();
+                            const userService = cont4.resolve(UserService);
                             sub.user.plan = undefined;
                             await userService.updateUser(sub.user.id!, sub.user);
                         }

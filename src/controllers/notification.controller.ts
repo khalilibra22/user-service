@@ -1,14 +1,16 @@
 import { Request, Response } from "express";
+import { injectable, inject } from "tsyringe";
 import { NotificationService } from "../services/notification.service";
 import { getLogger } from "../utils/logger";
 
 const log = getLogger();
 
+@injectable()
 export class NotificationController {
     private notificationService: NotificationService;
 
-    constructor() {
-        this.notificationService = new NotificationService();
+    constructor(@inject(NotificationService) notificationService: NotificationService) {
+        this.notificationService = notificationService;
     }
 
     // Trigger enrollment notification

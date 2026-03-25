@@ -1,11 +1,12 @@
-import express from "express";
+﻿import express from "express";
+import { container } from "../../container";
 import { PaymentController } from "../../controllers/payment.controller";
 import { ValidationMiddleware } from "../../utils/validation.middleware";
 import { AuthMiddleware } from "../../utils/auth.middleware";
 import { initiatePaymentSchema, submitReceiptSchema, refundToWalletSchema } from "../../validations/payment.validation";
 
 const router = express.Router();
-const paymentController = new PaymentController();
+const paymentController = container.resolve(PaymentController);
 
 // Middlewares
 const flexibleAuth = (req: any, res: any, next: any) => {
@@ -18,7 +19,7 @@ const flexibleAuth = (req: any, res: any, next: any) => {
     return AuthMiddleware.verifyToken(req, res, next);
 };
 
-/** Strictly internal — rejects anything without the correct service-to-service API key. */
+/** Strictly internal â€” rejects anything without the correct service-to-service API key. */
 const requireInternalApiKey = (req: any, res: any, next: any) => {
     const INBOUND_API_KEY = process.env.INBOUND_API_KEY;
     const providedKey = req.headers["x-internal-api-key"];
@@ -83,9 +84,9 @@ router.get(
 );
 
 /**
- * PUBLIC — SATIM browser redirect callback.
+ * PUBLIC â€” SATIM browser redirect callback.
  * SATIM redirects the user's browser here after payment (success or fail).
- * No JWT required — this is a browser redirect, not an API call.
+ * No JWT required â€” this is a browser redirect, not an API call.
  * Query params: transactionId (our internal ID)
  */
 router.get(
@@ -94,3 +95,4 @@ router.get(
 );
 
 export { router as paymentRouter };
+

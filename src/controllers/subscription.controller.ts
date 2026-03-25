@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
+import { injectable, inject } from "tsyringe";
 import { UserService } from "../services/user.service";
 import { SubscriptionService } from "../services/subscription.service";
-
 import { plainToInstance } from "class-transformer";
 import { PlanDto } from "../dtos/plan.dto";
 import { SubscriptionDto } from "../dtos/subscription.dto";
@@ -9,12 +9,19 @@ import { getLogger } from "../utils/logger";
 import { PaymentService } from "../services/payment.service";
 import { PaymentMethod } from "../enums/payment-method.enum";
 
+@injectable()
 export class SubscriptionController {
   private subscriptionService: SubscriptionService;
   private userService: UserService;
-  constructor() {
-    this.subscriptionService = new SubscriptionService();
-    this.userService = new UserService();
+  private paymentService: PaymentService;
+  constructor(
+    @inject(SubscriptionService) subscriptionService: SubscriptionService,
+    @inject(UserService) userService: UserService,
+    @inject(PaymentService) paymentService: PaymentService
+  ) {
+    this.subscriptionService = subscriptionService;
+    this.userService = userService;
+    this.paymentService = paymentService;
   }
 
   createPlan = async (req: Request, res: Response): Promise<void> => {
@@ -133,9 +140,7 @@ export class SubscriptionController {
       }
 
       // If paid, initiate payment — dates will be set by activateSubscription on success
-      const paymentService = new PaymentService();
-
-      const { paymentUrl, transactionId, message, discount } = await paymentService.initiateTransaction({
+      const { paymentUrl, transactionId, message, discount } = await this.paymentService.initiateTransaction({
         userId: userId,
         amount: plan.price!,
         method: req.body.paymentMethod || PaymentMethod.SATIM,
@@ -153,8 +158,12 @@ export class SubscriptionController {
         ...(discount && { discount }),
       });
 
-    } catch (error) {
+    } catch (error: any) {
       (req.log || getLogger()).error({ err: error }, 'Error creating subscription');
+      if (error.message === "Insufficient wallet balance") {
+        res.status(402).json({ error: "Insufficient wallet balance. Please top up your wallet and try again." });
+        return;
+      }
       res.status(500).json({ error: "Internal Server Error" });
     }
   }
@@ -209,8 +218,7 @@ export class SubscriptionController {
         return;
       }
 
-      const paymentService = new PaymentService();
-      const { paymentUrl, transactionId, message, discount } = await paymentService.initiateTransaction({
+      const { paymentUrl, transactionId, message, discount } = await this.paymentService.initiateTransaction({
         userId,
         amount: plan.price!,
         method: req.body.paymentMethod || PaymentMethod.SATIM,
@@ -236,6 +244,10 @@ export class SubscriptionController {
         res.status(404).json({ error: error.message });
         return;
       }
+      if (error.message === "Insufficient wallet balance") {
+        res.status(402).json({ error: "Insufficient wallet balance. Please top up your wallet and try again." });
+        return;
+      }
       res.status(500).json({ error: "Internal Server Error" });
     }
   }
@@ -252,8 +264,7 @@ export class SubscriptionController {
 
       const { newSubscription, plan } = await this.subscriptionService.upgradeSubscription(userId, newPlanId);
 
-      const paymentService = new PaymentService();
-      const { paymentUrl, transactionId, message, discount } = await paymentService.initiateTransaction({
+      const { paymentUrl, transactionId, message, discount } = await this.paymentService.initiateTransaction({
         userId,
         amount: plan.price!,
         method: req.body.paymentMethod || PaymentMethod.SATIM,
@@ -278,6 +289,10 @@ export class SubscriptionController {
       }
       if (error.message.includes("not an upgrade")) {
         res.status(400).json({ error: error.message });
+        return;
+      }
+      if (error.message === "Insufficient wallet balance") {
+        res.status(402).json({ error: "Insufficient wallet balance. Please top up your wallet and try again." });
         return;
       }
       res.status(500).json({ error: "Internal Server Error" });

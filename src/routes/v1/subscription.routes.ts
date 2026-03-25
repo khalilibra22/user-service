@@ -1,4 +1,5 @@
-import express from "express";
+﻿import express from "express";
+import { container } from "../../container";
 import { ValidationMiddleware } from "../../utils/validation.middleware";
 import { AuthMiddleware } from "../../utils/auth.middleware";
 import { SubscriptionController } from "../../controllers/subscription.controller";
@@ -10,11 +11,11 @@ import {
 
 const router = express.Router();
 
-const subscriptionController = new SubscriptionController();
+const subscriptionController = container.resolve(SubscriptionController);
 
-// ─── Plans ────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Plans â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-// Public: list all active plans (no auth required — users need to browse plans before subscribing)
+// Public: list all active plans (no auth required â€” users need to browse plans before subscribing)
 router.get("/plans", subscriptionController.getPlans);
 
 // Admin: create a new plan
@@ -43,7 +44,7 @@ router.delete(
   subscriptionController.deactivatePlan
 );
 
-// ─── Subscriptions ────────────────────────────────────────────────────────────
+// â”€â”€â”€ Subscriptions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 // Admin: get all active subscriptions
 router.get(
@@ -108,3 +109,4 @@ router.post(
 );
 
 export { router as subscriptionRouter };
+

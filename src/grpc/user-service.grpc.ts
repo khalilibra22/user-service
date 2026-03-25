@@ -1,4 +1,5 @@
 import * as grpc from "@grpc/grpc-js";
+import { container } from "../container";
 import { UserService } from "../services/user.service";
 import { AcademicBackgroundService } from "../services/academic-background.service";
 import { AvailabilityService } from "../services/availability.service";
@@ -14,9 +15,9 @@ export class GrpcUserService {
   private availabilityService: AvailabilityService;
 
   constructor() {
-    this.userService = new UserService();
-    this.academicBackgroundService = new AcademicBackgroundService();
-    this.availabilityService = new AvailabilityService();
+    this.userService = container.resolve(UserService);
+    this.academicBackgroundService = container.resolve(AcademicBackgroundService);
+    this.availabilityService = container.resolve(AvailabilityService);
   }
 
   // Convert database user to gRPC minimal user

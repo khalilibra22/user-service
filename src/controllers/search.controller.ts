@@ -1,17 +1,22 @@
 import { Request, Response } from "express";
+import { injectable, inject } from "tsyringe";
 import { UserService } from "../services/user.service";
 import { plainToInstance } from "class-transformer";
 import { SearchUserDto } from "../dtos/search-user.dto";
 import { getLogger } from "../utils/logger";
 import { ChatService } from "../services/chat.service";
 
+@injectable()
 export class SearchController {
   private userService: UserService;
   private chatService: ChatService;
 
-  constructor() {
-    this.userService = new UserService();
-    this.chatService = new ChatService();
+  constructor(
+    @inject(UserService) userService: UserService,
+    @inject(ChatService) chatService: ChatService
+  ) {
+    this.userService = userService;
+    this.chatService = chatService;
   }
 
   searchTeachersAndAcademies = async (

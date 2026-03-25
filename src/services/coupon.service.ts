@@ -1,3 +1,4 @@
+import { injectable } from "tsyringe";
 import { AppDataSource } from "../config/database";
 import { CouponModel } from "../models/coupon.model";
 import { getLogger } from "../utils/logger";
@@ -11,6 +12,7 @@ export interface CouponValidationResult {
   finalAmount: number;
 }
 
+@injectable()
 export class CouponService {
   couponRepo: any;
 

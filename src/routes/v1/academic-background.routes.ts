@@ -1,4 +1,5 @@
-import express from "express";
+﻿import express from "express";
+import { container } from "../../container";
 import { AuthMiddleware } from "../../utils/auth.middleware";
 import { ValidationMiddleware } from "../../utils/validation.middleware";
 import {
@@ -9,7 +10,7 @@ import { AcademicBackgroundController } from "../../controllers/academic-backgro
 
 const router = express.Router({ mergeParams: true });
 
-const academicBackgroundController = new AcademicBackgroundController();
+const academicBackgroundController = container.resolve(AcademicBackgroundController);
 // Create user's academic background
 router.post(
   "/",
@@ -48,3 +49,4 @@ router.get(
 );
 
 export { router as academicBackgroundRouter };
+

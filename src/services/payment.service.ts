@@ -1,3 +1,4 @@
+import { injectable, inject } from "tsyringe";
 import { AppDataSource } from "../config/database";
 import { TransactionModel } from "../models/transaction.model";
 import { UserModel } from "../models/user.model";
@@ -21,6 +22,7 @@ import { WalletTransactionModel, WalletTransactionPurpose, WalletTransactionType
 
 const log = getLogger();
 
+@injectable()
 export class PaymentService {
     private userRepo: Repository<UserModel>;
     private transactionRepo: Repository<TransactionModel>;
@@ -32,7 +34,10 @@ export class PaymentService {
     private notificationService: NotificationService;
     private couponService: CouponService;
 
-    constructor() {
+    constructor(
+        @inject(NotificationService) notificationService: NotificationService,
+        @inject(CouponService) couponService: CouponService
+    ) {
         this.userRepo = AppDataSource.getRepository(UserModel);
         this.transactionRepo = AppDataSource.getRepository(TransactionModel);
         this.earningRepo = AppDataSource.getRepository(EarningModel);
@@ -40,8 +45,8 @@ export class PaymentService {
         this.walletTxRepo = AppDataSource.getRepository(WalletTransactionModel);
         this.subscriptionRepo = AppDataSource.getRepository(SubscriptionModel);
         this.satimProvider = new SatimProvider();
-        this.notificationService = new NotificationService();
-        this.couponService = new CouponService();
+        this.notificationService = notificationService;
+        this.couponService = couponService;
     }
 
     async initiateTransaction(payload: {
@@ -311,8 +316,9 @@ export class PaymentService {
         // ─────────────────────────────────────────────────────────────────────
 
         if (transaction.referenceType === "SUBSCRIPTION") {
+            const { container: cont } = await import("../container");
             const { SubscriptionService } = await import("./subscription.service");
-            const subscriptionService = new SubscriptionService();
+            const subscriptionService = cont.resolve(SubscriptionService);
             if (isSuccess) {
                 const isRenewal = transaction.metadata?.isRenewal === true;
                 if (isRenewal && transaction.metadata?.renewsFrom) {
@@ -463,8 +469,9 @@ export class PaymentService {
 
         // Fallback to default free plan if teacher has no active subscription
         if (!plan) {
+            const { container: cont } = await import("../container");
             const { SubscriptionService } = await import("./subscription.service");
-            const subscriptionService = new SubscriptionService();
+            const subscriptionService = cont.resolve(SubscriptionService);
             const newSubscription = await subscriptionService.assignDefaultFreePlan(teacherId);
             plan = newSubscription?.plan;
         }

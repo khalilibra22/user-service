@@ -1,3 +1,4 @@
+import { injectable } from "tsyringe";
 import { AppDataSource } from "../config/database";
 import { SubscriptionModel } from "../models/subscription.model";
 import { getLogger } from "../utils/logger";
@@ -21,6 +22,7 @@ export interface QuotaResponse {
     canRecordSession: boolean;
 }
 
+@injectable()
 export class SubscriptionQuotaService {
     private subscriptionRepo = AppDataSource.getRepository(SubscriptionModel);
 
@@ -40,8 +42,9 @@ export class SubscriptionQuotaService {
             });
 
             if (!subscription) {
+                const { container: cont } = await import("../container");
                 const { SubscriptionService } = await import("./subscription.service");
-                const subscriptionService = new SubscriptionService();
+                const subscriptionService = cont.resolve(SubscriptionService);
                 subscription = await subscriptionService.assignDefaultFreePlan(userId);
             }
 

@@ -1,9 +1,10 @@
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+import { container } from "../container";
 import { UserService } from "../services/user.service";
 import { getLogger } from "../utils/logger";
 
-const userService = new UserService();
+const userService = container.resolve(UserService);
 const logger = getLogger();
 passport.use(
   new GoogleStrategy(

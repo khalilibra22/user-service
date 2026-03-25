@@ -1,11 +1,12 @@
-import express from "express";
+﻿import express from "express";
+import { container } from "../../container";
 import { SearchController } from "../../controllers/search.controller";
 import { ValidationMiddleware } from "../../utils/validation.middleware";
 import { nearbyUsersQueryValidationSchema } from "../../validations/user.validation";
 
 const router = express.Router();
 
-const searchController = new SearchController();
+const searchController = container.resolve(SearchController);
 
 router.get(
   "/",
@@ -21,3 +22,4 @@ router.get(
 );
 
 export { router as searchRouter };
+

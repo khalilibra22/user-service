@@ -1,4 +1,5 @@
-import express from "express";
+﻿import express from "express";
+import { container } from "../../container";
 import { AuthController } from "../../controllers/auth.controller";
 import { ValidationMiddleware } from "../../utils/validation.middleware";
 import {
@@ -16,7 +17,7 @@ import passport from "passport";
 
 const router = express.Router();
 
-const authController = new AuthController();
+const authController = container.resolve(AuthController);
 
 
 router.post(
@@ -81,3 +82,4 @@ router.get("/failure", (req, res) => {
 });
 
 export { router as authRouter };
+

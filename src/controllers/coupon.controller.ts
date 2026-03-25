@@ -1,17 +1,22 @@
 import { Request, Response } from "express";
+import { injectable, inject } from "tsyringe";
 import { CouponService } from "../services/coupon.service";
 import { UserService } from "../services/user.service";
 import { CouponDto, CouponValidationResponseDto } from "../dtos/coupon.dto";
 import { plainToInstance } from "class-transformer";
 import { getLogger } from "../utils/logger";
 
+@injectable()
 export class CouponController {
   private couponService: CouponService;
   private userService: UserService;
 
-  constructor() {
-    this.couponService = new CouponService();
-    this.userService = new UserService();
+  constructor(
+    @inject(CouponService) couponService: CouponService,
+    @inject(UserService) userService: UserService
+  ) {
+    this.couponService = couponService;
+    this.userService = userService;
   }
 
   // ─── User-scoped CRUD ────────────────────────────────────────────────────────
