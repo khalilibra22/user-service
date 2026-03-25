@@ -158,8 +158,12 @@ export class SubscriptionController {
         ...(discount && { discount }),
       });
 
-    } catch (error) {
+    } catch (error: any) {
       (req.log || getLogger()).error({ err: error }, 'Error creating subscription');
+      if (error.message === "Insufficient wallet balance") {
+        res.status(402).json({ error: "Insufficient wallet balance. Please top up your wallet and try again." });
+        return;
+      }
       res.status(500).json({ error: "Internal Server Error" });
     }
   }
@@ -240,6 +244,10 @@ export class SubscriptionController {
         res.status(404).json({ error: error.message });
         return;
       }
+      if (error.message === "Insufficient wallet balance") {
+        res.status(402).json({ error: "Insufficient wallet balance. Please top up your wallet and try again." });
+        return;
+      }
       res.status(500).json({ error: "Internal Server Error" });
     }
   }
@@ -281,6 +289,10 @@ export class SubscriptionController {
       }
       if (error.message.includes("not an upgrade")) {
         res.status(400).json({ error: error.message });
+        return;
+      }
+      if (error.message === "Insufficient wallet balance") {
+        res.status(402).json({ error: "Insufficient wallet balance. Please top up your wallet and try again." });
         return;
       }
       res.status(500).json({ error: "Internal Server Error" });
